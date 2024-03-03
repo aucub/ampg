@@ -1,14 +1,14 @@
-import { CloudflareWorkersAI } from "npm:@langchain/cloudflare";
+import { ChatCloudflareWorkersAI } from "npm:@langchain/cloudflare";
 import config from '../config.ts';
-import { AIInput } from "../types.ts";
+import { ChatModelParams } from "../types.ts";
 import { BaseLanguageModelInput } from "../deps.ts";
 
-export async function invokeCloudflareWorkers(params: AIInput, chatHistory: BaseLanguageModelInput) {
-    const model = new CloudflareWorkersAI({
-        model: params['model'],
+export async function generateCloudflareWorkers(params: ChatModelParams, chatHistory: BaseLanguageModelInput) {
+    const model = new ChatCloudflareWorkersAI({
+        model: params['modelName'],
         cloudflareAccountId: params['user'] || config.cloudflareAccountId,
         cloudflareApiToken: params['apiKey'] || config.cloudflareApiToken,
-        baseUrl: params['baseUrl'],
+        baseUrl: params['baseURL'],
         streaming: params['streaming'] || false
     });
     if (!params['streaming']) {
