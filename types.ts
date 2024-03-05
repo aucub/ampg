@@ -16,8 +16,6 @@ export interface BaseModelParams {
     cache?: boolean | false;
 }
 
-
-
 export interface ChatModelParams extends BaseModelParams {
     /** The randomness of the responses. */
     temperature?: number;
@@ -39,7 +37,6 @@ export interface ChatModelParams extends BaseModelParams {
     seed?: null | number;
 }
 
-
 export interface EmbeddingsParams extends BaseModelParams {
     encoding_format?: string;
     /**
@@ -55,4 +52,3 @@ export interface EmbeddingsParams extends BaseModelParams {
      */
     stripNewLines?: boolean;
 }
-

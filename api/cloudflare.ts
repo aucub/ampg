@@ -1,7 +1,7 @@
-import { ChatCloudflareWorkersAI } from "npm:@langchain/cloudflare";
+import {ChatCloudflareWorkersAI} from "../deps.ts";
 import config from '../config.ts';
-import { ChatModelParams } from "../types.ts";
-import { BaseLanguageModelInput } from "../deps.ts";
+import {ChatModelParams} from "../types.ts";
+import {BaseLanguageModelInput} from "../deps.ts";
 
 export async function generateCloudflareWorkers(params: ChatModelParams, chatHistory: BaseLanguageModelInput) {
     const model = new ChatCloudflareWorkersAI({

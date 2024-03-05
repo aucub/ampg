@@ -1,9 +1,9 @@
-import { cloudflareWorkersModel, googleGenaiModel, openAIModel } from "../config.ts";
-import { BaseLanguageModelInput } from "../deps.ts";
-import { ChatModelParams, EmbeddingsParams } from "../types.ts";
-import { generateCloudflareWorkers } from "./cloudflare.ts";
-import { generateContentGoogleGenerative, generateEmbeddingsGoogleGenerative } from "./google-genai.ts";
-import { generateOpenAIChatCompletion, generateOpenAIEmbeddings } from "./openai.ts";
+import {cloudflareWorkersModel, googleGenaiModel, openAIModel} from "../config.ts";
+import {BaseLanguageModelInput, HonoRequest} from "../deps.ts";
+import {ChatModelParams, EmbeddingsParams} from "../types.ts";
+import {generateCloudflareWorkers} from "./cloudflare.ts";
+import {generateContentGoogleGenerative, generateEmbeddingsGoogleGenerative} from "./google-genai.ts";
+import {generateOpenAIChatCompletion, generateOpenAIEmbeddings} from "./openai.ts";
 
 
 export async function generateChat(params: ChatModelParams, chatHistory: BaseLanguageModelInput) {
@@ -29,20 +29,18 @@ export async function generateEmbeddings(params: EmbeddingsParams, input: string
 }
 
 
-
-export async function parseHeaders(headers: Headers) {
+export async function parseHeaders(req: HonoRequest) {
     const params: ChatModelParams = {};
-    const auth = headers.get('Authorization');
-    const apiKey = headers.get('x-portkey-api-key');
-    const provider = headers.get('x-portkey-provider');
+    const auth = req.header('Authorization');
+    const apiKey = req.header('x-portkey-api-key');
+    const provider = req.header('x-portkey-provider');
     if (auth && auth.startsWith('Bearer ')) {
-        const token = auth.split(' ')[1];
-        params['apiKey'] = token;
+        params['apiKey'] = auth.split(' ')[1];
     } else if (apiKey) {
         params['apiKey'] = apiKey;
     }
     if (provider) {
         params['provider'] = provider;
     }
-    return await params;
+    return params;
 }

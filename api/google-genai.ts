@@ -1,7 +1,7 @@
-import { ChatGoogleGenerativeAI, GoogleGenerativeAIChatInput, GoogleGenerativeAIEmbeddingsParams } from "npm:@langchain/google-genai";
-import { BaseLanguageModelInput } from "../deps.ts";
-import { ChatModelParams, EmbeddingsParams } from "../types.ts";
-import { GoogleGenerativeAIEmbeddings } from "npm:@langchain/google-genai";
+import {ChatGoogleGenerativeAI, GoogleGenerativeAIChatInput, GoogleGenerativeAIEmbeddingsParams} from "../deps.ts";
+import {BaseLanguageModelInput} from "../deps.ts";
+import {ChatModelParams, EmbeddingsParams} from "../types.ts";
+import {GoogleGenerativeAIEmbeddings} from "../deps.ts";
 import config from "../config.ts";
 
 export async function generateContentGoogleGenerative(params: ChatModelParams, chatHistory: BaseLanguageModelInput) {
