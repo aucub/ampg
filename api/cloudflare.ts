@@ -1,14 +1,13 @@
-import {ChatCloudflareWorkersAI} from "../deps.ts";
+import { ChatCloudflareWorkersAI, BaseLanguageModelInput } from "../deps.ts";
 import config from '../config.ts';
-import {ChatModelParams} from "../types.ts";
-import {BaseLanguageModelInput} from "../deps.ts";
+import { ChatModelParams } from "../types.ts";
 
 export async function generateCloudflareWorkers(params: ChatModelParams, chatHistory: BaseLanguageModelInput) {
-    const model = new ChatCloudflareWorkersAI({
+    const model = await new ChatCloudflareWorkersAI({
         model: params['modelName'],
         cloudflareAccountId: params['user'] || config.cloudflareAccountId,
         cloudflareApiToken: params['apiKey'] || config.cloudflareApiToken,
-        baseUrl: params['baseURL'],
+        baseUrl: params['baseURL'] || null,
         streaming: params['streaming'] || false
     });
     if (!params['streaming']) {

@@ -1,23 +1,12 @@
-import {ChatGoogleGenerativeAI, GoogleGenerativeAIChatInput, GoogleGenerativeAIEmbeddingsParams} from "../deps.ts";
-import {BaseLanguageModelInput} from "../deps.ts";
-import {ChatModelParams, EmbeddingsParams} from "../types.ts";
-import {GoogleGenerativeAIEmbeddings} from "../deps.ts";
+import { ChatGoogleGenerativeAI, GoogleGenerativeAIChatInput, GoogleGenerativeAIEmbeddingsParams, BaseLanguageModelInput, GoogleGenerativeAIEmbeddings } from "../deps.ts";
+import { ChatModelParams, EmbeddingsParams } from "../types.ts";
 import config from "../config.ts";
 
 export async function generateContentGoogleGenerative(params: ChatModelParams, chatHistory: BaseLanguageModelInput) {
-    const ggai: GoogleGenerativeAIChatInput = {}
-    for (const key in params) {
-        const typedKey1 = key as keyof GoogleGenerativeAIChatInput;
-        const typedKey2 = key as keyof ChatModelParams;
-        if (typedKey1 == typedKey2) {
-            // deno-lint-ignore ban-ts-comment
-            // @ts-ignore
-            ggai[typedKey1] = params[typedKey2];
-        }
-    }
+    let ggai: GoogleGenerativeAIChatInput = { ...params };
     ggai['maxOutputTokens'] = params['maxTokens'];
     ggai['stopSequences'] = params['stop'];
-    const model = new ChatGoogleGenerativeAI(ggai);
+    const model = await new ChatGoogleGenerativeAI(ggai);
     if (!params['streaming']) {
         return await model.invoke(chatHistory);
     } else {
@@ -27,21 +16,10 @@ export async function generateContentGoogleGenerative(params: ChatModelParams, c
 
 
 export async function generateEmbeddingsGoogleGenerative(params: EmbeddingsParams, texts: string[] | string) {
-    const ggap: Partial<GoogleGenerativeAIEmbeddingsParams> = {}
-    for (const key in params) {
-        const typedKey1 = key as keyof GoogleGenerativeAIEmbeddingsParams;
-        const typedKey2 = key as keyof EmbeddingsParams;
-        if (typedKey1 == typedKey2) {
-            if (typeof ggap[typedKey1] != typeof params[typedKey2]) {
-                continue;
-            }
-            // deno-lint-ignore ban-ts-comment
-            // @ts-ignore
-            ggap[typedKey1] = params[typedKey2];
-        }
-    }
+    let ggap: Partial<GoogleGenerativeAIEmbeddingsParams> = {}
+    ggap = { ...ggap, ...params } as GoogleGenerativeAIEmbeddingsParams;
     ggap['apiKey'] = params['apiKey'] || config.googleApiKey;
-    const embeddings = new GoogleGenerativeAIEmbeddings(ggap);
+    const embeddings = await new GoogleGenerativeAIEmbeddings(ggap);
     if (Array.isArray(texts)) {
         return await embeddings.embedDocuments(texts);
     } else {

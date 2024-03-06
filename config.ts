@@ -1,4 +1,4 @@
-import { configAsync } from "https://deno.land/x/dotenv@v3.2.2/mod.ts";
+import { configAsync } from "./deps.ts";
 
 export const env = await configAsync();
 

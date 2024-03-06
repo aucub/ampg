@@ -6,14 +6,14 @@ export interface BaseModelParams {
     /**
      * API key to use when making requests.
      */
-    apiKey?: null | string;
+    apiKey?: string;
     /**
      * Override the default base URL for the API.
      */
     baseURL?: string;
     /** The AI provider to use for your calls. */
-    provider?: null | string;
-    cache?: boolean | false;
+    provider?: string;
+    cache?: boolean;
 }
 
 export interface ChatModelParams extends BaseModelParams {
@@ -34,7 +34,7 @@ export interface ChatModelParams extends BaseModelParams {
     /** List of stop words to use when generating */
     stop?: string[];
     /** If null, a random seed will be used. */
-    seed?: null | number;
+    seed?: number;
 }
 
 export interface EmbeddingsParams extends BaseModelParams {

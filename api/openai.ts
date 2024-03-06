@@ -4,41 +4,33 @@ import {
     OpenAIChatInput,
     OpenAIEmbeddings,
     OpenAIEmbeddingsParams,
-} from "../deps.ts";
-import { BaseLanguageModelInput } from "../deps.ts";
-import {
+    BaseLanguageModelInput,
     AIMessage,
     BaseMessage,
     BaseMessageLike,
     HumanMessage,
     MessageContentComplex,
     SystemMessage,
+    BaseChatModelParams
 } from "../deps.ts";
 import { ChatModelParams, EmbeddingsParams } from "../types.ts";
-import {
-    schemas
-} from "../types/openai.ts";
 import config from "../config.ts";
-import { BaseChatModelParams } from "npm:@langchain/core/language_models/chat_models";
-
+import { schemas } from "../types/openai.ts";
 
 export async function parseOpenAiChatRequest(
     data: any,
     params: ChatModelParams,
 ) {
-    for (const key in data) {
-        const typedKey = key as keyof ChatModelParams;
-        params[typedKey] = data[key] || params[typedKey];
-    }
+    params = { ...params, ...data } as ChatModelParams;
     params["modelName"] = data["model"];
-    params["streaming"] = data["stream"];
+    params["streaming"] = data["stream"] || false;
     const chatHistory: BaseMessageLike[] = [];
     for (let i = 0; i < data["messages"].length; i++) {
         const message = data["messages"][i];
         let messageContent;
         if (typeof message["content"] != "string") {
             messageContent = message["content"] as MessageContentComplex[];
-            for await (const content of messageContent) {
+            for (const content in messageContent) {
                 if (
                     content["type"] == "image_url" &&
                     typeof content["image_url"] === "object" &&
@@ -52,17 +44,17 @@ export async function parseOpenAiChatRequest(
             messageContent = message["content"];
         }
         if (message["role"] == "system") {
-            chatHistory.push(new SystemMessage(message["content"]));
+            chatHistory.push(await new SystemMessage(message["content"]));
         } else if (message["role"] == "user") {
             // deno-lint-ignore ban-ts-comment
             // @ts-ignore
-            chatHistory.push(
+            chatHistory.push(await
                 new HumanMessage({
                     content: messageContent,
                 }),
             );
         } else if (message["role"] == "assistant") {
-            chatHistory.push(new AIMessage(message["content"]));
+            chatHistory.push(await new AIMessage(message["content"]));
         }
     }
     return { params, chatHistory };
@@ -72,10 +64,7 @@ export async function parseOpenAiEmbeddingsRequest(
     data: any,
     params: EmbeddingsParams,
 ) {
-    for await (const key of data) {
-        const typedKey = key as keyof EmbeddingsParams;
-        params[typedKey] = data[key] || params[typedKey];
-    }
+    params = { ...params, ...data } as EmbeddingsParams;
     params["modelName"] = data["model"];
     const input = data["input"];
     return { params, input };
@@ -85,26 +74,14 @@ export async function generateOpenAIEmbeddings(
     params: ChatModelParams,
     texts: string[] | string,
 ) {
-    const oaep: Partial<OpenAIEmbeddingsParams> & {
+    let oaep: Partial<OpenAIEmbeddingsParams> & {
         verbose?: boolean;
         openAIApiKey?: string;
-        configuration: ClientOptions;
-    } = { configuration: {} };
-    for (const key in params) {
-        const typedKey1 = key as keyof OpenAIEmbeddingsParams;
-        const typedKey2 = key as keyof ChatModelParams;
-        if (typedKey1 == typedKey2) {
-            if (typeof oaep[typedKey1] != typeof params[typedKey2]) {
-                continue;
-            }
-            // deno-lint-ignore ban-ts-comment
-            // @ts-ignore
-            oaep[typedKey1] = params[typedKey2];
-        }
-    }
+        configuration?: ClientOptions;
+    } = { ...params }
     oaep["openAIApiKey"] = params["apiKey"] || config.openaiApiKey;
     oaep["configuration"]["baseURL"] = params["baseURL"] || config.openaiBaseUrl;
-    const embeddings = new OpenAIEmbeddings(oaep);
+    const embeddings = await new OpenAIEmbeddings(oaep);
     if (Array.isArray(texts)) {
         return await embeddings.embedDocuments(texts);
     } else {
@@ -116,28 +93,17 @@ export async function generateOpenAIChatCompletion(
     params: ChatModelParams,
     chatHistory: BaseLanguageModelInput,
 ) {
-    const oaci: Partial<OpenAIChatInput> & BaseChatModelParams & {
+    let oaci: Partial<OpenAIChatInput> & BaseChatModelParams & {
         configuration: Partial<ClientOptions>;
     } = {
         configuration: {},
-        cache: params["cache"],
+        cache: params["cache"] || true,
     };
-    for (const key in params) {
-        const typedKey1 = key as keyof OpenAIChatInput;
-        const typedKey2 = key as keyof ChatModelParams;
-        if (typedKey1 == typedKey2) {
-            if (typeof oaci[typedKey1] != typeof params[typedKey2]) {
-                continue;
-            }
-            // deno-lint-ignore ban-ts-comment
-            // @ts-ignore
-            oaci[typedKey1] = params[typedKey2];
-        }
-    }
+    oaci = { ...oaci, ...params }
     oaci["modelName"] = params["modelName"];
     oaci["openAIApiKey"] = params["apiKey"] || config.openaiApiKey;
     oaci["configuration"]["baseURL"] = params["baseURL"] || config.openaiBaseUrl;
-    const model = new ChatOpenAI(oaci);
+    const model = await new ChatOpenAI(oaci);
     if (!params["streaming"]) {
         return await model.invoke(chatHistory);
     } else {
@@ -148,7 +114,7 @@ export async function generateOpenAIChatCompletion(
 export async function adaptOpenAIChatResponse(
     params: ChatModelParams,
     data: BaseMessage | string,
-): Promise<schemas.CreateChatCompletionResponse> {
+) {
     let text = "";
     if (typeof data === "string") {
         text = data;
@@ -193,10 +159,10 @@ export async function adaptOpenAIChatResponse(
     }
 }
 
-export function adaptOpenAIEmbeddingsResponse(
+export async function adaptOpenAIEmbeddingsResponse(
     params: EmbeddingsParams,
     data: number[] | number[][],
-): schemas.CreateEmbeddingResponse {
+): Promise<any> {
     let embeddingData;
     if (Array.isArray(data[0])) {
         if (typeof data[0][0] == "number") {
