@@ -173,7 +173,7 @@ const config: Config = {
         env["CLOUDFLARE_API_TOKEN"],
     openaiBaseUrl: Deno.env.get("OPENAI_BASE_URL") || env["OPENAI_BASE_URL"],
     openaiApiKey: Deno.env.get("OPENAI_API_KEY") || env["OPENAI_API_KEY"],
-    googleApiKey: Deno.env.get("GOOGLE_API_KEY") || env["GOOGLE_API_KEY"],
+    googleApiKey: Deno.env.get("GOOGLE_API_KEY") || env["GOOGLE_API_KEY"] || Deno.env.get("API_KEY"),
 };
 
 export default config;

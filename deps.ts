@@ -1,9 +1,8 @@
-export { Hono, validator, type HonoRequest } from "https://deno.land/x/hono@v4.0.9/mod.ts";
+export { Hono, validator, type HonoRequest, HTTPException } from "https://deno.land/x/hono@v4.0.9/mod.ts";
 export {
   env,
   stream,
   streamSSE,
-  streamText,
 } from "https://deno.land/x/hono@v4.1.0-rc.1/helper.ts";
 export {
   compress,
@@ -40,7 +39,7 @@ export type {
 } from "npm:@langchain/openai";
 export {
   ChatGoogleGenerativeAI,
-  GoogleGenerativeAIEmbeddings,
+  GoogleGenerativeAIEmbeddings
 } from "npm:@langchain/google-genai";
 export type {
   GoogleGenerativeAIChatInput,
