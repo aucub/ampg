@@ -13,18 +13,18 @@ export interface BaseModelParams {
   baseURL?: string;
   /** The AI provider to use for your calls. */
   provider?: string;
-  // Caching configuration
+  /** Caching configuration. */
   cache?: boolean;
-  // Retry configuration
+  /** Retry configuration. */
   retry?: Retry;
-  // Returns a unique trace id for each response.
+  /** Returns a unique trace id for each response. */
   traceId?: string;
 }
 
 export interface Retry {
-  // Number of retry attempts
+  /** Number of retry attempts. */
   attempts?: number;
-  // Status codes to trigger retries
+  /** Status codes to trigger retries. */
   onStatusCodes?: number[];
 }
 

@@ -17,7 +17,13 @@ export const retrySchema = z.object({
 
 interface ConfigSchema {
   strategy?: z.infer<typeof strategySchema>;
-  provider?: "openai" | "anthropic" | "azure-openai" | "anyscale" | "cohere" | "palm";
+  provider?:
+    | "openai"
+    | "anthropic"
+    | "azure-openai"
+    | "anyscale"
+    | "cohere"
+    | "palm";
   resource_name?: string;
   deployment_id?: string;
   api_version?: string;

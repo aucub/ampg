@@ -10,6 +10,23 @@ interface Config {
   googleApiKey: string | undefined;
 }
 
+export const providers: string[] = [
+  "openai",
+  "anthropic",
+  "azure-openai",
+  "anyscale",
+  "cohere",
+  "palm",
+  "google",
+  "cloudflareworkersai",
+  "azureopenai",
+  "bedrock",
+  "clients",
+  "cohere",
+  "octoml",
+  "ollama",
+];
+
 export const openAIChatModel: string[] = [
   "gpt-4-0125-preview",
   "gpt-4-turbo-preview",

@@ -3,12 +3,12 @@ export {
   type HonoRequest,
   HTTPException,
   validator,
-} from "https://deno.land/x/hono@v4.0.10/mod.ts";
+} from "https://deno.land/x/hono@v4.1.0/mod.ts";
 export {
   env,
   stream,
   streamSSE,
-} from "https://deno.land/x/hono@v4.0.10/helper.ts";
+} from "https://deno.land/x/hono@v4.1.0/helper.ts";
 export {
   compress,
   cors,
@@ -17,8 +17,8 @@ export {
   prettyJSON,
   secureHeaders,
   timing,
-} from "https://deno.land/x/hono@v4.0.10/middleware.ts";
-export type { MiddlewareHandler } from "https://deno.land/x/hono@v4.0.10/types.ts";
+} from "https://deno.land/x/hono@v4.1.0/middleware.ts";
+export type { MiddlewareHandler } from "https://deno.land/x/hono@v4.1.0/types.ts";
 export { zValidator } from "npm:@hono/zod-validator@0.2.0";
 export { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 export { makeApi, Zodios, type ZodiosOptions } from "npm:@zodios/core@10.9.6";
@@ -59,3 +59,4 @@ export {
   ChatCloudflareWorkersAI,
   CloudflareWorkersAI,
 } from "npm:@langchain/cloudflare@0.0.3";
+export type { CloudflareWorkersAIInput } from "npm:@langchain/cloudflare@0.0.3";

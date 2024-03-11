@@ -205,7 +205,11 @@ const expRetryConfigSchema = z.object({
   retry_codes: z.array(z.number()).optional(),
 });
 
-const RetryPolicyOptions = ["DISABLED", "EXPONENTIAL_BACKOFF", "FIXED_DELAY"] as const;
+const RetryPolicyOptions = [
+  "DISABLED",
+  "EXPONENTIAL_BACKOFF",
+  "FIXED_DELAY",
+] as const;
 
 const RetryPolicyOption = z.enum(RetryPolicyOptions);
 
@@ -345,7 +349,7 @@ export const glideSchemas = {
   RetryPolicyOption: RetryPolicyOption.parse("DISABLED"),
   Error: errorSchema.parse({}),
   Health: healthSchema.parse({}),
-  RouterList: routerListSchema.parse({})
+  RouterList: routerListSchema.parse({}),
 };
 
 export const glideConfigSchema = z.object({

@@ -1108,7 +1108,7 @@ const ListMessageFilesResponse = z
   })
   .passthrough();
 
-export const openaiSchemas = {
+export const schemas = {
   ChatCompletionRequestSystemMessage,
   ChatCompletionRequestMessageContentPartText,
   ChatCompletionRequestMessageContentPartImage,

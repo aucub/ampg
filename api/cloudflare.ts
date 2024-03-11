@@ -1,18 +1,24 @@
-import { BaseLanguageModelInput, ChatCloudflareWorkersAI } from "../deps.ts";
-import config from "../config.ts";
+import {
+  BaseLanguageModelInput,
+  ChatCloudflareWorkersAI,
+  CloudflareWorkersAIInput,
+} from "../deps.ts";
+import config, { cloudflareWorkersTextGenerationModel } from "../config.ts";
 import { ChatModelParams } from "../types.ts";
 
 export async function generateCloudflareWorkers(
   params: ChatModelParams,
   chatHistory: BaseLanguageModelInput,
 ) {
-  const model = await new ChatCloudflareWorkersAI({
-    model: params["modelName"],
-    cloudflareAccountId: params["user"] || config.cloudflareAccountId,
-    cloudflareApiToken: params["apiKey"] || config.cloudflareApiToken,
-    baseUrl: params["baseURL"] || null,
-    streaming: params["streaming"] || false,
-  });
+  const cwai: CloudflareWorkersAIInput = {
+    ...params,
+  } as CloudflareWorkersAIInput;
+  if (!cloudflareWorkersTextGenerationModel.includes(cwai["model"] as string)) {
+    cwai["model"] = "@cf/meta/llama-2-7b-chat-int8";
+  }
+  cwai["cloudflareAccountId"] = params["user"] || config.cloudflareAccountId;
+  cwai["cloudflareApiToken"] = params["apiKey"] || config.cloudflareApiToken;
+  const model = new ChatCloudflareWorkersAI(cwai);
   if (!params["streaming"]) {
     return await model.invoke(chatHistory);
   } else {
