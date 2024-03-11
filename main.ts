@@ -3,102 +3,104 @@ import {
   compress,
   cors,
   Hono,
+  HTTPException,
   IterableReadableStream,
   logger,
   prettyJSON,
   secureHeaders,
-  streamSSE,
   timing,
   zValidator,
-  HTTPException,
 } from "./deps.ts";
-import { schemas } from "./types/openai.ts";
-import {
-  generateChat,
-  generateEmbeddings,
-  parseHeaders,
-} from "./api/chains.ts";
+import { openaiSchemas } from "./types/openai.ts";
+import { generateChat, generateEmbeddings } from "./api/chains.ts";
+import { headersMiddleware } from "./api/middleware.ts";
 import {
   adaptOpenAIChatResponse,
   adaptOpenAIEmbeddingsResponse,
   parseOpenAiChatRequest,
   parseOpenAiEmbeddingsRequest,
 } from "./api/openai.ts";
+import { ChatModelParams } from "./types.ts";
 
 const app = new Hono();
-app.use(timing(), compress(), logger(), secureHeaders(), cors(), prettyJSON());
 
+app.use(
+  logger(),
+  cors(),
+  secureHeaders(),
+  timing(),
+  headersMiddleware(),
+  compress(),
+  prettyJSON(),
+);
 
 app.post(
   "/v1/chat/completions",
-  zValidator("json", schemas.CreateChatCompletionRequest, (result, c) => {
-    if (!result.success) {
-      console.error(result);
-      return c.text(result.error, 400);
-    }
-  }),
+  zValidator("json", openaiSchemas.CreateChatCompletionRequest),
   async (c) => {
-    const params = await parseHeaders(c.req);
-    const body = await c.req.json();
+    const params: ChatModelParams = await c.get("params");
+    const body = await c.req.valid("json");
     const data = await parseOpenAiChatRequest(body, params);
     const message = await generateChat(data["params"], data["chatHistory"]);
-    if (data["params"]["streaming"]) {
-      c.res.headers.set("Content-Type", "text/event-stream");
-      c.res.headers.set("Connection", "keep-alive");
-      c.res.headers.set("Cache-Control", "no-cache");
-      if (message instanceof IterableReadableStream && message !== undefined) {
-        return streamSSE(c, async (stream) => {
-          for await (const chunk of message) {
-            const messageItem = await adaptOpenAIChatResponse(
-              data["params"],
-              chunk,
-            );
-            await stream.writeSSE({ data: JSON.stringify(messageItem) });
-          }
-          await stream.writeSSE({ data: "[DONE]" });
-        });
-      }
-    } else {
-      if (typeof message === "string") {
-        const post = await adaptOpenAIChatResponse(data["params"], message);
-        return c.json(post);
-      } else if (message instanceof BaseMessage) {
-        const post = await adaptOpenAIChatResponse(
+    if (message instanceof IterableReadableStream && message !== undefined) {
+      return streamSSE(c, async (stream) => {
+        for await (const chunk of message) {
+          const messageItem = await adaptOpenAIChatResponse(
+            data["params"],
+            chunk,
+          );
+          await stream.writeSSE({ data: JSON.stringify(messageItem) });
+        }
+        await stream.writeSSE({ data: "[DONE]" });
+      });
+    } else if (typeof message === "string") {
+      return c.json(await adaptOpenAIChatResponse(data["params"], message));
+    } else if (message instanceof BaseMessage) {
+      return c.json(
+        await adaptOpenAIChatResponse(
           data["params"],
           message.content.toString(),
-        );
-        return c.json(post);
-      }
+        ),
+      );
     }
   },
 );
 
 app.post(
   "/v1/embeddings",
-  zValidator("json", schemas.CreateEmbeddingRequest, (result, c) => {
-    if (!result.success) {
-      console.error(result);
-      return c.text(result.error, 400);
-    }
-  }),
+  zValidator("json", openaiSchemas.CreateEmbeddingRequest),
   async (c) => {
-    const params = await parseHeaders(await c.req);
-    const body = await c.req.json();
+    const params: ChatModelParams = await c.get("params");
+    const body = await c.req.valid("json");
     const data = await parseOpenAiEmbeddingsRequest(body, params);
     const embeddings = await generateEmbeddings(data["params"], data["input"]);
     if (embeddings !== undefined) {
-      c.res.body = adaptOpenAIEmbeddingsResponse(params, embeddings);
+      return c.json(adaptOpenAIEmbeddingsResponse(params, embeddings));
     }
   },
 );
 
+app.post(
+  "/images/generations",
+  zValidator("json", openaiSchemas.CreateImageRequest),
+  async (c) => {
+    const params: ChatModelParams = await c.get("params");
+    const body = await c.req.valid("json");
+    // TODO
+  },
+);
+
+app.notFound((c) => c.json({ message: "Not Found", ok: false }, 404));
+
 app.onError((err, c) => {
+  console.error(`${err}`);
   if (err instanceof HTTPException) {
-    return err.getResponse()
+    return err.getResponse();
   }
   if (err instanceof Error) {
-    return new HTTPException(err.status, { message: err.message }).getResponse()
+    return new HTTPException(err.status, { message: err.message })
+      .getResponse();
   }
-})
+});
 
 Deno.serve(app.fetch);
