@@ -19,44 +19,48 @@ export {
   timing,
 } from "https://deno.land/x/hono@v4.1.0/middleware.ts";
 export type { MiddlewareHandler } from "https://deno.land/x/hono@v4.1.0/types.ts";
-export { zValidator } from "npm:@hono/zod-validator@0.2.0";
+export { zValidator } from "https://esm.sh/@hono/zod-validator@0.2.0";
 export { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
-export { makeApi, Zodios, type ZodiosOptions } from "npm:@zodios/core@10.9.6";
+export {
+  makeApi,
+  Zodios,
+  type ZodiosOptions,
+} from "https://esm.sh/@zodios/core@10.9.6";
 export { configAsync } from "https://deno.land/x/dotenv@v3.2.2/mod.ts";
-export type { BaseLanguageModelInput } from "npm:@langchain/core/language_models/base";
-export type { BaseChatModelParams } from "npm:@langchain/core/language_models/chat_models";
-export { IterableReadableStream } from "npm:@langchain/core/utils/stream";
+export type { BaseLanguageModelInput } from "https://esm.sh/@langchain/core@0.1.44/language_models/base";
+export type { BaseChatModelParams } from "https://esm.sh/@langchain/core@0.1.44/language_models/chat_models";
+export { IterableReadableStream } from "https://esm.sh/@langchain/core@0.1.44/utils/stream";
 export {
   AIMessage,
   BaseMessage,
   HumanMessage,
   SystemMessage,
-} from "npm:@langchain/core/messages";
+} from "https://esm.sh/@langchain/core@0.1.44/messages";
 export type {
   BaseMessageLike,
   MessageContentComplex,
-} from "npm:@langchain/core/messages";
+} from "https://esm.sh/@langchain/core@0.1.44/messages";
 export {
   ChatOpenAI,
   OpenAIClient,
   OpenAIEmbeddings,
-} from "npm:@langchain/openai@0.0.19";
+} from "https://esm.sh/@langchain/openai@0.0.19";
 export { OpenAI } from "https://deno.land/x/openai@v4.28.4/mod.ts";
 export type {
   ClientOptions,
   OpenAIChatInput,
   OpenAIEmbeddingsParams,
-} from "npm:@langchain/openai@0.0.19";
+} from "https://esm.sh/@langchain/openai@0.0.19";
 export {
   ChatGoogleGenerativeAI,
   GoogleGenerativeAIEmbeddings,
-} from "npm:@langchain/google-genai@0.0.10";
+} from "https://esm.sh/@langchain/google-genai@0.0.10";
 export type {
   GoogleGenerativeAIChatInput,
   GoogleGenerativeAIEmbeddingsParams,
-} from "npm:@langchain/google-genai@0.0.10";
+} from "https://esm.sh/@langchain/google-genai@0.0.10";
 export {
   ChatCloudflareWorkersAI,
   CloudflareWorkersAI,
-} from "npm:@langchain/cloudflare@0.0.3";
-export type { CloudflareWorkersAIInput } from "npm:@langchain/cloudflare@0.0.3";
+} from "https://esm.sh/@langchain/cloudflare@0.0.3";
+export type { CloudflareWorkersAIInput } from "https://esm.sh/@langchain/cloudflare@0.0.3";
