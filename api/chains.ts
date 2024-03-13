@@ -8,9 +8,16 @@ import { BaseLanguageModelInput } from "../deps.ts";
 import {
   BaseModelParams,
   ChatModelParams,
+  EditImageParams,
   EmbeddingsParams,
+  TranscriptionParams,
 } from "../types.ts";
-import { generateCloudflareWorkers } from "./cloudflare.ts";
+import {
+  generateCloudflareWorkers,
+  generateEditImageCloudflareWorkers,
+  generateEmbeddingsCloudflareWorkers,
+  generateTranscriptionCloudflareWorkers,
+} from "./cloudflare.ts";
 import {
   generateContentGoogleGenerative,
   generateEmbeddingsGoogleGenerative,
@@ -18,6 +25,7 @@ import {
 import {
   generateOpenAIChatCompletion,
   generateOpenAIEmbeddings,
+  generateOpenAITranscription,
 } from "./openai.ts";
 
 export function parseParams(
@@ -77,5 +85,33 @@ export async function generateEmbeddings(
     params["provider"] == "palm"
   ) {
     return await generateEmbeddingsGoogleGenerative(params, input);
+  } else if (
+    params["provider"] == "cloudflareworkersai"
+  ) {
+    return generateEmbeddingsCloudflareWorkers(params, input);
+  }
+}
+
+export async function generateTranscription(
+  params: TranscriptionParams,
+) {
+  if (
+    params["provider"] == "openai"
+  ) {
+    return await generateOpenAITranscription(params);
+  } else if (
+    params["provider"] == "cloudflareworkersai"
+  ) {
+    return await generateTranscriptionCloudflareWorkers(params);
+  }
+}
+
+export async function generateEditImage(
+  params: EditImageParams,
+) {
+  if (
+    params["provider"] == "cloudflareworkersai"
+  ) {
+    return await generateEditImageCloudflareWorkers(params);
   }
 }

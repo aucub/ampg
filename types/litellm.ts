@@ -1,5 +1,4 @@
-import { makeApi, Zodios, type ZodiosOptions } from "../deps.ts";
-import { z } from "../deps.ts";
+import { makeApi, z, Zodios, type ZodiosOptions } from "../deps.ts";
 
 const postChatcompletions_Body = z
   .object({

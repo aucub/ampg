@@ -18,7 +18,7 @@ export async function generateContentGoogleGenerative(
   ggai["maxOutputTokens"] = params["maxTokens"];
   ggai["stopSequences"] = params["stop"];
   if (!googleGenaiModel.includes(ggai["modelName"] as string)) {
-    ggai["modelName"] = null;
+    ggai["modelName"] = undefined;
   }
   const model = new ChatGoogleGenerativeAI(ggai);
   if (!params["streaming"]) {
@@ -34,7 +34,7 @@ export async function generateEmbeddingsGoogleGenerative(
 ) {
   let ggap: Partial<GoogleGenerativeAIEmbeddingsParams> = {};
   ggap = { ...ggap, ...params } as GoogleGenerativeAIEmbeddingsParams;
-  ggap["apiKey"] = params["apiKey"] || config.googleApiKey;
+  ggap["apiKey"] = params["apiKey"] || config.GOOGLE_API_KEY;
   if (!googleGenaiModel.includes(ggap["modelName"] as string)) {
     ggap["modelName"] = undefined;
   }

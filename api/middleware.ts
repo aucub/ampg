@@ -7,7 +7,10 @@ const PREFIX = "Bearer";
 export const headersMiddleware = (): MiddlewareHandler => {
   return async function headersMiddleware(c, next) {
     const params: ChatModelParams = {};
-    let apiKey = c.req.header("x-portkey-api-key");
+    let apiKey = c.req.header("X-Auth-Key");
+    if (!apiKey) {
+      apiKey = c.req.header("x-portkey-api-key");
+    }
     if (!apiKey) {
       apiKey = c.req.header("Authorization");
       if (apiKey) {
@@ -25,6 +28,10 @@ export const headersMiddleware = (): MiddlewareHandler => {
     }
     if (apiKey) {
       params["apiKey"] = apiKey;
+    }
+    const user = c.req.header("X-Auth-Email");
+    if (user) {
+      params["user"] = user;
     }
     const provider = c.req.header("x-portkey-provider");
     if (provider) {

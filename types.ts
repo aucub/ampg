@@ -64,3 +64,67 @@ export interface EmbeddingsParams extends BaseModelParams {
    */
   stripNewLines?: boolean;
 }
+
+export interface TranscriptionParams extends BaseModelParams {
+  /**
+   * Transcribes audio into the input language.
+   */
+  language?: string;
+  /**
+   * An optional text to guide the model's style or continue a previous audio segment. The [prompt] should match the audio language.
+   */
+  prompt?: string;
+  /**
+   * The format of the transcript output, in one of these options: `json`, `text`, `srt`, `verbose_json`, or `vtt`.
+   */
+  response_format?: number;
+  /**  The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
+   */
+  temperature?: boolean;
+  /**
+   * The audio file object (not file name) to transcribe, in one of these formats: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, or webm.
+   */
+  file?: File;
+  /**
+   * The timestamp granularities to populate for this transcription. `response_format` must be set `verbose_json` to use timestamp granularities. Either or both of these options are supported: `word`, or `segment`. Note: There is no additional latency for segment timestamps, but generating word timestamps incurs additional latency.
+   */
+  timestampGranularities?: ("word" | "segment")[];
+}
+
+export interface CreateImageParams extends BaseModelParams {
+  /**
+   * A text description of the desired image(s).
+   */
+  prompt?: string;
+  /**
+   * The format in which the generated images are returned.
+   */
+  response_format?: string;
+
+  /** The number of images to generate. */
+  n?: number;
+  /**
+   * The quality of the image that will be generated.
+   */
+  quality?: string;
+  /**
+   * The size of the generated images.
+   */
+  size?: string;
+  /**
+   * The style of the generated images.
+   */
+  style?: string;
+}
+
+export interface EditImageParams extends BaseModelParams {
+  image?: File;
+  prompt?: string;
+  mask?: File;
+  n?: number;
+  size?: string;
+  response_format?: string;
+  guidance?: number;
+  num_steps?: number;
+  strength?: number;
+}
