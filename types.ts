@@ -117,7 +117,7 @@ export interface CreateImageParams extends BaseModelParams {
   style?: string;
 }
 
-export interface EditImageParams extends BaseModelParams {
+export interface ImagesEditsParams extends BaseModelParams {
   image?: File;
   prompt?: string;
   mask?: File;
@@ -150,4 +150,17 @@ export interface LLMOptions {
   virtual_key: string;
   model: string;
   max_tokens: number;
+}
+
+export interface openAIError {
+  code: string | null;
+  message: string;
+  param: string | null;
+  type: string;
+}
+
+export interface LangException extends Error {
+  llmOutput?: string;
+  toolOutput?: string;
+  observation?: string;
 }

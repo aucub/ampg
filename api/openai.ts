@@ -14,38 +14,42 @@ import {
   OpenAIWhisperAudio,
   SystemMessage,
   z,
+  AzureOpenAIInput,
+  ToolInputParsingException,
 } from "../deps.ts";
 import {
   ChatModelParams,
-  EditImageParams,
+  ImagesEditsParams,
   EmbeddingsParams,
   TranscriptionParams,
+  LangException,
+  openAIError
 } from "../types.ts";
 import secretMap, { openAIChatModel, openAIEmbeddingModel } from "../config.ts";
 import { schemas as openaiSchemas } from "../types/openai.ts";
 
-export async function parseOpenAiChatRequest(
-  data: z.infer<typeof openaiSchemas.CreateChatCompletionRequest>,
+export async function adaptChatCompletionRequestOpenAI(
+  body: z.infer<typeof openaiSchemas.CreateChatCompletionRequest>,
   params: ChatModelParams,
 ) {
-  params = { ...params, ...data } as ChatModelParams;
-  if (data["model"] && !params["modelName"]) {
-    params["modelName"] = data["model"];
+  params = { ...params, ...body } as ChatModelParams;
+  if (body["model"] && !params["modelName"]) {
+    params["modelName"] = body["model"];
   }
-  params["streaming"] = data["stream"] || false;
-  params["topP"] = data["top_p"] || undefined;
-  params["maxTokens"] = data["max_tokens"] || undefined;
+  params["streaming"] = body["stream"] || false;
+  params["topP"] = body["top_p"] || undefined;
+  params["maxTokens"] = body["max_tokens"] || undefined;
   const chatHistory: BaseMessageLike[] = [];
-  for (let i = 0; i < data["messages"].length; i++) {
-    const message = data["messages"][i];
+  for (let i = 0; i < body["messages"].length; i++) {
+    const message = body["messages"][i];
     let messageContent;
     if (typeof message["content"] != "string") {
       messageContent = message["content"] as MessageContentComplex[];
-      for (const content of messageContent) {
+      for await (const content of messageContent) {
         if (
           content["type"] == "image_url" &&
           typeof (content["image_url"] as { url: string })["url"] ===
-            "string" &&
+          "string" &&
           (content["image_url"] as { url: string })["url"].startsWith("http")
         ) {
           (content["image_url"] as { url: string })["url"] = await urlToBase64(
@@ -71,7 +75,8 @@ export async function parseOpenAiChatRequest(
   return { params, chatHistory };
 }
 
-export function parseOpenAiTranscriptionRequest(
+export function adaptTranscriptionRequestOpenAI(
+  // deno-lint-ignore no-explicit-any
   formData: any,
   params: TranscriptionParams,
 ) {
@@ -86,9 +91,10 @@ export function parseOpenAiTranscriptionRequest(
   return params;
 }
 
-export function parseOpenAiEditImageRequest(
+export function adaptImagesEditsRequestOpenAI(
+  // deno-lint-ignore no-explicit-any
   formData: any,
-  params: EditImageParams,
+  params: ImagesEditsParams,
 ) {
   const {
     prompt,
@@ -113,35 +119,35 @@ export function parseOpenAiEditImageRequest(
   return params;
 }
 
-export function parseOpenAiEmbeddingsRequest(
-  data: z.infer<typeof openaiSchemas.CreateEmbeddingRequest>,
+export function adaptEmbeddingsRequestOpenAI(
+  body: z.infer<typeof openaiSchemas.CreateEmbeddingRequest>,
   params: EmbeddingsParams,
 ) {
-  params = { ...params, ...data } as EmbeddingsParams;
-  params["modelName"] = data["model"];
-  const input = data["input"];
+  params = { ...params, ...body } as EmbeddingsParams;
+  params["modelName"] = body["model"];
+  const input = body["input"];
   return { params, input };
 }
 
-export async function generateOpenAIEmbeddings(
+export async function generateEmbeddingsOpenAI(
   params: EmbeddingsParams,
   texts: string[] | string,
 ) {
-  const oaep: Partial<OpenAIEmbeddingsParams> & {
+  const openAIEmbeddingsParams: Partial<OpenAIEmbeddingsParams> & {
     verbose?: boolean;
     openAIApiKey?: string;
     configuration?: ClientOptions;
   } = { ...params };
-  oaep["openAIApiKey"] = params["apiKey"] || secretMap.OPENAI_API_KEY;
-  if (!oaep["configuration"]) {
-    oaep["configuration"] = { ...params } as ClientOptions;
+  openAIEmbeddingsParams["openAIApiKey"] = params["apiKey"] || secretMap.OPENAI_API_KEY;
+  if (!openAIEmbeddingsParams["configuration"]) {
+    openAIEmbeddingsParams["configuration"] = { ...params } as ClientOptions;
   }
-  oaep["configuration"]["baseURL"] = params["baseURL"] ||
+  openAIEmbeddingsParams["configuration"]["baseURL"] = params["baseURL"] ||
     secretMap.OPENAI_BASE_URL;
-  if (!openAIEmbeddingModel.includes(oaep["modelName"] as string)) {
-    oaep["modelName"] = undefined;
+  if (!openAIEmbeddingModel.includes(openAIEmbeddingsParams["modelName"] as string)) {
+    openAIEmbeddingsParams["modelName"] = undefined;
   }
-  const embeddings = new OpenAIEmbeddings(oaep);
+  const embeddings = new OpenAIEmbeddings(openAIEmbeddingsParams);
   if (Array.isArray(texts)) {
     return await embeddings.embedDocuments(texts);
   } else {
@@ -149,25 +155,22 @@ export async function generateOpenAIEmbeddings(
   }
 }
 
-export async function generateOpenAIChatCompletion(
+export async function generateChatCompletionOpenAI(
   params: ChatModelParams,
   chatHistory: BaseLanguageModelInput,
 ) {
-  let oaci: Partial<OpenAIChatInput> & BaseChatModelParams & {
-    configuration: Partial<ClientOptions>;
-  } = {
-    configuration: {},
+  let openAIChatInput: Partial<OpenAIChatInput> & Partial<AzureOpenAIInput> & BaseChatModelParams = {
     cache: params["cache"] || true,
   };
-  oaci = { ...oaci, ...params };
-  oaci["modelName"] = params["modelName"];
-  oaci["openAIApiKey"] = params["apiKey"] || secretMap.OPENAI_API_KEY;
-  oaci["configuration"]["baseURL"] = params["baseURL"] ||
-    secretMap.OPENAI_BASE_URL;
-  if (!openAIChatModel.includes(oaci["modelName"] as string)) {
-    oaci["modelName"] = undefined;
+  openAIChatInput = { ...openAIChatInput, ...params };
+  openAIChatInput["modelName"] = params["modelName"];
+  openAIChatInput["openAIApiKey"] = params["apiKey"] || secretMap.OPENAI_API_KEY;
+  if (!openAIChatModel.includes(openAIChatInput["modelName"] as string)) {
+    openAIChatInput["modelName"] = undefined;
   }
-  const model = new ChatOpenAI(oaci);
+  // deno-lint-ignore ban-ts-comment
+  // @ts-ignore
+  const model = new ChatOpenAI(openAIChatInput);
   if (!params["streaming"]) {
     return await model.invoke(chatHistory);
   } else {
@@ -175,7 +178,7 @@ export async function generateOpenAIChatCompletion(
   }
 }
 
-export async function generateOpenAITranscription(
+export async function generateTranscriptionOpenAI(
   params: TranscriptionParams,
 ) {
   const loader = new OpenAIWhisperAudio(params["file"] as Blob, {
@@ -184,16 +187,16 @@ export async function generateOpenAITranscription(
   return await loader.load();
 }
 
-export function adaptOpenAIChatResponse(
+export function adaptChatCompletionResponseOpenAI(
   params: ChatModelParams,
-  data: BaseMessage | string,
+  message: BaseMessage | string,
   // deno-lint-ignore no-explicit-any
 ): z.infer<typeof openaiSchemas.CreateChatCompletionResponse> | any {
   let text;
-  if (typeof data === "string") {
-    text = data;
-  } else if (data instanceof BaseMessage) {
-    text = data.content.toString();
+  if (typeof message === "string") {
+    text = message;
+  } else if (message instanceof BaseMessage) {
+    text = message.content.toString();
   }
   if (!params["streaming"]) {
     return {
@@ -234,7 +237,7 @@ export function adaptOpenAIChatResponse(
   }
 }
 
-export async function adaptOpenAIEditImageResponse(blob: Blob) {
+export async function adaptImagesEditsResponseOpenAI(blob: Blob) {
   return {
     created: Math.floor(Date.now() / 1000),
     data: [
@@ -245,38 +248,59 @@ export async function adaptOpenAIEditImageResponse(blob: Blob) {
   };
 }
 
-export function adaptOpenAIEmbeddingsResponse(
+export function adaptEmbeddingsResponseOpenAI(
   params: EmbeddingsParams,
-  data: number[] | number[][],
+  embeddings: number[] | number[][],
   // deno-lint-ignore no-explicit-any
 ): z.infer<typeof openaiSchemas.CreateEmbeddingResponse> | any {
-  let embeddingData;
-  if (Array.isArray(data[0])) {
-    if (typeof data[0][0] == "number") {
-      embeddingData = data.map((embeddingArray, index) => ({
+  let embeddingsData;
+  if (Array.isArray(embeddings[0])) {
+    if (typeof embeddings[0][0] == "number") {
+      embeddingsData = embeddings.map((embeddingArray, index) => ({
         object: "embedding",
         embedding: embeddingArray,
         index: index,
       }));
     }
   } else {
-    embeddingData = {
+    embeddingsData = {
       object: "embedding",
-      embedding: data,
+      embedding: embeddings,
       index: 0,
     };
   }
   return {
     "object": "list",
-    "data": embeddingData,
+    "data": embeddingsData,
     "model": params["modelName"] || "unknown",
   };
+}
+
+
+export function adaptErrorResponseOpenAI(
+  err: LangException
+) {
+  const error: openAIError = {
+    code: null,
+    message: "",
+    param: null,
+    type: ""
+  };
+  error.message = JSON.stringify(err);
+  if (err.llmOutput) {
+    error.type = 'llm';
+  } else if (err.toolOutput) {
+    error.type = 'tool';
+  }
+  return new Response(JSON.stringify(error), {
+    status: 500,
+  });
 }
 
 async function urlToBase64(url: string): Promise<string> {
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error("Failed to download image.");
+    throw new ToolInputParsingException("Failed to download image.");
   }
   const blob = await response.blob();
   const buffer = await blob.arrayBuffer();
@@ -290,25 +314,19 @@ async function urlToBase64(url: string): Promise<string> {
 
 async function convertImageToBase64Json(blob: Blob) {
   const arrayBuffer = await blob.arrayBuffer();
-  const uint8Array = await new Uint8Array(arrayBuffer);
-
-  // Convert the Uint8Array to a Base64 string in chunks
+  const uint8Array = new Uint8Array(arrayBuffer);
   let binaryString = "";
   for (let i = 0; i < uint8Array.byteLength; i += 1024) {
-    const chunk = await uint8Array.subarray(
+    const chunk = uint8Array.subarray(
       i,
-      Math.min(i + 1024, uint8Array.byteLength),
+      Math.min(i + 1024, uint8Array.byteLength)
     );
-    binaryString += await String.fromCharCode.apply(null, chunk);
+    binaryString += String.fromCharCode.apply(null, Array.from(chunk));
   }
-  const base64String = await btoa(binaryString);
-
-  // Create a JSON object with the Base64 string
-  const json = await {
+  const base64String = btoa(binaryString);
+  const json = {
     image: base64String,
     contentType: blob.type,
   };
-
-  // Stringify the JSON object if you want a JSON string
-  return await JSON.stringify(json);
+  return JSON.stringify(json);
 }

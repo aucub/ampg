@@ -253,3 +253,10 @@ for await (const [key, value] of Object.entries(secretMap)) {
 }
 
 export default secretMap;
+
+export const openAIPaths: string[] = [
+  "/v1/chat/completions",
+  "/v1/embeddings",
+  "/v1/images/edits",
+  "/v1/audio/transcriptions",
+];
