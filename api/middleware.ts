@@ -1,8 +1,6 @@
 import { MiddlewareHandler } from "../deps.ts";
 import {
   BaseModelParams,
-  ChatModelParams,
-  LLMOptions,
   PortkeyModelParams,
 } from "../types.ts";
 
@@ -73,14 +71,6 @@ export const headersMiddleware = (): MiddlewareHandler => {
     const traceId = c.req.header("x-portkey-trace-id");
     if (traceId) {
       params["traceId"] = traceId;
-    }
-    const config = c.req.header("x-portkey-config");
-    if (config) {
-      const llms: LLMOptions[] = JSON.parse(config);
-      if (llms) {
-        params as PortkeyModelParams;
-        params["llms"] = llms;
-      }
     }
     c.set("params", params);
     await next();

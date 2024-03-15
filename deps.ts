@@ -24,7 +24,7 @@ export { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 export { makeApi, Zodios } from "https://esm.sh/@zodios/core@10.9.6";
 export type { ZodiosOptions } from "https://esm.sh/@zodios/core@10.9.6";
 export { configAsync } from "https://deno.land/x/dotenv@v3.2.2/mod.ts";
-export type { BaseLanguageModelInput } from "https://esm.sh/@langchain/core@0.1.47/language_models/base";
+export type { BaseLanguageModelInput, BaseLanguageModelParams } from "https://esm.sh/@langchain/core@0.1.47/language_models/base";
 export type { BaseChatModelParams } from "https://esm.sh/@langchain/core@0.1.47/language_models/chat_models";
 export { IterableReadableStream } from "https://esm.sh/@langchain/core@0.1.47/utils/stream";
 export {
@@ -36,7 +36,7 @@ export {
 export type {
   BaseMessageLike,
   MessageContentComplex,
-} from "https://esm.sh/@langchain/core@0.1.45/messages";
+} from "https://esm.sh/@langchain/core@0.1.47/messages";
 export {
   ChatOpenAI,
   OpenAIClient,
@@ -47,7 +47,8 @@ export type {
   ClientOptions,
   OpenAIChatInput,
   OpenAIEmbeddingsParams,
-} from "https://esm.sh/@langchain/openai@0.0.19";
+  AzureOpenAIInput
+} from "https://esm.sh/@langchain/openai@0.0.20";
 export {
   ChatGoogleGenerativeAI,
   GoogleGenerativeAIEmbeddings,
@@ -63,3 +64,5 @@ export {
 export type { CloudflareWorkersAIInput } from "https://esm.sh/@langchain/cloudflare@0.0.3";
 export { OpenAIWhisperAudio } from "https://esm.sh/langchain@0.1.28/document_loaders/fs/openai_whisper_audio";
 export { Portkey } from "https://esm.sh/@langchain/community@0.0.39/llms/portkey";
+export { ToolInputParsingException } from "https://esm.sh/@langchain/core@0.1.47/tools";
+export { OutputParserException } from "https://esm.sh/@langchain/core@0.1.47/output_parsers";

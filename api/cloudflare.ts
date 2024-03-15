@@ -4,36 +4,38 @@ import {
   CloudflareWorkersAIInput,
   z,
 } from "../deps.ts";
-import config, {
+import secretMap, {
   cloudflareWorkersASRModel,
   cloudflareWorkersTextEmbeddingsModel,
   cloudflareWorkersTextGenerationModel,
 } from "../config.ts";
 import {
   ChatModelParams,
-  EditImageParams,
+  ImagesEditsParams,
   EmbeddingsParams,
   TranscriptionParams,
+  LangException,
 } from "../types.ts";
 import { schemas as openaiSchemas } from "../types/openai.ts";
+import { schemas as cloudflareSchemas } from "../types/custom/cloudflare.ts";
 
-if (!config.CLOUDFLARE_BASE_URL) {
-  config.CLOUDFLARE_BASE_URL = "https://api.cloudflare.com/client/v4/accounts/";
+if (!secretMap.CLOUDFLARE_BASE_URL) {
+  secretMap.CLOUDFLARE_BASE_URL = "https://api.cloudflare.com/client/v4/accounts/";
 }
 
-export async function generateCloudflareWorkers(
+export async function generateContentCloudflare(
   params: ChatModelParams,
   chatHistory: BaseLanguageModelInput,
 ) {
-  const cwai: CloudflareWorkersAIInput = {
+  const cloudflareWorkersAIInput: CloudflareWorkersAIInput = {
     ...params,
   } as CloudflareWorkersAIInput;
-  if (!cloudflareWorkersTextGenerationModel.includes(cwai["model"] as string)) {
-    cwai["model"] = "@cf/meta/llama-2-7b-chat-int8";
+  if (!cloudflareWorkersTextGenerationModel.includes(cloudflareWorkersAIInput["model"] as string)) {
+    cloudflareWorkersAIInput["model"] = "@cf/meta/llama-2-7b-chat-int8";
   }
-  cwai["cloudflareAccountId"] = params["user"] || config.CLOUDFLARE_API_ID;
-  cwai["cloudflareApiToken"] = params["apiKey"] || config.CLOUDFLARE_API_TOKEN;
-  const model = new ChatCloudflareWorkersAI(cwai);
+  cloudflareWorkersAIInput["cloudflareAccountId"] = params["user"] || secretMap.CLOUDFLARE_ACCOUNT_ID;
+  cloudflareWorkersAIInput["cloudflareApiToken"] = params["apiKey"] || secretMap.CLOUDFLARE_API_TOKEN;
+  const model = new ChatCloudflareWorkersAI(cloudflareWorkersAIInput);
   if (!params["streaming"]) {
     return await model.invoke(chatHistory);
   } else {
@@ -41,7 +43,7 @@ export async function generateCloudflareWorkers(
   }
 }
 
-export async function generateEmbeddingsCloudflareWorkers(
+export async function generateEmbeddingsCloudflare(
   params: EmbeddingsParams,
   texts: string[] | string,
 ) {
@@ -51,28 +53,33 @@ export async function generateEmbeddingsCloudflareWorkers(
   ) {
     params["modelName"] = "@cf/baai/bge-large-en-v1.5";
   }
-  const resp = await fetch(
-    config.CLOUDFLARE_BASE_URL + params["user"] + "/ai/run/" +
+  let response;
+  if (secretMap.CLOUDFLARE_BASE_URL && params["user"]) {
+    response = await fetch(
+      secretMap.CLOUDFLARE_BASE_URL + params["user"] + "/ai/run/" +
       params["modelName"],
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + params["apiKey"],
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + params["apiKey"],
+        },
+        body: JSON.stringify({
+          "text": texts,
+        }),
       },
-      body: JSON.stringify({
-        "text": texts,
-      }),
-    },
-  );
-  const response = await resp.json();
-  if (!resp.ok || response["success"] != true) {
-    console.log(response);
+    );
   }
-  return response["result"]["data"];
+  if (response && response.ok) {
+    const body: z.infer<typeof cloudflareSchemas.Response> = await response.json();
+    if (!response || !response.ok || body["success"] != true) {
+      console.log(response);
+    }
+    return body["result"]["data"] ?? null;
+  }
 }
 
-export async function generateTranscriptionCloudflareWorkers(
+export async function generateTranscriptionCloudflare(
   params: TranscriptionParams,
 ) {
   if (
@@ -81,43 +88,50 @@ export async function generateTranscriptionCloudflareWorkers(
   ) {
     params["modelName"] = "@cf/openai/whisper";
   }
-  const resp = await fetch(
-    config.CLOUDFLARE_BASE_URL + params["user"] + "/ai/run/" +
+  let response;
+  if (secretMap.CLOUDFLARE_BASE_URL && params["user"]) {
+    response = await fetch(
+      secretMap.CLOUDFLARE_BASE_URL + params["user"] + "/ai/run/" +
       params["modelName"],
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/octet-stream",
-        "Authorization": "Bearer " + params["apiKey"],
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/octet-stream",
+          "Authorization": "Bearer " + params["apiKey"],
+        },
+        body: await (params["file"]?.arrayBuffer() ?? null),
       },
-      body: await params["file"].arrayBuffer(),
-    },
-  );
-  const response = await resp.json();
-  if (!await resp.ok || await response["success"] != true) {
-    console.log(response);
+    );
   }
-  const result = await response["result"];
-  const responseBody: z.infer<
-    typeof openaiSchemas.CreateTranscriptionResponseVerboseJson
-  > = await {
-    task: "transcribe",
-    language: "unknown",
-    duration: result["word_count"],
-    text: result["text"],
-    words: result["words"].map((word) => ({
-      word: word.word,
-      start: word.start,
-      end: word.end,
-    })),
-  };
-  return await responseBody;
+  if (response && response.ok) {
+    const body: z.infer<typeof cloudflareSchemas.Response> = await response.json();
+    if (!response || !response.ok || body["success"] != true) {
+      console.log(response);
+    }
+    const result = body["result"];
+    const responseBody: z.infer<
+      typeof openaiSchemas.CreateTranscriptionResponseVerboseJson
+    > = {
+      task: "transcribe",
+      language: "unknown",
+      duration: result["word_count"] as string,
+      text: result["text"] as string,
+      // deno-lint-ignore no-explicit-any
+      words: (result["words"] as any[]).map((word: any) => ({
+        word: word.word.toString(),
+        start: word.start,
+        end: word.end,
+      })),
+    };
+    return responseBody;
+  }
+
 }
 
-export async function generateEditImageCloudflareWorkers(
-  params: EditImageParams,
+export async function generateImagesEditsCloudflare(
+  params: ImagesEditsParams,
 ) {
-  const imageParams = await {
+  const imagesEditsParams = {
     guidance: params.guidance || 7.5,
     image: params.image instanceof File
       ? [...new Uint8Array(await params.image.arrayBuffer())]
@@ -129,25 +143,30 @@ export async function generateEditImageCloudflareWorkers(
     prompt: params.prompt || undefined,
     strength: params.strength || 1,
   };
-  const requestBody = await JSON.stringify(imageParams);
-  const resp = await fetch(
-    config.CLOUDFLARE_BASE_URL + params["user"] +
+  let response;
+  if (secretMap.CLOUDFLARE_BASE_URL && params["user"]) {
+    response = await fetch(
+      secretMap.CLOUDFLARE_BASE_URL + params["user"] +
       "/ai/run/" + params["modelName"],
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + params["apiKey"],
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + params["apiKey"],
+        },
+        body: await JSON.stringify(imagesEditsParams),
       },
-      body: requestBody,
-    },
-  );
-  if (await resp.headers.get("Content-Type") == "image/png") {
-    return await resp.blob();
-  } else {
-    const response = await resp.json();
-    const encoder = await new TextEncoder();
-    const data = await encoder.encode(JSON.stringify(response, null, 2));
-    Deno.stdout.writeSync(await data);
+    );
+    if (response.headers.get("Content-Type")?.includes("image/")) {
+      return await response.blob();
+    } else {
+      const body = await response.text();
+      const langException: LangException = {
+        name: "",
+        message: ""
+      }
+      langException.message = body
+      throw langException;
+    }
   }
 }

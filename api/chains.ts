@@ -8,24 +8,24 @@ import { BaseLanguageModelInput } from "../deps.ts";
 import {
   BaseModelParams,
   ChatModelParams,
-  EditImageParams,
+  ImagesEditsParams,
   EmbeddingsParams,
   TranscriptionParams,
 } from "../types.ts";
 import {
-  generateCloudflareWorkers,
-  generateEditImageCloudflareWorkers,
-  generateEmbeddingsCloudflareWorkers,
-  generateTranscriptionCloudflareWorkers,
+  generateContentCloudflare,
+  generateImagesEditsCloudflare,
+  generateEmbeddingsCloudflare,
+  generateTranscriptionCloudflare,
 } from "./cloudflare.ts";
 import {
-  generateContentGoogleGenerative,
-  generateEmbeddingsGoogleGenerative,
+  generateContentGoogleGenerativeAI,
+  generateEmbeddingsGoogleGenerativeAI,
 } from "./google-genai.ts";
 import {
-  generateOpenAIChatCompletion,
-  generateOpenAIEmbeddings,
-  generateOpenAITranscription,
+  generateChatCompletionOpenAI,
+  generateEmbeddingsOpenAI,
+  generateTranscriptionOpenAI,
 } from "./openai.ts";
 
 export function parseParams(
@@ -59,16 +59,16 @@ export async function generateChat(
   if (
     params["provider"] == "openai"
   ) {
-    return await generateOpenAIChatCompletion(params, chatHistory);
+    return await generateChatCompletionOpenAI(params, chatHistory);
   } else if (
     params["provider"] == "google" ||
     params["provider"] == "palm"
   ) {
-    return await generateContentGoogleGenerative(params, chatHistory);
+    return await generateContentGoogleGenerativeAI(params, chatHistory);
   } else if (
     params["provider"] == "cloudflareworkersai"
   ) {
-    return await generateCloudflareWorkers(params, chatHistory);
+    return await generateContentCloudflare(params, chatHistory);
   }
 }
 
@@ -79,16 +79,16 @@ export async function generateEmbeddings(
   if (
     params["provider"] == "openai"
   ) {
-    return await generateOpenAIEmbeddings(params, input);
+    return await generateEmbeddingsOpenAI(params, input);
   } else if (
     params["provider"] == "google" ||
     params["provider"] == "palm"
   ) {
-    return await generateEmbeddingsGoogleGenerative(params, input);
+    return await generateEmbeddingsGoogleGenerativeAI(params, input);
   } else if (
     params["provider"] == "cloudflareworkersai"
   ) {
-    return generateEmbeddingsCloudflareWorkers(params, input);
+    return generateEmbeddingsCloudflare(params, input);
   }
 }
 
@@ -98,20 +98,20 @@ export async function generateTranscription(
   if (
     params["provider"] == "openai"
   ) {
-    return await generateOpenAITranscription(params);
+    return await generateTranscriptionOpenAI(params);
   } else if (
     params["provider"] == "cloudflareworkersai"
   ) {
-    return await generateTranscriptionCloudflareWorkers(params);
+    return await generateTranscriptionCloudflare(params);
   }
 }
 
 export async function generateEditImage(
-  params: EditImageParams,
+  params: ImagesEditsParams,
 ) {
   if (
     params["provider"] == "cloudflareworkersai"
   ) {
-    return await generateEditImageCloudflareWorkers(params);
+    return await generateImagesEditsCloudflare(params);
   }
 }

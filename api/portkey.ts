@@ -1,16 +1,15 @@
-import { BaseLanguageModelInput, PortkeyChat } from "../deps.ts";
+import { BaseLanguageModelInput, Portkey } from "../deps.ts";
 import { PortkeyModelParams } from "../types.ts";
 
 export async function generateContentPortkey(
   params: PortkeyModelParams,
   chatHistory: BaseLanguageModelInput,
 ) {
-  const ppc: Partial<PortkeyChat> = {};
-  ppc.apiKey = params?.apiKey;
-  ppc.baseURL = params?.baseURL;
-  ppc.mode = params?.mode;
-  ppc.llms = params.llms;
-  const model = new PortkeyChat(ppc);
+  const portkeyParams: Partial<Portkey> = {};
+  portkeyParams.apiKey = params?.apiKey;
+  portkeyParams.baseURL = params?.baseURL;
+  portkeyParams.mode = params?.mode;
+  const model = new Portkey(portkeyParams);
   if (!params["streaming"]) {
     return await model.invoke(chatHistory);
   } else {
