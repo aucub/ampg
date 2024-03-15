@@ -1,7 +1,7 @@
 import { configAsync } from "./deps.ts";
 
 interface CustomSecretMap {
-  CLOUDFLARE_API_ID?: string;
+  CLOUDFLARE_ACCOUNT_ID?: string;
   CLOUDFLARE_BASE_URL?: string;
   OPENAI_BASE_URL?: string;
 }
@@ -247,4 +247,9 @@ export const cloudflareWorkersModel: string[] = [
 ];
 
 const secretMap: SecretMap = await configAsync();
+
+for await (const [key, value] of Object.entries(secretMap)) {
+  Deno.env.set(key, value);
+}
+
 export default secretMap;

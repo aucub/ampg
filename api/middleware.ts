@@ -1,12 +1,17 @@
 import { MiddlewareHandler } from "../deps.ts";
-import { ChatModelParams } from "../types.ts";
+import {
+  BaseModelParams,
+  ChatModelParams,
+  LLMOptions,
+  PortkeyModelParams,
+} from "../types.ts";
 
 const TOKEN_STRINGS = "[A-Za-z0-9._~+/-]+=*";
 const PREFIX = "Bearer";
 
 export const headersMiddleware = (): MiddlewareHandler => {
   return async function headersMiddleware(c, next) {
-    const params: ChatModelParams = {};
+    const params: BaseModelParams = {};
     let apiKey = c.req.header("X-Auth-Key");
     if (!apiKey) {
       apiKey = c.req.header("x-portkey-api-key");
@@ -68,6 +73,14 @@ export const headersMiddleware = (): MiddlewareHandler => {
     const traceId = c.req.header("x-portkey-trace-id");
     if (traceId) {
       params["traceId"] = traceId;
+    }
+    const config = c.req.header("x-portkey-config");
+    if (config) {
+      const llms: LLMOptions[] = JSON.parse(config);
+      if (llms) {
+        params as PortkeyModelParams;
+        params["llms"] = llms;
+      }
     }
     c.set("params", params);
     await next();

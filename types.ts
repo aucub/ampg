@@ -128,3 +128,26 @@ export interface EditImageParams extends BaseModelParams {
   num_steps?: number;
   strength?: number;
 }
+
+export interface PortkeyModelParams extends ChatModelParams {
+  /**
+   * Gets the provider options based on the specified mode.
+   * Modes can be "single"(uses the first provider), "loadbalance"(selects one provider based on weights),
+   * or "fallback"(uses all providers in the given order).If the mode does not match these options, null is returned.
+   */
+  mode?: string;
+  /**
+   * @deprecated
+   */
+  llms?: [LLMOptions] | null;
+}
+
+/**
+ * @deprecated
+ */
+export interface LLMOptions {
+  provider: string;
+  virtual_key: string;
+  model: string;
+  max_tokens: number;
+}
