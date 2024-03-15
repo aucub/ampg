@@ -108,7 +108,7 @@ app.post(
   async (c) => {
     let params: EditImageParams = await c.get("params");
     const formData = await c.req.valid("form");
-    params = await parseOpenAiEditImageRequest(formData, params);
+    params = parseOpenAiEditImageRequest(formData, params);
     params = await parseParams(params);
     const image = await generateEditImage(params);
     return await c.json(await adaptOpenAIEditImageResponse(image));
