@@ -24,31 +24,34 @@ export { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 export { makeApi, Zodios } from "https://esm.sh/@zodios/core@10.9.6";
 export type { ZodiosOptions } from "https://esm.sh/@zodios/core@10.9.6";
 export { configAsync } from "https://deno.land/x/dotenv@v3.2.2/mod.ts";
-export type { BaseLanguageModelInput, BaseLanguageModelParams } from "https://esm.sh/@langchain/core@0.1.47/language_models/base";
-export type { BaseChatModelParams } from "https://esm.sh/@langchain/core@0.1.47/language_models/chat_models";
-export { IterableReadableStream } from "https://esm.sh/@langchain/core@0.1.47/utils/stream";
+export type {
+  BaseLanguageModelInput,
+  BaseLanguageModelParams,
+} from "https://esm.sh/@langchain/core@0.1.48/language_models/base";
+export type { BaseChatModelParams } from "https://esm.sh/@langchain/core@0.1.48/language_models/chat_models";
+export { IterableReadableStream } from "https://esm.sh/@langchain/core@0.1.48/utils/stream";
 export {
   AIMessage,
   BaseMessage,
   HumanMessage,
   SystemMessage,
-} from "https://esm.sh/@langchain/core@0.1.47/messages";
+} from "https://esm.sh/@langchain/core@0.1.48/messages";
 export type {
   BaseMessageLike,
   MessageContentComplex,
-} from "https://esm.sh/@langchain/core@0.1.47/messages";
+} from "https://esm.sh/@langchain/core@0.1.48/messages";
 export {
   ChatOpenAI,
   OpenAIClient,
   OpenAIEmbeddings,
-} from "https://esm.sh/@langchain/openai@0.0.20";
-export { OpenAI } from "https://deno.land/x/openai@v4.29.0/mod.ts";
+} from "https://esm.sh/@langchain/openai@0.0.21";
+export { OpenAI } from "https://deno.land/x/openai@v4.29.1/mod.ts";
 export type {
+  AzureOpenAIInput,
   ClientOptions,
   OpenAIChatInput,
   OpenAIEmbeddingsParams,
-  AzureOpenAIInput
-} from "https://esm.sh/@langchain/openai@0.0.20";
+} from "https://esm.sh/@langchain/openai@0.0.21";
 export {
   ChatGoogleGenerativeAI,
   GoogleGenerativeAIEmbeddings,
@@ -63,6 +66,6 @@ export {
 } from "https://esm.sh/@langchain/cloudflare@0.0.3";
 export type { CloudflareWorkersAIInput } from "https://esm.sh/@langchain/cloudflare@0.0.3";
 export { OpenAIWhisperAudio } from "https://esm.sh/langchain@0.1.28/document_loaders/fs/openai_whisper_audio";
-export { Portkey } from "https://esm.sh/@langchain/community@0.0.39/llms/portkey";
-export { ToolInputParsingException } from "https://esm.sh/@langchain/core@0.1.47/tools";
-export { OutputParserException } from "https://esm.sh/@langchain/core@0.1.47/output_parsers";
+export { Portkey } from "https://esm.sh/@langchain/community@0.0.40/llms/portkey";
+export { ToolInputParsingException } from "https://esm.sh/@langchain/core@0.1.48/tools";
+export { OutputParserException } from "https://esm.sh/@langchain/core@0.1.48/output_parsers";

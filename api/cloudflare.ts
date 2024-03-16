@@ -11,16 +11,17 @@ import secretMap, {
 } from "../config.ts";
 import {
   ChatModelParams,
-  ImagesEditsParams,
   EmbeddingsParams,
-  TranscriptionParams,
+  ImagesEditsParams,
   LangException,
+  TranscriptionParams,
 } from "../types.ts";
 import { schemas as openaiSchemas } from "../types/openai.ts";
 import { schemas as cloudflareSchemas } from "../types/custom/cloudflare.ts";
 
 if (!secretMap.CLOUDFLARE_BASE_URL) {
-  secretMap.CLOUDFLARE_BASE_URL = "https://api.cloudflare.com/client/v4/accounts/";
+  secretMap.CLOUDFLARE_BASE_URL =
+    "https://api.cloudflare.com/client/v4/accounts/";
 }
 
 export async function generateContentCloudflare(
@@ -30,11 +31,17 @@ export async function generateContentCloudflare(
   const cloudflareWorkersAIInput: CloudflareWorkersAIInput = {
     ...params,
   } as CloudflareWorkersAIInput;
-  if (!cloudflareWorkersTextGenerationModel.includes(cloudflareWorkersAIInput["model"] as string)) {
+  if (
+    !cloudflareWorkersTextGenerationModel.includes(
+      cloudflareWorkersAIInput["model"] as string,
+    )
+  ) {
     cloudflareWorkersAIInput["model"] = "@cf/meta/llama-2-7b-chat-int8";
   }
-  cloudflareWorkersAIInput["cloudflareAccountId"] = params["user"] || secretMap.CLOUDFLARE_ACCOUNT_ID;
-  cloudflareWorkersAIInput["cloudflareApiToken"] = params["apiKey"] || secretMap.CLOUDFLARE_API_TOKEN;
+  cloudflareWorkersAIInput["cloudflareAccountId"] = params["user"] ||
+    secretMap.CLOUDFLARE_ACCOUNT_ID;
+  cloudflareWorkersAIInput["cloudflareApiToken"] = params["apiKey"] ||
+    secretMap.CLOUDFLARE_API_TOKEN;
   const model = new ChatCloudflareWorkersAI(cloudflareWorkersAIInput);
   if (!params["streaming"]) {
     return await model.invoke(chatHistory);
@@ -57,7 +64,7 @@ export async function generateEmbeddingsCloudflare(
   if (secretMap.CLOUDFLARE_BASE_URL && params["user"]) {
     response = await fetch(
       secretMap.CLOUDFLARE_BASE_URL + params["user"] + "/ai/run/" +
-      params["modelName"],
+        params["modelName"],
       {
         method: "POST",
         headers: {
@@ -71,7 +78,8 @@ export async function generateEmbeddingsCloudflare(
     );
   }
   if (response && response.ok) {
-    const body: z.infer<typeof cloudflareSchemas.Response> = await response.json();
+    const body: z.infer<typeof cloudflareSchemas.Response> = await response
+      .json();
     if (!response || !response.ok || body["success"] != true) {
       console.log(response);
     }
@@ -92,7 +100,7 @@ export async function generateTranscriptionCloudflare(
   if (secretMap.CLOUDFLARE_BASE_URL && params["user"]) {
     response = await fetch(
       secretMap.CLOUDFLARE_BASE_URL + params["user"] + "/ai/run/" +
-      params["modelName"],
+        params["modelName"],
       {
         method: "POST",
         headers: {
@@ -104,7 +112,8 @@ export async function generateTranscriptionCloudflare(
     );
   }
   if (response && response.ok) {
-    const body: z.infer<typeof cloudflareSchemas.Response> = await response.json();
+    const body: z.infer<typeof cloudflareSchemas.Response> = await response
+      .json();
     if (!response || !response.ok || body["success"] != true) {
       console.log(response);
     }
@@ -125,7 +134,6 @@ export async function generateTranscriptionCloudflare(
     };
     return responseBody;
   }
-
 }
 
 export async function generateImagesEditsCloudflare(
@@ -147,7 +155,7 @@ export async function generateImagesEditsCloudflare(
   if (secretMap.CLOUDFLARE_BASE_URL && params["user"]) {
     response = await fetch(
       secretMap.CLOUDFLARE_BASE_URL + params["user"] +
-      "/ai/run/" + params["modelName"],
+        "/ai/run/" + params["modelName"],
       {
         method: "POST",
         headers: {
@@ -163,9 +171,9 @@ export async function generateImagesEditsCloudflare(
       const body = await response.text();
       const langException: LangException = {
         name: "",
-        message: ""
-      }
-      langException.message = body
+        message: "",
+      };
+      langException.message = body;
       throw langException;
     }
   }

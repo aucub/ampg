@@ -136,20 +136,6 @@ export interface PortkeyModelParams extends ChatModelParams {
    * or "fallback"(uses all providers in the given order).If the mode does not match these options, null is returned.
    */
   mode?: string;
-  /**
-   * @deprecated
-   */
-  llms?: [LLMOptions] | null;
-}
-
-/**
- * @deprecated
- */
-export interface LLMOptions {
-  provider: string;
-  virtual_key: string;
-  model: string;
-  max_tokens: number;
 }
 
 export interface openAIError {
@@ -159,7 +145,7 @@ export interface openAIError {
   type: string;
 }
 
-export interface LangException extends Error {
+export class LangException extends Error {
   llmOutput?: string;
   toolOutput?: string;
   observation?: string;
