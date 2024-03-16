@@ -13,6 +13,7 @@ import {
   timing,
   ToolInputParsingException,
   zValidator,
+  z
 } from "./deps.ts";
 import { schemas as openaiSchemas } from "./types/openai.ts";
 import {
@@ -24,21 +25,22 @@ import {
 } from "./api/chains.ts";
 import { headersMiddleware } from "./api/middleware.ts";
 import {
+  adaptChatCompletionRequestOpenAI,
   adaptChatCompletionResponseOpenAI,
-  adaptImagesEditsResponseOpenAI,
+  adaptEmbeddingsRequestOpenAI,
   adaptEmbeddingsResponseOpenAI,
   adaptErrorResponseOpenAI,
-  adaptChatCompletionRequestOpenAI,
   adaptImagesEditsRequestOpenAI,
-  adaptEmbeddingsRequestOpenAI,
+  adaptImagesEditsResponseOpenAI,
   adaptTranscriptionRequestOpenAI,
 } from "./api/openai.ts";
 import {
   ChatModelParams,
   ImagesEditsParams,
-  LangException,
   TranscriptionParams,
+  LangException
 } from "./types.ts";
+import { openAIPaths } from "./config.ts";
 
 const app = new Hono();
 
@@ -56,16 +58,21 @@ app.post(
   "/v1/chat/completions",
   zValidator("json", openaiSchemas.CreateChatCompletionRequest),
   async (c) => {
-    let params: ChatModelParams = await c.get("params");
-    const body = c.req.valid("json");
-    const data = await adaptChatCompletionRequestOpenAI(body, params);
+    let params: ChatModelParams | undefined;
+    try {
+      params = await c.get<ChatModelParams>("params");
+    } catch (error) {
+      console.error("Error retrieving params:", error);
+    }
+    const body = c.req.valid<z.infer<typeof openaiSchemas.CreateChatCompletionRequest>>("json");
+    const data = await adaptChatCompletionRequestOpenAI(body, params || {});
     params = parseParams(data["params"]);
     const message = await generateChat(params, data["chatHistory"]);
     if (message instanceof IterableReadableStream) {
       return streamSSE(c, async (stream) => {
         for await (const chunk of message) {
           const messageItem = await adaptChatCompletionResponseOpenAI(
-            params,
+            params!,
             chunk,
           );
           await stream.writeSSE({ data: JSON.stringify(messageItem) });
@@ -89,8 +96,8 @@ app.post(
   "/v1/embeddings",
   zValidator("json", openaiSchemas.CreateEmbeddingRequest),
   async (c) => {
-    let params: ChatModelParams = await c.get("params");
-    const body = c.req.valid("json");
+    let params: ChatModelParams = await c.get<ChatModelParams>("params") as ChatModelParams;
+    const body = c.req.valid<any>("json") as any;
     const data = adaptEmbeddingsRequestOpenAI(body, params);
     params = parseParams(data["params"]);
     let input;
@@ -101,7 +108,7 @@ app.post(
     }
     const embeddings = await generateEmbeddings(params, input);
     if (embeddings !== undefined) {
-      return c.json(adaptEmbeddingsResponseOpenAI(params, embeddings));
+      return c.json(adaptEmbeddingsResponseOpenAI(params, embeddings as number[] | number[][]));
     }
   },
 );
@@ -110,12 +117,14 @@ app.post(
   "/v1/images/edits",
   zValidator("form", openaiSchemas.CreateImageEditRequest),
   async (c) => {
-    let params: ImagesEditsParams = await c.get("params");
-    const formData = await c.req.valid("form");
+    let params = c.get<ImagesEditsParams>("params") as ImagesEditsParams;
+    const formData = c.req.valid<any>("form") as any;
     params = adaptImagesEditsRequestOpenAI(formData, params);
-    params = await parseParams(params);
+    params = parseParams(params);
     const image = await generateEditImage(params);
-    return await c.json(await adaptImagesEditsResponseOpenAI(image));
+    if (image) {
+      return c.json(await adaptImagesEditsResponseOpenAI(image));
+    }
   },
 );
 
@@ -123,21 +132,19 @@ app.post(
   "/v1/audio/transcriptions",
   zValidator("form", openaiSchemas.CreateTranscriptionRequest),
   async (c) => {
-    let params: TranscriptionParams = await c.get("params");
-    const formData = await c.req.valid("form");
-    params = await adaptTranscriptionRequestOpenAI(formData, params);
-    params = await parseParams(params);
-    return await c.json(await generateTranscription(params));
+    let params = c.get<TranscriptionParams>("params") as TranscriptionParams;
+    const formData = c.req.valid<any>("form");
+    params = adaptTranscriptionRequestOpenAI(formData, params);
+    params = parseParams(params);
+    return c.json(await generateTranscription(params));
   },
 );
 
-app.notFound((c) => c.json({ message: "Not Found", ok: false }, 404));
-
-app.onError(async (err, c) => {
-  const exception: LangException = LangException();
+app.onError(async (err, c): Promise<Response> => {
+  let exception: LangException = new LangException();
   if (err instanceof ToolInputParsingException) {
     exception.message = err.message;
-    exception.output = err.output;
+    exception.toolOutput = err.output;
   }
   if (err instanceof OutputParserException) {
     exception.message = err.message;
@@ -148,7 +155,7 @@ app.onError(async (err, c) => {
     exception = err;
   }
   if (exception.message) {
-    if (openAIPaths.includes(await c.req.path)) {
+    if (openAIPaths.includes(c.req.path)) {
       return adaptErrorResponseOpenAI(exception);
     }
   }
@@ -156,10 +163,11 @@ app.onError(async (err, c) => {
   if (err instanceof HTTPException) {
     return err.getResponse();
   }
-  const options = { message: err.message };
   if (err instanceof Error) {
-    return new HTTPException(options).getResponse();
+    const options = { message: err.message };
+    return new HTTPException(500, options).getResponse();
   }
+  return new HTTPException(500, {}).getResponse();
 });
 
 export { app };

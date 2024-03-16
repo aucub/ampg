@@ -1,5 +1,6 @@
 import {
   AIMessage,
+  AzureOpenAIInput,
   BaseChatModelParams,
   BaseLanguageModelInput,
   BaseMessage,
@@ -13,17 +14,16 @@ import {
   OpenAIEmbeddingsParams,
   OpenAIWhisperAudio,
   SystemMessage,
-  z,
-  AzureOpenAIInput,
   ToolInputParsingException,
+  z,
 } from "../deps.ts";
 import {
   ChatModelParams,
-  ImagesEditsParams,
   EmbeddingsParams,
-  TranscriptionParams,
+  ImagesEditsParams,
   LangException,
-  openAIError
+  openAIError,
+  TranscriptionParams,
 } from "../types.ts";
 import secretMap, { openAIChatModel, openAIEmbeddingModel } from "../config.ts";
 import { schemas as openaiSchemas } from "../types/openai.ts";
@@ -49,7 +49,7 @@ export async function adaptChatCompletionRequestOpenAI(
         if (
           content["type"] == "image_url" &&
           typeof (content["image_url"] as { url: string })["url"] ===
-          "string" &&
+            "string" &&
           (content["image_url"] as { url: string })["url"].startsWith("http")
         ) {
           (content["image_url"] as { url: string })["url"] = await urlToBase64(
@@ -138,13 +138,18 @@ export async function generateEmbeddingsOpenAI(
     openAIApiKey?: string;
     configuration?: ClientOptions;
   } = { ...params };
-  openAIEmbeddingsParams["openAIApiKey"] = params["apiKey"] || secretMap.OPENAI_API_KEY;
+  openAIEmbeddingsParams["openAIApiKey"] = params["apiKey"] ||
+    secretMap.OPENAI_API_KEY;
   if (!openAIEmbeddingsParams["configuration"]) {
     openAIEmbeddingsParams["configuration"] = { ...params } as ClientOptions;
   }
   openAIEmbeddingsParams["configuration"]["baseURL"] = params["baseURL"] ||
     secretMap.OPENAI_BASE_URL;
-  if (!openAIEmbeddingModel.includes(openAIEmbeddingsParams["modelName"] as string)) {
+  if (
+    !openAIEmbeddingModel.includes(
+      openAIEmbeddingsParams["modelName"] as string,
+    )
+  ) {
     openAIEmbeddingsParams["modelName"] = undefined;
   }
   const embeddings = new OpenAIEmbeddings(openAIEmbeddingsParams);
@@ -159,12 +164,16 @@ export async function generateChatCompletionOpenAI(
   params: ChatModelParams,
   chatHistory: BaseLanguageModelInput,
 ) {
-  let openAIChatInput: Partial<OpenAIChatInput> & Partial<AzureOpenAIInput> & BaseChatModelParams = {
-    cache: params["cache"] || true,
-  };
+  let openAIChatInput:
+    & Partial<OpenAIChatInput>
+    & Partial<AzureOpenAIInput>
+    & BaseChatModelParams = {
+      cache: params["cache"] || true,
+    };
   openAIChatInput = { ...openAIChatInput, ...params };
   openAIChatInput["modelName"] = params["modelName"];
-  openAIChatInput["openAIApiKey"] = params["apiKey"] || secretMap.OPENAI_API_KEY;
+  openAIChatInput["openAIApiKey"] = params["apiKey"] ||
+    secretMap.OPENAI_API_KEY;
   if (!openAIChatModel.includes(openAIChatInput["modelName"] as string)) {
     openAIChatInput["modelName"] = undefined;
   }
@@ -276,21 +285,20 @@ export function adaptEmbeddingsResponseOpenAI(
   };
 }
 
-
 export function adaptErrorResponseOpenAI(
-  err: LangException
+  err: LangException,
 ) {
   const error: openAIError = {
     code: null,
     message: "",
     param: null,
-    type: ""
+    type: "",
   };
   error.message = JSON.stringify(err);
   if (err.llmOutput) {
-    error.type = 'llm';
+    error.type = "llm";
   } else if (err.toolOutput) {
-    error.type = 'tool';
+    error.type = "tool";
   }
   return new Response(JSON.stringify(error), {
     status: 500,
@@ -319,7 +327,7 @@ async function convertImageToBase64Json(blob: Blob) {
   for (let i = 0; i < uint8Array.byteLength; i += 1024) {
     const chunk = uint8Array.subarray(
       i,
-      Math.min(i + 1024, uint8Array.byteLength)
+      Math.min(i + 1024, uint8Array.byteLength),
     );
     binaryString += String.fromCharCode.apply(null, Array.from(chunk));
   }

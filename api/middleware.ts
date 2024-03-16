@@ -1,8 +1,5 @@
 import { MiddlewareHandler } from "../deps.ts";
-import {
-  BaseModelParams,
-  PortkeyModelParams,
-} from "../types.ts";
+import { BaseModelParams, PortkeyModelParams } from "../types.ts";
 
 const TOKEN_STRINGS = "[A-Za-z0-9._~+/-]+=*";
 const PREFIX = "Bearer";

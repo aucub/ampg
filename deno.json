@@ -1,9 +1,22 @@
 {
   "tasks": {
+    "dev": "deno run --allow-net --allow-env --allow-read --unstable-hmr main.ts",
     "start": "deno run --allow-net --allow-env --allow-read main.ts",
     "update": "deno run --allow-env --allow-read --allow-write --allow-run=git,deno --allow-net https://deno.land/x/molt@0.17.1/cli.ts ./deps.ts",
     "update:commit": "deno task -q update --commit --pre-commit=fmt"
   },
+  "unstable": [
+    "bare-node-builtins",
+    "sloppy-imports",
+    "webgpu"
+  ],
+  "exclude": [
+    ".env.example",
+    ".vscode",
+    ".github",
+    ".devcontainer",
+    ".gitignore"
+  ],
   "npmRegistry": "https://registry.npmmirror.com",
   "lock": false
 }

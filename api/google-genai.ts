@@ -17,7 +17,11 @@ export async function generateContentGoogleGenerativeAI(
   } as GoogleGenerativeAIChatInput;
   googleGenerativeAIChatInput["maxOutputTokens"] = params["maxTokens"];
   googleGenerativeAIChatInput["stopSequences"] = params["stop"];
-  if (!googleGenaiModel.includes(googleGenerativeAIChatInput["modelName"] as string)) {
+  if (
+    !googleGenaiModel.includes(
+      googleGenerativeAIChatInput["modelName"] as string,
+    )
+  ) {
     googleGenerativeAIChatInput["modelName"] = undefined;
   }
   const model = new ChatGoogleGenerativeAI(googleGenerativeAIChatInput);
@@ -32,12 +36,21 @@ export async function generateEmbeddingsGoogleGenerativeAI(
   params: EmbeddingsParams,
   texts: string[] | string,
 ) {
-  const googleGenerativeAIEmbeddingsParams = params as Partial<GoogleGenerativeAIEmbeddingsParams>;
-  googleGenerativeAIEmbeddingsParams["apiKey"] = params["apiKey"] || secretMap.GOOGLE_API_KEY;
-  if (!googleGenaiModel.includes(googleGenerativeAIEmbeddingsParams["modelName"] as string)) {
+  const googleGenerativeAIEmbeddingsParams = params as Partial<
+    GoogleGenerativeAIEmbeddingsParams
+  >;
+  googleGenerativeAIEmbeddingsParams["apiKey"] = params["apiKey"] ||
+    secretMap.GOOGLE_API_KEY;
+  if (
+    !googleGenaiModel.includes(
+      googleGenerativeAIEmbeddingsParams["modelName"] as string,
+    )
+  ) {
     googleGenerativeAIEmbeddingsParams["modelName"] = undefined;
   }
-  const embeddings = new GoogleGenerativeAIEmbeddings(googleGenerativeAIEmbeddingsParams);
+  const embeddings = new GoogleGenerativeAIEmbeddings(
+    googleGenerativeAIEmbeddingsParams,
+  );
   if (Array.isArray(texts)) {
     return await embeddings.embedDocuments(texts);
   } else {

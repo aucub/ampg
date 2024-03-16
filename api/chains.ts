@@ -8,14 +8,14 @@ import { BaseLanguageModelInput } from "../deps.ts";
 import {
   BaseModelParams,
   ChatModelParams,
-  ImagesEditsParams,
   EmbeddingsParams,
+  ImagesEditsParams,
   TranscriptionParams,
 } from "../types.ts";
 import {
   generateContentCloudflare,
-  generateImagesEditsCloudflare,
   generateEmbeddingsCloudflare,
+  generateImagesEditsCloudflare,
   generateTranscriptionCloudflare,
 } from "./cloudflare.ts";
 import {
