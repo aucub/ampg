@@ -2,7 +2,7 @@ import { MiddlewareHandler } from "../deps.ts";
 import { BaseModelParams } from "../types.ts";
 
 const TOKEN_STRINGS = "[A-Za-z0-9._~+/-]+=*";
-const PREFIX = "Bearer";
+const TOKEN_PREFIX = "Bearer";
 
 export const headersMiddleware = (): MiddlewareHandler => {
   return async function headersMiddleware(c, next) {
@@ -15,7 +15,7 @@ export const headersMiddleware = (): MiddlewareHandler => {
       apiKey = c.req.header("Authorization");
       if (apiKey) {
         const regexp = new RegExp(
-          "^" + PREFIX + " +(" + TOKEN_STRINGS + ") *$",
+          "^" + TOKEN_PREFIX + " +(" + TOKEN_STRINGS + ") *$",
         );
         const match = regexp.exec(apiKey);
         if (match) {

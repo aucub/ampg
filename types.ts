@@ -79,7 +79,7 @@ export interface ChatModelParams extends BaseModelParams {
   seed?: number;
 }
 
-export interface EmbeddingsParams extends BaseModelParams {
+export interface EmbeddingParams extends BaseModelParams {
   encoding_format?: string;
   /**
    * An optional title for the text.
@@ -150,7 +150,7 @@ export interface CreateImageParams extends BaseModelParams {
   style?: string;
 }
 
-export interface ImagesEditsParams extends BaseModelParams {
+export interface ImageEditParams extends BaseModelParams {
   image?: File;
   prompt?: string;
   mask?: File;

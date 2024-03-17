@@ -1,117 +1,117 @@
 import {
-  cloudflareWorkersModel,
+  cloudflareWorkersAIModel,
   googleGenaiModel,
   openAIModel,
-  providers,
+  Providers,
 } from "../config.ts";
 import { BaseLanguageModelInput } from "../deps.ts";
 import {
   BaseModelParams,
   ChatModelParams,
-  EmbeddingsParams,
-  ImagesEditsParams,
+  EmbeddingParams,
+  ImageEditParams,
   TranscriptionParams,
 } from "../types.ts";
 import {
-  generateContentCloudflare,
-  generateEmbeddingsCloudflare,
-  generateImagesEditsCloudflare,
-  generateTranscriptionCloudflare,
+  speechRecognitionCloudflare,
+  textEmbeddingsCloudflare,
+  textGenerationCloudflare,
+  textToImageCloudflare,
 } from "./cloudflare.ts";
 import {
+  embedContentGoogleGenerativeAI,
   generateContentGoogleGenerativeAI,
-  generateEmbeddingsGoogleGenerativeAI,
 } from "./google-genai.ts";
 import {
-  generateChatCompletionOpenAI,
-  generateEmbeddingsOpenAI,
-  generateTranscriptionOpenAI,
+  chatCompletionOpenAI,
+  embeddingOpenAI,
+  transcriptionOpenAI,
 } from "./openai.ts";
 
 export function parseParams(
   params: BaseModelParams,
 ) {
   if (
-    (!params["provider"] || !providers.includes(params["provider"])) &&
-    params["modelName"] !== undefined
+    (!params["provider"] ||
+      !Object.values(Providers).includes(params["provider"] as Providers)) &&
+    params["modelName"] !== undefined &&
+    params["modelName"] !== null
   ) {
     if (
       openAIModel.includes(params["modelName"] as string)
     ) {
-      params["provider"] = "openapi";
+      params["provider"] = Providers.OPENAI;
     } else if (
       googleGenaiModel.includes(params["modelName"] as string)
     ) {
-      params["provider"] = "google";
+      params["provider"] = Providers.GOOGLE;
     } else if (
-      cloudflareWorkersModel.includes(params["modelName"] as string)
+      cloudflareWorkersAIModel.includes(params["modelName"] as string)
     ) {
-      params["provider"] = "cloudflareworkersai";
+      params["provider"] = Providers.CLOUDFLARE;
     }
   }
   return params;
 }
 
-export async function generateChat(
+export async function chatCompletion(
   params: ChatModelParams,
   chatHistory: BaseLanguageModelInput,
 ) {
   if (
-    params["provider"] == "openai"
+    params["provider"] == Providers.OPENAI
   ) {
-    return await generateChatCompletionOpenAI(params, chatHistory);
+    return await chatCompletionOpenAI(params, chatHistory);
   } else if (
-    params["provider"] == "google" ||
-    params["provider"] == "palm"
+    params["provider"] == Providers.GOOGLE
   ) {
     return await generateContentGoogleGenerativeAI(params, chatHistory);
   } else if (
-    params["provider"] == "cloudflareworkersai"
+    params["provider"] == Providers.CLOUDFLARE
   ) {
-    return await generateContentCloudflare(params, chatHistory);
+    return await textGenerationCloudflare(params, chatHistory);
   }
 }
 
-export async function generateEmbeddings(
-  params: EmbeddingsParams,
+export async function embedding(
+  params: EmbeddingParams,
   input: string | string[],
 ) {
   if (
-    params["provider"] == "openai"
+    params["provider"] == Providers.OPENAI
   ) {
-    return await generateEmbeddingsOpenAI(params, input);
+    return await embeddingOpenAI(params, input);
   } else if (
-    params["provider"] == "google" ||
-    params["provider"] == "palm"
+    params["provider"] == Providers.GOOGLE
   ) {
-    return await generateEmbeddingsGoogleGenerativeAI(params, input);
+    return await embedContentGoogleGenerativeAI(params, input);
   } else if (
-    params["provider"] == "cloudflareworkersai"
+    params["provider"] == Providers.CLOUDFLARE
   ) {
-    return await generateEmbeddingsCloudflare(params, input);
+    return await textEmbeddingsCloudflare(params, input);
   }
 }
 
-export async function generateTranscription(
+export async function transcription(
   params: TranscriptionParams,
 ) {
   if (
-    params["provider"] == "openai"
+    params["provider"] == Providers.OPENAI
   ) {
-    return await generateTranscriptionOpenAI(params);
+    return await transcriptionOpenAI(params);
   } else if (
-    params["provider"] == "cloudflareworkersai"
+    params["provider"] == Providers.CLOUDFLARE
   ) {
-    return await generateTranscriptionCloudflare(params);
+    return await speechRecognitionCloudflare(params);
   }
 }
 
-export async function generateEditImage(
-  params: ImagesEditsParams,
+export async function imageEdit(
+  params: ImageEditParams,
 ) {
   if (
-    params["provider"] == "cloudflareworkersai"
+    params["provider"] == Providers.CLOUDFLARE
   ) {
-    return await generateImagesEditsCloudflare(params);
+    return await textToImageCloudflare(params);
   }
 }

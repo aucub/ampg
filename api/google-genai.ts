@@ -5,8 +5,8 @@ import {
   GoogleGenerativeAIEmbeddings,
   GoogleGenerativeAIEmbeddingsParams,
 } from "../deps.ts";
-import { ChatModelParams, EmbeddingsParams } from "../types.ts";
-import secretMap, { googleGenaiModel } from "../config.ts";
+import { ChatModelParams, EmbeddingParams } from "../types.ts";
+import { googleGenaiModel } from "../config.ts";
 
 export async function generateContentGoogleGenerativeAI(
   params: ChatModelParams,
@@ -32,15 +32,15 @@ export async function generateContentGoogleGenerativeAI(
   }
 }
 
-export async function generateEmbeddingsGoogleGenerativeAI(
-  params: EmbeddingsParams,
+export async function embedContentGoogleGenerativeAI(
+  params: EmbeddingParams,
   texts: string[] | string,
 ) {
   const googleGenerativeAIEmbeddingsParams = params as Partial<
     GoogleGenerativeAIEmbeddingsParams
   >;
   googleGenerativeAIEmbeddingsParams["apiKey"] = params["apiKey"] ||
-    secretMap.GOOGLE_API_KEY;
+    Deno.env.get("GOOGLE_API_KEY");
   if (
     !googleGenaiModel.includes(
       googleGenerativeAIEmbeddingsParams["modelName"] as string,
