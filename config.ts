@@ -75,22 +75,21 @@ interface CommunitySecretMap {
 
 export type SecretMap = CoreSecretMap & CommunitySecretMap & CustomSecretMap;
 
-export const providers: string[] = [
-  "openai",
-  "anthropic",
-  "azure-openai",
-  "anyscale",
-  "cohere",
-  "palm",
-  "google",
-  "cloudflareworkersai",
-  "azureopenai",
-  "bedrock",
-  "clients",
-  "cohere",
-  "octoml",
-  "ollama",
-];
+export enum Providers {
+  OPENAI = "openai",
+  ANTHROPIC = "anthropic",
+  AZURE_OPENAI = "azure-openai",
+  ANYSCALE = "anyscale",
+  COHERE = "cohere",
+  PALM = "palm",
+  GOOGLE = "google",
+  CLOUDFLARE = "cloudflare",
+  AZUREOPENAI = "azureopenai",
+  BEDROCK = "bedrock",
+  CLIENTS = "clients",
+  OCTOML = "octoml",
+  OLLAMA = "ollama",
+}
 
 export const openAIChatModel: string[] = [
   "gpt-4-0125-preview",
@@ -164,7 +163,7 @@ export const googleGenaiModel: string[] = [
   "aqa",
 ];
 
-export const cloudflareWorkersTextGenerationModel: string[] = [
+export const cloudflareWorkersAITextGenerationModel: string[] = [
   "@cf/qwen/qwen1.5-0.5b-chat",
   "@hf/thebloke/llamaguard-7b-awq",
   "@hf/thebloke/neural-chat-7b-v3-1-awq",
@@ -196,11 +195,11 @@ export const cloudflareWorkersTextGenerationModel: string[] = [
   "@hf/thebloke/mistral-7b-instruct-v0.1-awq",
 ];
 
-export const cloudflareWorkersTranslationModel: string[] = [
+export const cloudflareWorkersAITranslationModel: string[] = [
   "@cf/meta/m2m100-1.2b",
 ];
 
-export const cloudflareWorkersTextToImageModel: string[] = [
+export const cloudflareWorkersAITextToImageModel: string[] = [
   "@cf/runwayml/stable-diffusion-v1-5-inpainting",
   "@cf/bytedance/stable-diffusion-xl-lightning",
   "@cf/lykon/dreamshaper-8-lcm",
@@ -209,41 +208,51 @@ export const cloudflareWorkersTextToImageModel: string[] = [
   "@cf/stabilityai/stable-diffusion-xl-base-1.0",
 ];
 
-export const cloudflareWorkersTextEmbeddingsModel: string[] = [
+export const cloudflareWorkersAITextEmbeddingsModel: string[] = [
   "@hf/baai/bge-base-en-v1.5",
   "@cf/baai/bge-small-en-v1.5",
   "@cf/baai/bge-base-en-v1.5",
   "@cf/baai/bge-large-en-v1.5",
 ];
 
-export const cloudflareWorkersTextClassificationModel: string[] = [
+export const cloudflareWorkersAISentenceSimilarityModel: string[] = [
+  "@hf/sentence-transformers/all-minilm-l6-v2 ",
+  "@cf/inml/inml-roberta-dga",
+  "@cf/jpmorganchase/roberta-spam",
+];
+
+export const cloudflareWorkersAITextClassificationModel: string[] = [
   "@cf/huggingface/distilbert-sst-2-int8",
 ];
 
-export const cloudflareWorkersASRModel: string[] = ["@cf/openai/whisper"];
+export const cloudflareWorkersAISpeechRecognitionModel: string[] = [
+  "@cf/openai/whisper",
+  "@cf/openai/whisper-sherpa",
+];
 
-export const cloudflareWorkersObjectDetectionModel: string[] = [
+export const cloudflareWorkersAIObjectDetectionModel: string[] = [
   "@cf/facebook/detr-resnet-50",
 ];
 
-export const cloudflareWorkersImageClassificationModel: string[] = [
+export const cloudflareWorkersAIImageClassificationModel: string[] = [
   "@cf/microsoft/resnet-50",
 ];
 
-export const cloudflareWorkersImageToTextModel: string[] = [
+export const cloudflareWorkersAIImageToTextModel: string[] = [
   "@cf/unum/uform-gen2-qwen-500m",
 ];
 
-export const cloudflareWorkersModel: string[] = [
-  ...cloudflareWorkersTextGenerationModel,
-  ...cloudflareWorkersImageClassificationModel,
-  ...cloudflareWorkersObjectDetectionModel,
-  ...cloudflareWorkersASRModel,
-  ...cloudflareWorkersTextClassificationModel,
-  ...cloudflareWorkersTextToImageModel,
-  ...cloudflareWorkersTextEmbeddingsModel,
-  ...cloudflareWorkersTranslationModel,
-  ...cloudflareWorkersImageToTextModel,
+export const cloudflareWorkersAIModel: string[] = [
+  ...cloudflareWorkersAITextGenerationModel,
+  ...cloudflareWorkersAIImageClassificationModel,
+  ...cloudflareWorkersAIObjectDetectionModel,
+  ...cloudflareWorkersAISpeechRecognitionModel,
+  ...cloudflareWorkersAITextClassificationModel,
+  ...cloudflareWorkersAITextToImageModel,
+  ...cloudflareWorkersAITextEmbeddingsModel,
+  ...cloudflareWorkersAITranslationModel,
+  ...cloudflareWorkersAIImageToTextModel,
+  ...cloudflareWorkersAISentenceSimilarityModel,
 ];
 
 const secretMap: SecretMap = await configAsync();

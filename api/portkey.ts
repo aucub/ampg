@@ -1,7 +1,7 @@
 import { BaseLanguageModelInput, Portkey } from "../deps.ts";
 import { PortkeyModelParams } from "../types.ts";
 
-export async function generateContentPortkey(
+export async function chatCompletionPortkey(
   params: PortkeyModelParams,
   chatHistory: BaseLanguageModelInput,
 ) {

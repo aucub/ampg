@@ -25,7 +25,10 @@ jobs:
           cd types
           curl -o openai.yaml https://raw.githubusercontent.com/openai/openai-openapi/master/openapi.yaml
           curl -o litellm.json https://raw.githubusercontent.com/BerriAI/litellm/main/litellm/proxy/openapi.json
-          curl -o cloudflare.json https://raw.githubusercontent.com/cloudflare/api-schemas/main/openapi.json
+          curl -o cloudflare.yaml https://raw.githubusercontent.com/cloudflare/api-schemas/main/openapi.yaml
+          pip install icecream
+          python ../.github/workflows/split-openapi.py
+          mv cloudflare-filtered.yaml cloudflare.yaml
 
       - name: Run openapi
         run: |
@@ -45,6 +48,9 @@ jobs:
 
       - name: Run linter
         run: deno lint
+
+      - name: Run tests
+        run: deno test -A
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6.0.1
