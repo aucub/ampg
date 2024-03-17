@@ -12,8 +12,10 @@ import {
   streamSSE,
   timing,
   ToolInputParsingException,
+  z,
   zValidator,
-  z
+  isBaseMessageChunk,
+  isBaseMessage
 } from "./deps.ts";
 import { schemas as openaiSchemas } from "./types/openai.ts";
 import {
@@ -37,8 +39,8 @@ import {
 import {
   ChatModelParams,
   ImagesEditsParams,
+  LangException,
   TranscriptionParams,
-  LangException
 } from "./types.ts";
 import { openAIPaths } from "./config.ts";
 
@@ -58,13 +60,12 @@ app.post(
   "/v1/chat/completions",
   zValidator("json", openaiSchemas.CreateChatCompletionRequest),
   async (c) => {
-    let params: ChatModelParams | undefined;
-    try {
-      params = await c.get<ChatModelParams>("params");
-    } catch (error) {
-      console.error("Error retrieving params:", error);
-    }
-    const body = c.req.valid<z.infer<typeof openaiSchemas.CreateChatCompletionRequest>>("json");
+    let params: ChatModelParams = await c.get<ChatModelParams>(
+      "params",
+    ) as ChatModelParams;
+    const body = c.req.valid<
+      z.infer<typeof openaiSchemas.CreateChatCompletionRequest>
+    >("json");
     const data = await adaptChatCompletionRequestOpenAI(body, params || {});
     params = parseParams(data["params"]);
     const message = await generateChat(params, data["chatHistory"]);
@@ -81,7 +82,7 @@ app.post(
       });
     } else if (typeof message === "string") {
       return c.json(await adaptChatCompletionResponseOpenAI(params, message));
-    } else if (message instanceof BaseMessage) {
+    } else if (isBaseMessageChunk(message) || isBaseMessage(message)) {
       return c.json(
         await adaptChatCompletionResponseOpenAI(
           params,
@@ -96,7 +97,9 @@ app.post(
   "/v1/embeddings",
   zValidator("json", openaiSchemas.CreateEmbeddingRequest),
   async (c) => {
-    let params: ChatModelParams = await c.get<ChatModelParams>("params") as ChatModelParams;
+    let params: ChatModelParams = await c.get<ChatModelParams>(
+      "params",
+    ) as ChatModelParams;
     const body = c.req.valid<any>("json") as any;
     const data = adaptEmbeddingsRequestOpenAI(body, params);
     params = parseParams(data["params"]);
@@ -108,7 +111,12 @@ app.post(
     }
     const embeddings = await generateEmbeddings(params, input);
     if (embeddings !== undefined) {
-      return c.json(adaptEmbeddingsResponseOpenAI(params, embeddings as number[] | number[][]));
+      return c.json(
+        adaptEmbeddingsResponseOpenAI(
+          params,
+          embeddings as number[] | number[][],
+        ),
+      );
     }
   },
 );

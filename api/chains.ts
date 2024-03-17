@@ -88,7 +88,7 @@ export async function generateEmbeddings(
   } else if (
     params["provider"] == "cloudflareworkersai"
   ) {
-    return generateEmbeddingsCloudflare(params, input);
+    return await generateEmbeddingsCloudflare(params, input);
   }
 }
 

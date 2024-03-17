@@ -2,13 +2,14 @@ export {
   Hono,
   HTTPException,
   validator,
-} from "https://deno.land/x/hono@v4.1.0/mod.ts";
+} from "https://deno.land/x/hono@v4.1.1/mod.ts";
 export type { HonoRequest } from "https://deno.land/x/hono@v4.1.0/mod.ts";
 export {
   env,
   stream,
   streamSSE,
-} from "https://deno.land/x/hono@v4.1.0/helper.ts";
+  testClient,
+} from "https://deno.land/x/hono@v4.1.1/helper.ts";
 export {
   compress,
   cors,
@@ -17,13 +18,14 @@ export {
   prettyJSON,
   secureHeaders,
   timing,
-} from "https://deno.land/x/hono@v4.1.0/middleware.ts";
-export type { MiddlewareHandler } from "https://deno.land/x/hono@v4.1.0/types.ts";
+} from "https://deno.land/x/hono@v4.1.1/middleware.ts";
+export type { MiddlewareHandler } from "https://deno.land/x/hono@v4.1.1/types.ts";
 export { zValidator } from "https://esm.sh/@hono/zod-validator@0.2.0";
 export { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 export { makeApi, Zodios } from "https://esm.sh/@zodios/core@10.9.6";
 export type { ZodiosOptions } from "https://esm.sh/@zodios/core@10.9.6";
 export { configAsync } from "https://deno.land/x/dotenv@v3.2.2/mod.ts";
+export { is } from "https://deno.land/x/unknownutil@v3.17.0/mod.ts";
 export type {
   BaseLanguageModelInput,
   BaseLanguageModelParams,
@@ -35,6 +37,8 @@ export {
   BaseMessage,
   HumanMessage,
   SystemMessage,
+  isBaseMessageChunk,
+  isBaseMessage
 } from "https://esm.sh/@langchain/core@0.1.48/messages";
 export type {
   BaseMessageLike,
