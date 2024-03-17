@@ -1,7 +1,11 @@
 export interface BaseModelParams {
-  /** Unique string identifier representing your end-user. */
+  /**
+   * Unique string identifier representing your end-user.
+   */
   user?: string;
-  /** Model name to use */
+  /**
+   * Model name to use.
+   */
   modelName?: string;
   /**
    * API key to use when making requests.
@@ -11,41 +15,67 @@ export interface BaseModelParams {
    * Override the default base URL for the API.
    */
   baseURL?: string;
-  /** The AI provider to use for your calls. */
+  /**
+   * The AI provider to use for your calls.
+   */
   provider?: string;
-  /** Caching configuration. */
+  /**
+   * Caching configuration.
+   */
   cache?: boolean;
-  /** Retry configuration. */
+  /**
+   * Retry configuration.
+   */
   retry?: Retry;
-  /** Returns a unique trace id for each response. */
+  /**
+   * Returns a unique trace id for each response.
+   */
   traceId?: string;
 }
 
 export interface Retry {
-  /** Number of retry attempts. */
+  /**
+   * Number of retry attempts.
+   */
   attempts?: number;
-  /** Status codes to trigger retries. */
+  /**
+   * Status codes to trigger retries.
+   */
   onStatusCodes?: number[];
 }
 
 export interface ChatModelParams extends BaseModelParams {
-  /** The randomness of the responses. */
+  /**
+   * The randomness of the responses.
+   */
   temperature?: number;
   /**
    * Maximum number of tokens to generate in the completion.
    */
   maxTokens?: number;
-  /** Consider the n most likely tokens. */
+  /**
+   * Consider the n most likely tokens.
+   */
   topK?: number;
-  /** Total probability mass of tokens to consider at each step */
+  /**
+   * Total probability mass of tokens to consider at each step
+   */
   topP?: number;
-  /** Number of completions to generate for each prompt */
+  /**
+   * Number of completions to generate for each prompt
+   */
   n?: number;
-  /** Whether to stream the results or not. */
+  /**
+   * Whether to stream the results or not.
+   */
   streaming?: boolean;
-  /** List of stop words to use when generating */
+  /**
+   *  List of stop words to use when generating
+   */
   stop?: string[];
-  /** If null, a random seed will be used. */
+  /**
+   * If null, a random seed will be used.
+   */
   seed?: number;
 }
 
@@ -78,7 +108,8 @@ export interface TranscriptionParams extends BaseModelParams {
    * The format of the transcript output, in one of these options: `json`, `text`, `srt`, `verbose_json`, or `vtt`.
    */
   response_format?: number;
-  /**  The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
+  /**
+   * The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
    */
   temperature?: boolean;
   /**
@@ -101,7 +132,9 @@ export interface CreateImageParams extends BaseModelParams {
    */
   response_format?: string;
 
-  /** The number of images to generate. */
+  /**
+   *  The number of images to generate.
+   */
   n?: number;
   /**
    * The quality of the image that will be generated.

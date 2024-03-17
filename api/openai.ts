@@ -5,6 +5,7 @@ import {
   BaseLanguageModelInput,
   BaseMessage,
   BaseMessageLike,
+  BaseMessageChunk,
   ChatOpenAI,
   ClientOptions,
   HumanMessage,
@@ -167,8 +168,11 @@ export async function generateChatCompletionOpenAI(
   let openAIChatInput:
     & Partial<OpenAIChatInput>
     & Partial<AzureOpenAIInput>
-    & BaseChatModelParams = {
-      cache: params["cache"] || true,
+    & BaseChatModelParams
+    & {
+      configuration?: ClientOptions;
+    } = {
+      cache: params["cache"] || false,
     };
   openAIChatInput = { ...openAIChatInput, ...params };
   openAIChatInput["modelName"] = params["modelName"];
@@ -176,6 +180,11 @@ export async function generateChatCompletionOpenAI(
     secretMap.OPENAI_API_KEY;
   if (!openAIChatModel.includes(openAIChatInput["modelName"] as string)) {
     openAIChatInput["modelName"] = undefined;
+  }
+  if (secretMap.OPENAI_BASE_URL || Deno.env.get("OPENAI_BASE_URL")) {
+    openAIChatInput.configuration = openAIChatInput.configuration ?? {};
+    openAIChatInput.configuration["baseURL"] = secretMap.OPENAI_BASE_URL ??
+      Deno.env.get("OPENAI_BASE_URL");
   }
   // deno-lint-ignore ban-ts-comment
   // @ts-ignore
