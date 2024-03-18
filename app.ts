@@ -66,14 +66,21 @@ app.post(
     const data = await adaptChatCompletionRequestOpenAI(body, params || {});
     params = parseParams(data["params"]);
     const message = await chatCompletion(params, data["chatHistory"]);
-    if (message instanceof IterableReadableStream) {
+    if (
+      message != undefined &&
+      (message instanceof IterableReadableStream ||
+        ("locked" in message && "cancel" in message && "getReader" in message))
+    ) {
       return streamSSE(c, async (stream) => {
-        for await (const chunk of message) {
-          const messageItem = await adaptChatCompletionResponseOpenAI(
-            params!,
-            chunk,
-          );
-          await stream.writeSSE({ data: JSON.stringify(messageItem) });
+        for await (let chunk of message) {
+          chunk = chunk as string;
+          if (chunk) {
+            const messageItem = await adaptChatCompletionResponseOpenAI(
+              params!,
+              chunk as string,
+            );
+            await stream.writeSSE({ data: JSON.stringify(messageItem) });
+          }
         }
         await stream.writeSSE({ data: "[DONE]" });
       });
@@ -120,10 +127,9 @@ app.post(
 
 app.post(
   "/v1/images/edits",
-  zValidator("form", openaiSchemas.CreateImageEditRequest),
   async (c) => {
     let params = c.get("params") as ImageEditParams;
-    const formData = c.req.valid("form");
+    const formData = await c.req.parseBody();
     params = adaptImageEditRequestOpenAI(formData, params);
     params = parseParams(params);
     const image = await imageEdit(params);
@@ -135,10 +141,9 @@ app.post(
 
 app.post(
   "/v1/audio/transcriptions",
-  zValidator("form", openaiSchemas.CreateTranscriptionRequest),
   async (c) => {
-    let params = c.get("params") as TranscriptionParams;
-    const formData = c.req.valid("form");
+    let params = await c.get("params") as TranscriptionParams;
+    const formData = await c.req.parseBody();
     params = adaptTranscriptionRequestOpenAI(formData, params);
     params = parseParams(params);
     return c.json(await transcription(params));
