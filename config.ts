@@ -89,6 +89,15 @@ export enum Providers {
   CLIENTS = "clients",
   OCTOML = "octoml",
   OLLAMA = "ollama",
+  TOGETHER_AI = "together-ai",
+  PERPLEXITY_AI = "perplexity-ai",
+  MISTRAL_AI = "mistral-ai",
+  DEEPINFRA = "deepinfra",
+  STABILITY_AI = "stability-ai",
+  NOMIC = "nomic",
+  AI21 = "ai21",
+  GROQ = "groq",
+  SEGMIND = "segmind",
 }
 
 export const openAIChatModel: string[] = [
