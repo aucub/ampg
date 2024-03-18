@@ -50,10 +50,10 @@ export async function adaptChatCompletionRequestOpenAI(
         if (
           content["type"] == "image_url" &&
           typeof (content["image_url"] as { url: string })["url"] ===
-            "string" &&
+          "string" &&
           (content["image_url"] as { url: string })["url"].startsWith("http")
         ) {
-          (content["image_url"] as { url: string })["url"] = await urlToBase64(
+          content["image_url"] = await urlToDataURL(
             (content["image_url"] as { url: string })["url"],
           );
         }
@@ -172,8 +172,8 @@ export async function chatCompletionOpenAI(
     & {
       configuration?: ClientOptions;
     } = {
-      cache: params["cache"] || true,
-    };
+    cache: params["cache"] || true,
+  };
   openAIChatInput = { ...openAIChatInput, ...params };
   openAIChatInput["modelName"] = params["modelName"];
   openAIChatInput["openAIApiKey"] = params["apiKey"] ||
@@ -316,19 +316,22 @@ export function adaptErrorResponseOpenAI(
   });
 }
 
-async function urlToBase64(url: string): Promise<string> {
+async function urlToDataURL(url: string): Promise<string> {
   const response = await fetch(url);
   if (!response.ok) {
     throw new ToolInputParsingException("Failed to download.");
   }
   const blob = await response.blob();
-  const buffer = await blob.arrayBuffer();
-  const type = blob.type;
-  const base64String = btoa(
-    new Uint8Array(buffer)
-      .reduce((data, byte) => data + String.fromCharCode(byte), ""),
-  );
-  return `data:${type};base64,${base64String}`;
+  return await blobToDataURL(blob);
+}
+
+async function blobToDataURL(blob: Blob): Promise<string> {
+  return await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 }
 
 async function blobToBase64(blob: Blob) {

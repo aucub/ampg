@@ -1,6 +1,7 @@
 import { app } from "../app.ts";
 import { assertEquals, it, testClient } from "../deps.ts";
 import { schemas as openaiSchemas } from "../types/openai.ts";
+import { Providers } from "../config.ts";
 
 it("POST /v1/chat/completions", async () => {
   const payload = {
@@ -88,7 +89,7 @@ it("POST /v1/chat/completions IMAGE_URL", async () => {
 it("POST /v1/embeddings", async () => {
   const payload = {
     input: "The food was delicious and the waiter...",
-    model: "@cf/baai/bge-small-en-v1.5",
+    model: "embedding-001",
     encoding_format: "float",
   };
   // deno-lint-ignore ban-ts-comment
@@ -130,7 +131,7 @@ it("POST /v1/audio/transcriptions", async () => {
     {
       form: formData,
       header: {
-        "x-portkey-provider": "cloudflareworkersai",
+        "x-portkey-provider": Providers.CLOUDFLARE,
         "X-Auth-Email": Deno.env.get("CLOUDFLARE_ACCOUNT_ID"),
         "Authorization": "Bearer " + Deno.env.get("CLOUDFLARE_API_TOKEN"),
       },
@@ -165,7 +166,7 @@ it("POST /v1/images/edits", async () => {
     {
       form: formData,
       header: {
-        "x-portkey-provider": "cloudflareworkersai",
+        "x-portkey-provider": Providers.CLOUDFLARE,
         "X-Auth-Email": Deno.env.get("CLOUDFLARE_ACCOUNT_ID"),
         "Authorization": "Bearer " + Deno.env.get("CLOUDFLARE_API_TOKEN"),
       },
