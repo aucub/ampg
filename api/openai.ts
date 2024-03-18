@@ -50,7 +50,7 @@ export async function adaptChatCompletionRequestOpenAI(
         if (
           content["type"] == "image_url" &&
           typeof (content["image_url"] as { url: string })["url"] ===
-          "string" &&
+            "string" &&
           (content["image_url"] as { url: string })["url"].startsWith("http")
         ) {
           content["image_url"] = await urlToDataURL(
@@ -78,17 +78,23 @@ export async function adaptChatCompletionRequestOpenAI(
 
 export function adaptTranscriptionRequestOpenAI(
   // deno-lint-ignore no-explicit-any
-  formData: any,
+  formData: any | FormData,
   params: TranscriptionParams,
 ) {
-  const {
-    file,
-    model,
-    response_format,
-  } = formData;
-  params["file"] = file;
-  params["modelName"] = model;
-  params["response_format"] = response_format;
+  if (formData && typeof formData.get === "function") {
+    params["file"] = formData.get("file") as File;
+    params["modelName"] = formData.get("model");
+    params["response_format"] = formData.get("response_format");
+  } else {
+    const {
+      file,
+      model,
+      response_format,
+    } = formData;
+    params["file"] = file as File;
+    params["modelName"] = model;
+    params["response_format"] = response_format;
+  }
   return params;
 }
 
@@ -107,13 +113,27 @@ export function adaptImageEditRequestOpenAI(
     response_format,
     user,
   } = formData;
-  params["prompt"] = prompt;
-  params["image"] = image;
-  params["mask"] = mask;
-  params["modelName"] = model;
-  params["n"] = n;
-  params["size"] = size;
-  params["response_format"] = response_format;
+  if (prompt) {
+    params["prompt"] = prompt;
+  }
+  if (image) {
+    params["image"] = image;
+  }
+  if (mask) {
+    params["mask"] = mask;
+  }
+  if (model) {
+    params["modelName"] = model;
+  }
+  if (n) {
+    params["n"] = n;
+  }
+  if (size) {
+    params["size"] = size;
+  }
+  if (response_format) {
+    params["response_format"] = response_format;
+  }
   if (user) {
     params["user"] = user;
   }
@@ -172,8 +192,8 @@ export async function chatCompletionOpenAI(
     & {
       configuration?: ClientOptions;
     } = {
-    cache: params["cache"] || true,
-  };
+      cache: params["cache"] || true,
+    };
   openAIChatInput = { ...openAIChatInput, ...params };
   openAIChatInput["modelName"] = params["modelName"];
   openAIChatInput["openAIApiKey"] = params["apiKey"] ||
@@ -259,10 +279,7 @@ export async function adaptImageEditResponseOpenAI(blob: Blob) {
     created: Math.floor(Date.now() / 1000),
     data: [
       {
-        b64_json: {
-          image: await blobToBase64(blob),
-          contentType: blob.type,
-        },
+        b64_json: await blobToBase64(blob),
       },
     ],
   };

@@ -83,7 +83,7 @@ export async function textEmbeddingsCloudflare(
     const body: z.infer<typeof cloudflareSchemas.Response> = await response
       .json();
     if (body["success"] != true) {
-      console.error(response);
+      console.error("HTTP error:", response.status, response.statusText);
     }
     return body["result"]["data"] ?? null;
   }
@@ -106,18 +106,18 @@ export async function speechRecognitionCloudflare(
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/octet-stream",
+          "Content-Type": params["file"].type,
           "Authorization": "Bearer " + params["apiKey"],
         },
-        body: await (params["file"]?.arrayBuffer() ?? null),
+        body: await params["file"],
       },
     );
   }
   if (response && response.ok) {
     const body: z.infer<typeof cloudflareSchemas.Response> = await response
       .json();
-    if (!response || !response.ok || body["success"] != true) {
-      console.error(response);
+    if (body["success"] != true) {
+      console.error("HTTP error:", response.status, response.statusText);
     }
     const result = body["result"];
     const responseBody: z.infer<
@@ -128,8 +128,8 @@ export async function speechRecognitionCloudflare(
       duration: result["word_count"] as string,
       text: result["text"] as string,
       // deno-lint-ignore no-explicit-any
-      words: (result["words"] as any[]).map((word: any) => ({
-        word: word.word.toString(),
+      words: await (result["words"] as any[]).map((word: any) => ({
+        word: word.word as string,
         start: word.start,
         end: word.end,
       })),
@@ -141,18 +141,29 @@ export async function speechRecognitionCloudflare(
 export async function textToImageCloudflare(
   params: ImageEditParams,
 ) {
-  const textToImageParams = {
-    guidance: params.guidance || 7.5,
-    image: params.image instanceof File
-      ? [...new Uint8Array(await params.image.arrayBuffer())]
-      : undefined,
-    mask: params.mask instanceof File
-      ? [...new Uint8Array(await params.mask.arrayBuffer())]
-      : undefined,
-    num_steps: params.num_steps || 20,
-    prompt: params.prompt || undefined,
-    strength: params.strength || 1,
-  };
+  const textToImageParams: any = {};
+  if (params.guidance) {
+    textToImageParams.guidance = params.guidance;
+  }
+  if (params.num_steps) {
+    textToImageParams.num_steps = params.num_steps;
+  }
+  if (params.prompt) {
+    textToImageParams.prompt = params.prompt;
+  }
+  if (params.strength) {
+    textToImageParams.strength = params.strength;
+  }
+  if (params.image && params.image instanceof File) {
+    textToImageParams.image = [
+      ...new Uint8Array(await params.image.arrayBuffer()),
+    ];
+  }
+  if (params.mask && params.mask instanceof File) {
+    textToImageParams.mask = [
+      ...new Uint8Array(await params.mask.arrayBuffer()),
+    ];
+  }
   let response;
   if (Deno.env.get("CLOUDFLARE_BASE_URL") && params["user"]) {
     response = await fetch(
