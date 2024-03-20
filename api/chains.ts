@@ -10,6 +10,7 @@ import {
   ChatModelParams,
   EmbeddingParams,
   ImageEditParams,
+  LangException,
   TranscriptionParams,
 } from "../types.ts";
 import {
@@ -23,6 +24,7 @@ import {
   generateContentGoogleGenerativeAI,
 } from "./google-genai.ts";
 import {
+  adaptErrorResponseOpenAI,
   chatCompletionOpenAI,
   embeddingOpenAI,
   transcriptionOpenAI,
@@ -113,5 +115,16 @@ export async function imageEdit(
     params["provider"] == Providers.CLOUDFLARE
   ) {
     return await textToImageCloudflare(params);
+  }
+}
+
+export function parseError(
+  params: BaseModelParams,
+  exception: LangException,
+) {
+  if (
+    params["provider"] == Providers.OPENAI
+  ) {
+    return adaptErrorResponseOpenAI(exception);
   }
 }

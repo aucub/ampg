@@ -1,10 +1,22 @@
 {
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
-  },
   "deno.enable": true,
+  "deno.lint": false,
+  "editor.formatOnSave": false,
+  "deno.cacheOnSave": false,
+  "deno.maxTsServerMemory": 4096,
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
   "deno.enablePaths": [
     "./"
+  ],
+  "deno.disablePaths": [
+    "types/",
+    "*.md",
+    ".devcontainer/",
+    ".github/",
+    ".env*",
+    ".gitignore"
   ],
   "editor.inlayHints.enabled": "off"
 }

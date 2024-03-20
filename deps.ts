@@ -2,14 +2,14 @@ export {
   Hono,
   HTTPException,
   validator,
-} from "https://deno.land/x/hono@v4.1.1/mod.ts";
-export type { HonoRequest } from "https://deno.land/x/hono@v4.1.1/mod.ts";
+} from "https://deno.land/x/hono@v4.1.3/mod.ts";
+export type { HonoRequest } from "https://deno.land/x/hono@v4.1.3/mod.ts";
 export {
   env,
   stream,
   streamSSE,
   testClient,
-} from "https://deno.land/x/hono@v4.1.1/helper.ts";
+} from "https://deno.land/x/hono@v4.1.3/helper.ts";
 export {
   compress,
   cors,
@@ -18,8 +18,8 @@ export {
   prettyJSON,
   secureHeaders,
   timing,
-} from "https://deno.land/x/hono@v4.1.1/middleware.ts";
-export type { MiddlewareHandler } from "https://deno.land/x/hono@v4.1.1/types.ts";
+} from "https://deno.land/x/hono@v4.1.3/middleware.ts";
+export type { MiddlewareHandler } from "https://deno.land/x/hono@v4.1.3/types.ts";
 export { assertEquals } from "https://deno.land/std@0.220.1/assert/mod.ts";
 export { it } from "https://deno.land/std@0.220.1/testing/bdd.ts";
 export { decodeBase64 } from "https://deno.land/std@0.220.1/encoding/base64.ts";
@@ -31,9 +31,9 @@ export { configAsync } from "https://deno.land/x/dotenv@v3.2.2/mod.ts";
 export type {
   BaseLanguageModelInput,
   BaseLanguageModelParams,
-} from "https://esm.sh/@langchain/core@0.1.48/language_models/base";
-export type { BaseChatModelParams } from "https://esm.sh/@langchain/core@0.1.48/language_models/chat_models";
-export { IterableReadableStream } from "https://esm.sh/@langchain/core@0.1.48/utils/stream";
+} from "https://esm.sh/@langchain/core@0.1.49/language_models/base";
+export type { BaseChatModelParams } from "https://esm.sh/@langchain/core@0.1.49/language_models/chat_models";
+export { IterableReadableStream } from "https://esm.sh/@langchain/core@0.1.49/utils/stream";
 export {
   AIMessage,
   BaseMessage,
@@ -41,23 +41,26 @@ export {
   isBaseMessage,
   isBaseMessageChunk,
   SystemMessage,
-} from "https://esm.sh/@langchain/core@0.1.48/messages";
+} from "https://esm.sh/@langchain/core@0.1.49/messages";
 export type {
   BaseMessageLike,
+  MessageContent,
   MessageContentComplex,
-} from "https://esm.sh/@langchain/core@0.1.48/messages";
+  MessageType,
+} from "https://esm.sh/@langchain/core@0.1.49/messages";
 export {
   ChatOpenAI,
+  DallEAPIWrapper,
   OpenAIClient,
   OpenAIEmbeddings,
-} from "https://esm.sh/@langchain/openai@0.0.21";
-export { OpenAI } from "https://deno.land/x/openai@v4.29.1/mod.ts";
+} from "https://esm.sh/@langchain/openai@0.0.23";
+export { OpenAI } from "https://deno.land/x/openai@v4.29.2/mod.ts";
 export type {
   AzureOpenAIInput,
   ClientOptions,
   OpenAIChatInput,
   OpenAIEmbeddingsParams,
-} from "https://esm.sh/@langchain/openai@0.0.21";
+} from "https://esm.sh/@langchain/openai@0.0.23";
 export {
   ChatGoogleGenerativeAI,
   GoogleGenerativeAIEmbeddings,
@@ -72,6 +75,8 @@ export {
 } from "https://esm.sh/@langchain/cloudflare@0.0.3";
 export type { CloudflareWorkersAIInput } from "https://esm.sh/@langchain/cloudflare@0.0.3";
 export { OpenAIWhisperAudio } from "https://esm.sh/langchain@0.1.28/document_loaders/fs/openai_whisper_audio";
-export { Portkey } from "https://esm.sh/@langchain/community@0.0.40/llms/portkey";
-export { ToolInputParsingException } from "https://esm.sh/@langchain/core@0.1.48/tools";
-export { OutputParserException } from "https://esm.sh/@langchain/core@0.1.48/output_parsers";
+export { Portkey } from "https://esm.sh/@langchain/community@0.0.41/llms/portkey";
+export { ToolInputParsingException } from "https://esm.sh/@langchain/core@0.1.49/tools";
+export { OutputParserException } from "https://esm.sh/@langchain/core@0.1.49/output_parsers";
+export { HuggingFaceInference } from "https://esm.sh/@langchain/community@0.0.41/llms/hf";
+export { HuggingFaceInferenceEmbeddings } from "https://esm.sh/@langchain/community@0.0.41/embeddings/hf ";

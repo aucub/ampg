@@ -4,6 +4,7 @@ interface CustomSecretMap {
   CLOUDFLARE_ACCOUNT_ID?: string;
   CLOUDFLARE_BASE_URL?: string;
   OPENAI_BASE_URL?: string;
+  HUGGINGFACEHUB_BASE_URL?: string;
 }
 
 interface CoreSecretMap {

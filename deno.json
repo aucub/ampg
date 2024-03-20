@@ -7,5 +7,17 @@
     "update:commit": "deno task -q update --commit --pre-commit=fmt"
   },
   "npmRegistry": "https://registry.npmmirror.com",
-  "lock": false
+  "lock": false,
+  "exclude": [
+    "types/",
+    "*.md",
+    ".devcontainer/",
+    ".github/",
+    ".env*",
+    ".gitignore"
+  ],
+  "compilerOptions": {
+    "noStrictGenericChecks": true,
+    "strict": false
+  }
 }

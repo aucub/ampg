@@ -9,12 +9,12 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  deno:
     runs-on: ubuntu-latest
 
     steps:
       - name: Setup repo
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.2
 
       - name: Setup Deno
         uses: denoland/setup-deno@v1.1.4

@@ -4,5 +4,25 @@
     "ghcr.io/devcontainers-community/features/deno:1": {
       "version": "latest"
     }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "MS-CEINTL.vscode-language-pack-zh-hans",
+        "ms-vscode.cpptools",
+        "redhat.vscode-yaml",
+        "tomoki1207.pdf",
+        "nvarner.typst-lsp",
+        "rangav.vscode-thunder-client",
+        "charliermarsh.ruff",
+        "ms-python.python",
+        "YoavBls.pretty-ts-errors",
+        "yzhang.markdown-all-in-one",
+        "oderwat.indent-rainbow",
+        "mhutchie.git-graph",
+        "formulahendry.code-runner",
+        "golang.go"
+      ]
+    }
   }
 }

@@ -7,6 +7,7 @@ import {
   BaseMessageLike,
   ChatOpenAI,
   ClientOptions,
+  DallEAPIWrapper,
   HumanMessage,
   isBaseMessage,
   MessageContentComplex,
@@ -20,6 +21,7 @@ import {
 } from "../deps.ts";
 import {
   ChatModelParams,
+  CreateImageParams,
   EmbeddingParams,
   ImageEditParams,
   LangException,
@@ -221,7 +223,22 @@ export async function transcriptionOpenAI(
   const loader = new OpenAIWhisperAudio(params["file"] as Blob, {
     clientOptions: params as ClientOptions,
   });
-  return await loader.load();
+  const docs = await loader.load();
+  const responseBody: z.infer<
+    typeof openaiSchemas.CreateTranscriptionResponseJson
+  > = {
+    "text": docs.pageContent,
+  };
+  return responseBody;
+}
+
+export async function createImageOpenAI(
+  params: CreateImageParams,
+) {
+  params["openAIApiKey"] = params["apiKey"] || Deno.env.get("OPENAI_API_KEY");
+  params["responseFormat"] = params["response_format"];
+  const tool = new DallEAPIWrapper(params);
+  return await tool.invoke(params.prompt);
 }
 
 export function adaptChatCompletionResponseOpenAI(
@@ -274,15 +291,30 @@ export function adaptChatCompletionResponseOpenAI(
   }
 }
 
-export async function adaptImageEditResponseOpenAI(blob: Blob) {
-  return {
-    created: Math.floor(Date.now() / 1000),
-    data: [
-      {
-        b64_json: await blobToBase64(blob),
-      },
-    ],
-  };
+export async function adaptImageResponseOpenAI(
+  image: Blob | string,
+  params: CreateImageParams | ImageEditParams,
+) {
+  if (params.response_format == "url" && typeof image == "string") {
+    return {
+      "created": Math.floor(Date.now() / 1000),
+      "data": [
+        {
+          "url": image,
+        },
+      ],
+    };
+  }
+  if (image instanceof Blob) {
+    return {
+      created: Math.floor(Date.now() / 1000),
+      data: [
+        {
+          b64_json: await blobToBase64(image),
+        },
+      ],
+    };
+  }
 }
 
 export function adaptEmbeddingResponseOpenAI(
@@ -314,7 +346,7 @@ export function adaptEmbeddingResponseOpenAI(
 }
 
 export function adaptErrorResponseOpenAI(
-  err: LangException,
+  exception: LangException,
 ) {
   const error: openAIError = {
     code: null,
@@ -322,11 +354,16 @@ export function adaptErrorResponseOpenAI(
     param: null,
     type: "",
   };
-  error.message = JSON.stringify(err);
-  if (err.llmOutput) {
+  error.message = exception.message;
+  if (exception.llmOutput) {
     error.type = "llm";
-  } else if (err.toolOutput) {
+    error.param = JSON.stringify({
+      llmOutput: exception.llmOutput,
+      observation: exception.observation,
+    });
+  } else if (exception.toolOutput) {
     error.type = "tool";
+    error.param = exception.toolOutput;
   }
   return new Response(JSON.stringify(error), {
     status: 500,

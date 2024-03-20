@@ -13,7 +13,6 @@ import {
   streamSSE,
   timing,
   ToolInputParsingException,
-  z,
   zValidator,
 } from "./deps.ts";
 import { schemas as openaiSchemas } from "./types/openai.ts";
@@ -21,6 +20,7 @@ import {
   chatCompletion,
   embedding,
   imageEdit,
+  parseError,
   parseParams,
   transcription,
 } from "./api/chains.ts";
@@ -30,18 +30,17 @@ import {
   adaptChatCompletionResponseOpenAI,
   adaptEmbeddingRequestOpenAI,
   adaptEmbeddingResponseOpenAI,
-  adaptErrorResponseOpenAI,
   adaptImageEditRequestOpenAI,
-  adaptImageEditResponseOpenAI,
+  adaptImageResponseOpenAI,
   adaptTranscriptionRequestOpenAI,
 } from "./api/openai.ts";
 import {
+  BaseModelParams,
   ChatModelParams,
   ImageEditParams,
   LangException,
   TranscriptionParams,
 } from "./types.ts";
-import { openAIPaths } from "./config.ts";
 
 const app = new Hono();
 
@@ -57,11 +56,14 @@ app.use(
 
 app.post(
   "/v1/chat/completions",
+  // deno-lint-ignore ban-ts-comment
+  // @ts-ignore
   zValidator("json", openaiSchemas.CreateChatCompletionRequest),
   async (c) => {
-    let params: ChatModelParams = await c.get(
-      "params",
-    ) as ChatModelParams;
+    // deno-lint-ignore ban-ts-comment
+    // @ts-ignore
+    let params: ChatModelParams = await c.get("params");
+    // @ts-ignore
     const body = c.req.valid("json");
     const data = await adaptChatCompletionRequestOpenAI(body, params || {});
     params = parseParams(data["params"]);
@@ -134,7 +136,7 @@ app.post(
     params = parseParams(params);
     const image = await imageEdit(params);
     if (image) {
-      return c.json(await adaptImageEditResponseOpenAI(image));
+      return c.json(await adaptImageResponseOpenAI(image, params));
     }
   },
 );
@@ -150,7 +152,7 @@ app.post(
   },
 );
 
-app.onError((err, c): Promise<Response> => {
+app.onError((err, c) => {
   console.error(`${err}`);
   let exception: LangException = new LangException();
   if (err instanceof ToolInputParsingException) {
@@ -166,9 +168,8 @@ app.onError((err, c): Promise<Response> => {
     exception = err;
   }
   if (exception.message) {
-    if (openAIPaths.includes(c.req.path)) {
-      return adaptErrorResponseOpenAI(exception);
-    }
+    let params: BaseModelParams = c.get("params");
+    return parseError(params, exception);
   }
   if (err instanceof HTTPException) {
     return err.getResponse();
@@ -177,7 +178,7 @@ app.onError((err, c): Promise<Response> => {
     const options = { message: err.message };
     return new HTTPException(500, options).getResponse();
   }
-  return new HTTPException(500, {}).getResponse();
+  return new HTTPException(500, { message: "unknown Error" }).getResponse();
 });
 
 export { app };
