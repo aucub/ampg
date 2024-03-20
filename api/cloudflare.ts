@@ -182,12 +182,7 @@ export async function textToImageCloudflare(
       return await response.blob();
     } else {
       const body = await response.text();
-      const langException: LangException = {
-        name: "",
-        message: "",
-      };
-      langException.message = body;
-      throw langException;
+      throw new LangException(body);
     }
   }
 }

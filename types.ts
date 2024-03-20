@@ -131,7 +131,6 @@ export interface CreateImageParams extends BaseModelParams {
    * The format in which the generated images are returned.
    */
   response_format?: string;
-
   /**
    *  The number of images to generate.
    */
