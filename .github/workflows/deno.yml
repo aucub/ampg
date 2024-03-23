@@ -53,6 +53,6 @@ jobs:
         run: deno test -A
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6.0.1
+        uses: peter-evans/create-pull-request@v6.0.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
