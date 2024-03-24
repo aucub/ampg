@@ -1,3 +1,5 @@
+import { BaseLanguageModelInput } from "./deps";
+
 export interface BaseModelParams {
   /**
    * Unique string identifier representing your end-user.
@@ -77,6 +79,7 @@ export interface ChatModelParams extends BaseModelParams {
    * If null, a random seed will be used.
    */
   seed?: number;
+  input?: BaseLanguageModelInput
 }
 
 export interface EmbeddingParams extends BaseModelParams {
@@ -93,6 +96,7 @@ export interface EmbeddingParams extends BaseModelParams {
    * Whether to strip new lines from the input text. Default to true
    */
   stripNewLines?: boolean;
+  input?: string[] | string,
 }
 
 export interface TranscriptionParams extends BaseModelParams {
@@ -107,7 +111,7 @@ export interface TranscriptionParams extends BaseModelParams {
   /**
    * The format of the transcript output, in one of these options: `json`, `text`, `srt`, `verbose_json`, or `vtt`.
    */
-  response_format?: number;
+  response_format?: string;
   /**
    * The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
    */
@@ -122,7 +126,7 @@ export interface TranscriptionParams extends BaseModelParams {
   timestampGranularities?: ("word" | "segment")[];
 }
 
-export interface CreateImageParams extends BaseModelParams {
+export interface ImageGenerationParams extends BaseModelParams {
   /**
    * A text description of the desired image(s).
    */
@@ -170,8 +174,8 @@ export interface PortkeyModelParams extends ChatModelParams {
   mode?: string;
 }
 
-export interface openAIError {
-  code: string | null;
+export interface OpenAIError {
+  code: string | number | null;
   message: string;
   param: string | null;
   type: string;

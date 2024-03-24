@@ -1,4 +1,4 @@
-import { makeApi, z, Zodios, type ZodiosOptions } from "../deps.ts";
+import { makeApi, z, Zodios, type ZodiosOptions } from "../../deps.ts";
 
 const ChatCompletionRequestSystemMessage = z
   .object({

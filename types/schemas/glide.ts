@@ -1,5 +1,5 @@
 // Imports
-import { z } from "../deps.ts";
+import { z } from "../../deps.ts";
 
 // Anthropic
 const AnthropicConfig = z.object({

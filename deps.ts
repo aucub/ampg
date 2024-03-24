@@ -3,6 +3,7 @@ export {
   HTTPException,
   validator,
 } from "https://deno.land/x/hono@v4.1.3/mod.ts";
+export { Context } from "https://deno.land/x/hono@v4.1.3/context.ts";
 export type { HonoRequest } from "https://deno.land/x/hono@v4.1.3/mod.ts";
 export {
   env,
