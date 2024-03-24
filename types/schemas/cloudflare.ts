@@ -1,4 +1,4 @@
-import { makeApi, z, Zodios, type ZodiosOptions } from "../deps.ts";
+import { makeApi, z, Zodios, type ZodiosOptions } from "../../deps.ts";
 
 type request_tracer_trace = Array<
   Partial<{

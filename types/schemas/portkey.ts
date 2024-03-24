@@ -1,4 +1,4 @@
-import { z } from "../deps.ts";
+import { z } from "../../deps.ts";
 
 const strategySchema = z.object({
   mode: z.enum(["single", "loadbalance", "fallback"]),
