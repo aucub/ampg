@@ -13,12 +13,18 @@ import {
 } from "./deps.ts";
 import { schemas as openaiSchemas } from "./types/schemas/openai.ts";
 import { headersMiddleware } from "./middlewares/header_middleware.ts";
+import { BaseModelParams, LangException } from "./types.ts";
 import {
-  BaseModelParams,
-  LangException,
-} from "./types.ts";
-import { OpenAIChatService, OpenAIEmbeddingService, OpenAIImageEditService, OpenAITranscriptionService } from "./services/openai_service.ts";
-import { getExceptionHandling, getModelService } from "./services/model_service_provider.ts";
+  OpenAIChatService,
+  OpenAIEmbeddingService,
+  OpenAIImageEditService,
+  OpenAIImageGenerationService,
+  OpenAITranscriptionService,
+} from "./services/openai_service.ts";
+import {
+  getExceptionHandling,
+  getModelService,
+} from "./services/model_service_provider.ts";
 
 const app = new Hono();
 
@@ -32,7 +38,10 @@ app.use(
   prettyJSON(),
 );
 
-function createModelRequestHandler(serviceConstructor: any, serviceType: string) {
+function createModelRequestHandler(
+  serviceConstructor: any,
+  serviceType: string,
+) {
   return async (c) => {
     const serviceInstance = new serviceConstructor();
     const params = await serviceInstance.prepareModelParams(c);
@@ -48,36 +57,55 @@ app.post(
   zValidator("json", openaiSchemas.CreateChatCompletionRequest),
   createModelRequestHandler(
     OpenAIChatService,
-    'chat'
-  )
+    "chat",
+  ),
 );
-// @ts-ignore
-app.post("/v1/embeddings", zValidator("json", openaiSchemas.CreateEmbeddingRequest), createModelRequestHandler(OpenAIEmbeddingService, 'embedding'));
 
-app.post("/v1/images/edits", createModelRequestHandler(OpenAIImageEditService, 'imageEdit'));
+app.post(
+  "/v1/embeddings",
+  // @ts-ignore
+  zValidator("json", openaiSchemas.CreateEmbeddingRequest),
+  createModelRequestHandler(OpenAIEmbeddingService, "embedding"),
+);
 
-app.post("/v1/audio/transcriptions", createModelRequestHandler(OpenAITranscriptionService, 'transcription'));
+app.post(
+  "/v1/images/edits",
+  createModelRequestHandler(OpenAIImageEditService, "imageEdit"),
+);
+
+app.post(
+  "/v1/images/generations",
+  // @ts-ignore
+  zValidator("json", openaiSchemas.CreateImageRequest),
+  createModelRequestHandler(OpenAIImageGenerationService, "imageGeneration"),
+);
+
+app.post(
+  "/v1/audio/transcriptions",
+  createModelRequestHandler(OpenAITranscriptionService, "transcription"),
+);
 
 app.onError((err, c) => {
   console.error(`${err}`);
-  let exception = err instanceof LangException ? err : new LangException();
-  if (err instanceof ToolInputParsingException || err instanceof OutputParserException) {
-    exception.message = err.message;
-    exception.toolOutput = err.toolOutput ?? undefined;
-    exception.llmOutput = err.llmOutput ?? undefined;
-    exception.observation = err.observation ?? undefined;
-  } else if (!(err instanceof LangException) && err instanceof Error) {
-    exception.message = err.message;
+  let langException = err instanceof LangException ? err : new LangException();
+  if (err instanceof ToolInputParsingException) {
+    langException.message = err.message;
+    langException.toolOutput = err.output;
   }
-  if (exception.message) {
+  if (err instanceof OutputParserException) {
+    langException.message = err.message;
+    langException.llmOutput = err.llmOutput;
+    langException.observation = err.observation;
+  }
+  if (langException.message) {
     const params: BaseModelParams = c.get("params") || {};
     const exceptionHandling = getExceptionHandling(params.provider ?? "");
-    return exceptionHandling.handleException(exception);
+    return exceptionHandling.handleException(langException);
   }
   if (err instanceof HTTPException) {
     return err.getResponse();
   }
-  return new HTTPException(500, { message: "An unknown error occurred" }).getResponse();
+  return new HTTPException(500, { message: err.message }).getResponse();
 });
 
 export { app };

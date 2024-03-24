@@ -99,6 +99,9 @@ export enum Providers {
   AI21 = "ai21",
   GROQ = "groq",
   SEGMIND = "segmind",
+  HUGGINGFACEHUB = "hf",
+  PORTKEY = "portkey",
+  GLIDE = "glide",
 }
 
 export const openAIChatModel: string[] = [

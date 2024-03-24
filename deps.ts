@@ -32,9 +32,9 @@ export { configAsync } from "https://deno.land/x/dotenv@v3.2.2/mod.ts";
 export type {
   BaseLanguageModelInput,
   BaseLanguageModelParams,
-} from "https://esm.sh/@langchain/core@0.1.49/language_models/base";
-export type { BaseChatModelParams } from "https://esm.sh/@langchain/core@0.1.49/language_models/chat_models";
-export { IterableReadableStream } from "https://esm.sh/@langchain/core@0.1.49/utils/stream";
+} from "https://esm.sh/@langchain/core@0.1.50/language_models/base";
+export type { BaseChatModelParams } from "https://esm.sh/@langchain/core@0.1.50/language_models/chat_models";
+export { IterableReadableStream } from "https://esm.sh/@langchain/core@0.1.50/utils/stream";
 export {
   AIMessage,
   BaseMessage,
@@ -42,8 +42,9 @@ export {
   isBaseMessage,
   isBaseMessageChunk,
   SystemMessage,
-} from "https://esm.sh/@langchain/core@0.1.49/messages";
+} from "https://esm.sh/@langchain/core@0.1.50/messages";
 export type {
+  BaseMessageChunk,
   BaseMessageLike,
   MessageContent,
   MessageContentComplex,
@@ -77,7 +78,7 @@ export {
 export type { CloudflareWorkersAIInput } from "https://esm.sh/@langchain/cloudflare@0.0.3";
 export { OpenAIWhisperAudio } from "https://esm.sh/langchain@0.1.28/document_loaders/fs/openai_whisper_audio";
 export { Portkey } from "https://esm.sh/@langchain/community@0.0.41/llms/portkey";
-export { ToolInputParsingException } from "https://esm.sh/@langchain/core@0.1.49/tools";
-export { OutputParserException } from "https://esm.sh/@langchain/core@0.1.49/output_parsers";
+export { ToolInputParsingException } from "https://esm.sh/@langchain/core@0.1.50/tools";
+export { OutputParserException } from "https://esm.sh/@langchain/core@0.1.50/output_parsers";
 export { HuggingFaceInference } from "https://esm.sh/@langchain/community@0.0.41/llms/hf";
 export { HuggingFaceInferenceEmbeddings } from "https://esm.sh/@langchain/community@0.0.41/embeddings/hf ";

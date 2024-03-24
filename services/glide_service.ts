@@ -1,10 +1,4 @@
-import {
-  Context,
-  MessageContent,
-  MessageType,
-  env,
-  z,
-} from "../deps.ts";
+import { Context, env, MessageContent, MessageType, z } from "../deps.ts";
 import { ChatModelParams, LangException } from "../types.ts";
 import {
   ChatMessage,
@@ -13,7 +7,6 @@ import {
   ErrorSchema,
 } from "../types/schemas/glide.ts";
 import { IChatService } from "../types/i_service.ts";
-
 
 type StringWithAutocomplete<T> = T | (string & Record<never, never>);
 
@@ -28,7 +21,8 @@ export class GlideChatService implements IChatService {
   }
   async executeModel(c: Context, params: ChatModelParams): Promise<any> {
     const requestPayload = this.createChatRequest(params.input);
-    const baseUrl = params["baseURL"] || env<{ GLIDE_BASE_URL: string }>(c)['GLIDE_BASE_URL'];
+    const baseUrl = params["baseURL"] ||
+      env<{ GLIDE_BASE_URL: string }>(c)["GLIDE_BASE_URL"];
     let response: Response | undefined;
 
     if (baseUrl) {
@@ -47,7 +41,9 @@ export class GlideChatService implements IChatService {
       if (validationResult.success) {
         return validationResult.data.modelResponse.message.content ?? null;
       }
-    } else if (response && (response.status === 400 || response.status === 404)) {
+    } else if (
+      response && (response.status === 400 || response.status === 404)
+    ) {
       const errorData = await response.json();
       const validationResult = ErrorSchema.safeParse(errorData);
       if (validationResult.success) {
@@ -59,7 +55,9 @@ export class GlideChatService implements IChatService {
     throw new Error("Method not implemented.");
   }
 
-  private createChatRequest(messages: BaseMessageLikeComplex[]): z.infer<typeof ChatRequest> {
+  private createChatRequest(
+    messages: BaseMessageLikeComplex[],
+  ): z.infer<typeof ChatRequest> {
     const userMessages = messages.filter(([role]) =>
       ["user", "human", "generic"].includes(role as string)
     ) as BaseMessageLikeComplex[];

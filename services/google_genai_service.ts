@@ -1,25 +1,32 @@
 import {
+  BaseMessageChunk,
   ChatGoogleGenerativeAI,
   Context,
+  env,
   GoogleGenerativeAIChatInput,
   GoogleGenerativeAIEmbeddings,
   GoogleGenerativeAIEmbeddingsParams,
-  env,
+  IterableReadableStream,
 } from "../deps.ts";
 import { googleGenaiModel } from "../config.ts";
-import { ChatModelParams, EmbeddingParams } from '../types.ts';
-import { IChatService, IEmbeddingService } from '../types/i_service.ts'
+import { ChatModelParams, EmbeddingParams } from "../types.ts";
+import { IChatService, IEmbeddingService } from "../types/i_service.ts";
 
 export class GoogleGenerativeAIChatService implements IChatService {
   prepareModelParams(c: Context): Promise<ChatModelParams> {
     throw new Error("Method not implemented.");
   }
-  async executeModel(c: Context, params: ChatModelParams): Promise<any> {
+  async executeModel(
+    c: Context,
+    params: ChatModelParams,
+  ): Promise<string | BaseMessageChunk | IterableReadableStream<any>> {
     const googleGenerativeAIChatInput: GoogleGenerativeAIChatInput = {
       ...params,
       maxOutputTokens: params.maxTokens,
       stopSequences: params.stop,
-      modelName: googleGenaiModel.includes(params.modelName ?? "") ? params.modelName : undefined,
+      modelName: googleGenaiModel.includes(params.modelName ?? "")
+        ? params.modelName
+        : undefined,
     };
 
     const model = new ChatGoogleGenerativeAI(googleGenerativeAIChatInput);
@@ -39,15 +46,22 @@ export class GoogleGenerativeAIEmbeddingService implements IEmbeddingService {
   prepareModelParams(c: Context): Promise<EmbeddingParams> {
     throw new Error("Method not implemented.");
   }
-  async executeModel(c: Context, params: EmbeddingParams): Promise<number[] | number[][]> {
-    const googleGenerativeAIEmbeddingsParams: GoogleGenerativeAIEmbeddingsParams = {
-      ...params,
-      apiKey: params.apiKey || env<{ GOOGLE_API_KEY: string }>(c)['GOOGLE_API_KEY'],
-    };
+  async executeModel(
+    c: Context,
+    params: EmbeddingParams,
+  ): Promise<number[] | number[][]> {
+    const googleGenerativeAIEmbeddingsParams:
+      GoogleGenerativeAIEmbeddingsParams = {
+        ...params,
+        apiKey: params.apiKey ||
+          env<{ GOOGLE_API_KEY: string }>(c)["GOOGLE_API_KEY"],
+      };
     if (!googleGenaiModel.includes(params.modelName ?? "")) {
       googleGenerativeAIEmbeddingsParams.modelName = undefined;
     }
-    const embeddings = new GoogleGenerativeAIEmbeddings(googleGenerativeAIEmbeddingsParams);
+    const embeddings = new GoogleGenerativeAIEmbeddings(
+      googleGenerativeAIEmbeddingsParams,
+    );
     if (Array.isArray(params.input)) {
       return await embeddings.embedDocuments(params.input);
     } else {
