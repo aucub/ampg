@@ -1,5 +1,5 @@
 import { openAIChatModel, openAIEmbeddingModel } from '../config.ts';
-import { AIMessage, AzureOpenAIInput, BaseChatModelParams, BaseMessageLike, ChatOpenAI, ClientOptions, Context, DallEAPIWrapper, HumanMessage, IterableReadableStream, OpenAIChatInput, OpenAIEmbeddings, OpenAIEmbeddingsParams, OpenAIWhisperAudio, SystemMessage, isBaseMessage, isBaseMessageChunk, streamSSE, z } from '../deps.ts';
+import { AIMessage, AzureOpenAIInput, BaseChatModelParams, BaseMessageLike, ChatOpenAI, ClientOptions, Context, DallEAPIWrapper, HumanMessage, IterableReadableStream, OpenAIChatInput, OpenAIEmbeddings, OpenAIEmbeddingsParams, OpenAIWhisperAudio, SystemMessage, env, isBaseMessage, isBaseMessageChunk, streamSSE, z } from '../deps.ts';
 import { blobToBase64, isIterableReadableStream, urlToDataURL } from '../helpers/util.ts';
 import { ChatModelParams, EmbeddingParams, ImageEditParams, ImageGenerationParams, LangException, TranscriptionParams, OpenAIError, BaseModelParams } from '../types.ts';
 import { IChatService, IEmbeddingService, ITranscriptionService, IImageEditService, IExceptionHandling, IImageGenerationService } from '../types/i_service.ts'
@@ -9,7 +9,12 @@ import { assignProvider } from './model_service_provider.ts';
 export class OpenAIChatService implements IChatService {
     async prepareModelParams(c: Context): Promise<ChatModelParams> {
         const params: Partial<ChatModelParams> = await c.get("params") ?? {};
-        const body = c.req.valid("json");
+        // @ts-ignore
+        const body: z.infer<typeof openaiSchemas.CreateChatCompletionRequest> = await c.req.valid("json");
+        if (typeof body.stop === 'string') {
+            body.stop = [body.stop];
+        }
+        // @ts-ignore
         let mergedParams: ChatModelParams = {
             ...params,
             ...body,
@@ -25,8 +30,9 @@ export class OpenAIChatService implements IChatService {
             const role = message["role"];
             if (Array.isArray(content)) {
                 for (const contentPiece of content) {
-                    if (contentPiece["type"] === "image_url" && typeof contentPiece["image_url"] === "string" && contentPiece["image_url"].startsWith("http")) {
-                        contentPiece["image_url"] = await urlToDataURL(contentPiece["image_url"]);
+                    if (contentPiece["type"] === "image_url" && (contentPiece["image_url"] as { url: string })["url"].startsWith("http")) {
+                        // @ts-ignore
+                        contentPiece["image_url"] = await urlToDataURL(contentPiece["image_url"]["url"]);
                     }
                 }
             }
@@ -35,7 +41,7 @@ export class OpenAIChatService implements IChatService {
                     chatHistory.push(new SystemMessage(content));
                     break;
                 case "user":
-                    chatHistory.push(new HumanMessage({ content }));
+                    chatHistory.push(new HumanMessage({ content: content }));
                     break;
                 case "assistant":
                     chatHistory.push(new AIMessage(content as string));
@@ -44,6 +50,7 @@ export class OpenAIChatService implements IChatService {
         }
         mergedParams.input = chatHistory;
         mergedParams = assignProvider(mergedParams) as ChatModelParams;
+        c.set("params", mergedParams);
         return mergedParams;
     }
 
@@ -51,9 +58,9 @@ export class OpenAIChatService implements IChatService {
         const openAIChatModelInput: Partial<OpenAIChatInput> & Partial<AzureOpenAIInput> & BaseChatModelParams = {
             cache: chatModelParams.cache ?? true,
             modelName: chatModelParams.modelName,
-            openAIApiKey: chatModelParams.apiKey ?? c.env.OPENAI_API_KEY,
+            openAIApiKey: chatModelParams.apiKey ?? env<{ OPENAI_BASE_URL: string }>(c)['OPENAI_API_KEY'],
             configuration: {
-                baseURL: c.env.OPENAI_BASE_URL ?? undefined,
+                baseURL: env<{ OPENAI_BASE_URL: string }>(c)['OPENAI_BASE_URL'] ?? undefined,
             },
         };
         if (!openAIChatModel.includes(chatModelParams.modelName ?? "")) {
@@ -68,8 +75,11 @@ export class OpenAIChatService implements IChatService {
         const params: Partial<ChatModelParams> = await c.get("params") ?? {};
         const modelName = params.modelName || "unknown";
         if (output instanceof IterableReadableStream || isIterableReadableStream(output)) {
-            return await streamSSE(c, async (stream) => {
-                for await (const chunk of output) {
+            return streamSSE(c, async (stream) => {
+                for await (let chunk of output) {
+                    if (chunk && (isBaseMessageChunk(chunk) || isBaseMessage(chunk))) {
+                        chunk = chunk.content.toString();
+                    }
                     if (chunk) {
                         await stream.writeSSE({
                             data: JSON.stringify(this.createCompletionChunk(chunk, modelName))
@@ -164,8 +174,12 @@ export class OpenAITranscriptionService implements ITranscriptionService {
         try {
             const audioLoader = new OpenAIWhisperAudio(params.file, { clientOptions: clientOptions });
             const transcription = await audioLoader.load();
+            let text = '';
+            for (const document of transcription) {
+                text += document.pageContent;
+            }
             const transcriptionResponse = openaiSchemas.CreateTranscriptionResponseJson.parse({
-                "text": transcription.pageContent,
+                "text": text,
             });
             return transcriptionResponse;
         } catch (error) {
@@ -174,7 +188,7 @@ export class OpenAITranscriptionService implements ITranscriptionService {
         }
     }
 
-    deliverOutput(c: Context, output: any): Promise<Response> {
+    async deliverOutput(c: Context, output: any): Promise<Response> {
         return c.json(output);
     }
 
@@ -200,10 +214,11 @@ export class OpenAIImageEditService implements IImageEditService {
                 params[field] = formData[field];
             }
         }
-        if (formData['model']) {
+        if (typeof formData['model'] === 'string') {
             params['modelName'] = formData['model'];
         }
         params = assignProvider(params) as ImageEditParams;
+        c.set("params", params);
         return params;
     }
 
@@ -211,7 +226,7 @@ export class OpenAIImageEditService implements IImageEditService {
         throw new Error('Method not implemented.');
     }
     async deliverOutput(c: Context, output: string | Blob): Promise<Response> {
-        const params = c.get("params") as ImageEditParams;
+        const params = await c.get("params") as ImageEditParams;
         const currentTime = Math.floor(Date.now() / 1000);
         if (params.response_format === "url" && typeof output === "string") {
             return c.json({
@@ -237,7 +252,8 @@ export class OpenAIEmbeddingService implements IEmbeddingService {
         if (!baseModelParams) {
             throw new Error("Model parameters are not available in the context.");
         }
-        const body = await c.req.valid("json");
+        // @ts-ignore
+        const body: z.infer<typeof openaiSchemas.CreateEmbeddingRequest> = await c.req.valid("json");
         if (!body) {
             throw new Error("Invalid JSON in the request body.");
         }
@@ -245,18 +261,19 @@ export class OpenAIEmbeddingService implements IEmbeddingService {
             ...baseModelParams,
             ...body,
             modelName: body.model,
-            input: body.input,
+            input: body.input as string | string[],
         };
         embeddingParams = assignProvider(embeddingParams) as EmbeddingParams;
+        c.set("params", embeddingParams);
         return embeddingParams;
     }
 
     async executeModel(c: Context, params: EmbeddingParams): Promise<number[] | number[][]> {
         const embeddingsParams: Partial<OpenAIEmbeddingsParams> = {
             ...params,
-            openAIApiKey: params.apiKey || c.env.OPENAI_API_KEY,
+            openAIApiKey: params.apiKey || env<{ OPENAI_API_KEY: string }>(c)['OPENAI_API_KEY'],
             configuration: {
-                baseURL: params.baseURL || c.env.OPENAI_BASE_URL,
+                baseURL: params.baseURL || env<{ OPENAI_BASE_URL: string }>(c)['OPENAI_BASE_URL'],
             },
         };
         if (!openAIEmbeddingModel.includes(params.modelName ?? "")) {
@@ -295,6 +312,10 @@ export class OpenAIEmbeddingService implements IEmbeddingService {
             object: "list",
             data: embeddingData,
             model: embeddingParams.modelName || "unknown",
+            usage: {
+                prompt_tokens: 0,
+                total_tokens: 0
+            }
         });
     }
 }
@@ -307,7 +328,7 @@ export class OpenAIImageGenerationService implements IImageGenerationService {
     async executeModel(c: Context, params: ImageGenerationParams) {
         const { apiKey, prompt } = params;
         const apiParams = {
-            openAIApiKey: apiKey || c.env.OPENAI_API_KEY,
+            openAIApiKey: apiKey || env<{ OPENAI_API_KEY: string }>(c)['OPENAI_API_KEY'],
             responseFormat: params.response_format,
         };
         const tool = new DallEAPIWrapper(apiParams);

@@ -2,6 +2,7 @@ import {
   Context,
   HuggingFaceInference,
   HuggingFaceInferenceEmbeddings,
+  env,
 } from "../deps.ts";
 import { ChatModelParams, EmbeddingParams } from "../types.ts";
 import { IChatService, IEmbeddingService } from "../types/i_service.ts";
@@ -35,10 +36,10 @@ export class HuggingFaceInferenceEmbeddingService implements IEmbeddingService {
     const hfInput = {
       ...params,
       model: params.modelName,
-      endpointUrl: params.baseURL || c.env.HUGGING_FACE_HUB_BASE_URL,
-      apiKey: params.apiKey || c.env.HUGGING_FACE_HUB_API_KEY
+      endpointUrl: params.baseURL || env<{ HUGGING_FACE_HUB_BASE_URL: string }>(c)['HUGGING_FACE_HUB_BASE_URL'],
+      apiKey: params.apiKey || env<{ HUGGING_FACE_HUB_API_KEY: string }>(c)['HUGGING_FACE_HUB_API_KEY'],
     };
-    const embeddings = new HuggingFaceInferenceEmbeddings(params);
+    const embeddings = new HuggingFaceInferenceEmbeddings(hfInput);
     return Array.isArray(params.input) ? await embeddings.embedDocuments(params.input) : await embeddings.embedQuery(params.input);
   }
 

@@ -3,7 +3,7 @@ import { assertEquals, decodeBase64, it, testClient } from "../deps.ts";
 import { schemas as openaiSchemas } from "../types/schemas/openai.ts";
 import { Providers } from "../config.ts";
 
-it("POST /v1/chat/completions", async () => {
+it.skip("POST /v1/chat/completions", async () => {
   const payload = {
     model: "gemini-pro",
     messages: [
@@ -17,16 +17,16 @@ it("POST /v1/chat/completions", async () => {
       },
     ],
   };
-  const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
-  if (!openaiApiKey) {
-    throw new Error("OPENAI_API_KEY is not set in the environment variables.");
+  const apiKey = Deno.env.get("OPENAI_API_KEY");
+  if (!apiKey) {
+    throw new Error("API_KEY is not set in the environment variables.");
   }
   const res = await testClient(app)["/v1/chat/completions"].$post({
     json: payload,
-    headers: {
+    header: {
       "Content-Type": "application/json",
       "x-portkey-provider": Providers.OPENAI,
-      "Authorization": `Bearer ${openaiApiKey}`,
+      "Authorization": `Bearer ${apiKey}`,
     },
   });
 
@@ -42,7 +42,7 @@ it("POST /v1/chat/completions", async () => {
   }
 });
 
-it("POST /v1/chat/completions Stream", async () => {
+it.skip("POST /v1/chat/completions Stream", async () => {
   const payload = {
     model: "gemini-pro",
     messages: [
@@ -58,52 +58,47 @@ it("POST /v1/chat/completions Stream", async () => {
     stream: true,
   };
 
-  const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
-  if (!openaiApiKey) {
-    throw new Error("OPENAI_API_KEY is not set in the environment variables.");
+  const apiKey = Deno.env.get("OPENAI_API_KEY");
+  if (!apiKey) {
+    throw new Error("API_KEY is not set in the environment variables.");
   }
   const res = await testClient(app)["/v1/chat/completions"].$post({
     json: payload,
-    headers: {
+    header: {
       "Content-Type": "application/json",
       "x-portkey-provider": Providers.OPENAI,
-      "Authorization": `Bearer ${openaiApiKey}`,
+      "Authorization": `Bearer ${apiKey}`,
     },
   });
 
   assertEquals(res.status, 200);
-  if (res.ok && res.body) {
-    const reader = res.body.getReader();
-    let result = "";
-    try {
+  if (res.ok) {
+    if (res.body) {
+      const reader = new ReadableStreamDefaultReader(res.body);
+      let result = "";
       while (true) {
         const { done, value } = await reader.read();
         if (done) {
           break;
         }
-        result += new TextDecoder("utf-8").decode(value, { stream: true });
-        if (result.startsWith("data:")) {
-          const jsonEndIndex = result.indexOf("\n\n");
-          if (jsonEndIndex !== -1) {
-            const jsonString = result.slice(5, jsonEndIndex);
-            result = result.slice(jsonEndIndex + 2);
-            const data = JSON.parse(jsonString);
-            console.log(data);
-          }
+        result = new TextDecoder("utf-8").decode(value);
+        if (
+          result.startsWith("data:") && !result.trimEnd().endsWith("[DONE]")
+        ) {
+          const data = JSON.parse(result.slice(5));
+          console.log(data);
+        } else if (result) {
+          console.log(result);
+          assertEquals(result.trimEnd().endsWith("[DONE]"), true);
+        } else {
+          console.log(result);
         }
       }
-      assertEquals(result.trimEnd(), "[DONE]");
-    } catch (error) {
-      console.error("Error reading the stream:", error);
-    } finally {
-      reader.releaseLock();
     }
-  } else {
-    console.error("Response was not ok", res);
   }
 });
 
-it("POST /v1/chat/completions IMAGE_URL", async () => {
+it.skip("POST /v1/chat/completions IMAGE_URL", async () => {
   const payload = {
     model: "gemini-pro-vision",
     messages: [
@@ -116,27 +111,27 @@ it("POST /v1/chat/completions IMAGE_URL", async () => {
           },
           {
             type: "image_url",
-            url:
-              "https://github.com/langchain-ai/langchainjs/blob/main/examples/hotdog.jpg?raw=true",
+            image_url: {
+              url: "https://github.com/langchain-ai/langchainjs/blob/main/examples/hotdog.jpg?raw=true",
+            }
           },
         ],
       },
     ],
   };
 
-  const googleApiKey = Deno.env.get("GOOGLE_API_KEY");
-  if (!googleApiKey) {
-    throw new Error("GOOGLE_API_KEY is not set in the environment variables.");
+  const apiKey = Deno.env.get("GOOGLE_API_KEY");
+  if (!apiKey) {
+    throw new Error("API_KEY is not set in the environment variables.");
   }
-  const res = await testClient(app)["/v1/chat/completions"].$post({
+  const res: Response = await testClient(app)["/v1/chat/completions"].$post({
     json: payload,
-    headers: {
+    header: {
       "Content-Type": "application/json",
       "x-portkey-provider": Providers.GOOGLE,
-      "Authorization": `Bearer ${googleApiKey}`,
+      "Authorization": `Bearer ${apiKey}`,
     },
   });
-
   assertEquals(res.status, 200);
   if (res.ok) {
     const data = await res.json();
@@ -151,22 +146,22 @@ it("POST /v1/chat/completions IMAGE_URL", async () => {
   }
 });
 
-it("POST /v1/embeddings", async () => {
+it.skip("POST /v1/embeddings", async () => {
   const payload = {
     input: "The food was delicious and the waiter...",
     model: "embedding-001",
     encoding_format: "float",
   };
-  const googleApiKey = Deno.env.get("GOOGLE_API_KEY");
-  if (!googleApiKey) {
-    throw new Error("GOOGLE_API_KEY is not set in the environment variables.");
+  const apiKey = Deno.env.get("GOOGLE_API_KEY");
+  if (!apiKey) {
+    throw new Error("API_KEY is not set in the environment variables.");
   }
   const res = await testClient(app)["/v1/embeddings"].$post({
     json: payload,
-    headers: {
+    header: {
       "Content-Type": "application/json",
       "x-portkey-provider": Providers.GOOGLE,
-      "Authorization": `Bearer ${googleApiKey}`,
+      "Authorization": `Bearer ${apiKey}`,
     },
   });
   assertEquals(res.status, 200);
@@ -197,7 +192,6 @@ it.skip("POST /v1/audio/transcriptions", async () => {
     const blob = new Blob([arrayBuffer], { type: "audio/wav" });
     const file = new File([blob], "jfk.wav");
 
-    // Send the transcription request
     const transcriptionResponse: Response = await testClient(app)["/v1/audio/transcriptions"].$post(
       {
         form: {

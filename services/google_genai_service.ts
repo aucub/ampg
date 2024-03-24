@@ -4,6 +4,7 @@ import {
   GoogleGenerativeAIChatInput,
   GoogleGenerativeAIEmbeddings,
   GoogleGenerativeAIEmbeddingsParams,
+  env,
 } from "../deps.ts";
 import { googleGenaiModel } from "../config.ts";
 import { ChatModelParams, EmbeddingParams } from '../types.ts';
@@ -41,7 +42,7 @@ export class GoogleGenerativeAIEmbeddingService implements IEmbeddingService {
   async executeModel(c: Context, params: EmbeddingParams): Promise<number[] | number[][]> {
     const googleGenerativeAIEmbeddingsParams: GoogleGenerativeAIEmbeddingsParams = {
       ...params,
-      apiKey: params.apiKey || c.env.GOOGLE_API_KEY,
+      apiKey: params.apiKey || env<{ GOOGLE_API_KEY: string }>(c)['GOOGLE_API_KEY'],
     };
     if (!googleGenaiModel.includes(params.modelName ?? "")) {
       googleGenerativeAIEmbeddingsParams.modelName = undefined;

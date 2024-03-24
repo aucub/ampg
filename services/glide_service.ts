@@ -2,6 +2,8 @@ import {
   Context,
   MessageContent,
   MessageType,
+  env,
+  z,
 } from "../deps.ts";
 import { ChatModelParams, LangException } from "../types.ts";
 import {
@@ -26,7 +28,7 @@ export class GlideChatService implements IChatService {
   }
   async executeModel(c: Context, params: ChatModelParams): Promise<any> {
     const requestPayload = this.createChatRequest(params.input);
-    const baseUrl = params["baseURL"] || c.env.GLIDE_BASE_URL;
+    const baseUrl = params["baseURL"] || env<{ GLIDE_BASE_URL: string }>(c)['GLIDE_BASE_URL'];
     let response: Response | undefined;
 
     if (baseUrl) {
@@ -43,13 +45,13 @@ export class GlideChatService implements IChatService {
       const responseData = await response.json();
       const validationResult = ChatResponse.safeParse(responseData);
       if (validationResult.success) {
-        return responseData.modelResponse.message.content ?? null;
+        return validationResult.data.modelResponse.message.content ?? null;
       }
     } else if (response && (response.status === 400 || response.status === 404)) {
       const errorData = await response.json();
       const validationResult = ErrorSchema.safeParse(errorData);
       if (validationResult.success) {
-        throw new LangException(errorData.message);
+        throw new LangException(validationResult.data.message);
       }
     }
   }
@@ -57,20 +59,20 @@ export class GlideChatService implements IChatService {
     throw new Error("Method not implemented.");
   }
 
-  private createChatRequest(messages: BaseMessageLikeComplex[]): typeof ChatRequest {
+  private createChatRequest(messages: BaseMessageLikeComplex[]): z.infer<typeof ChatRequest> {
     const userMessages = messages.filter(([role]) =>
       ["user", "human", "generic"].includes(role as string)
-    ) as [MessageType, MessageContent][];
+    ) as BaseMessageLikeComplex[];
     const assistantMessages = messages.filter(([role]) =>
       ["assistant", "ai"].includes(role as string)
-    ) as [MessageType, MessageContent][];
+    ) as BaseMessageLikeComplex[];
 
-    const message: typeof ChatMessage = {
+    const message: z.infer<typeof ChatMessage> = {
       content: userMessages[0][1],
       role: userMessages[0][0],
     };
 
-    const messageHistory: typeof ChatMessage[] = [
+    const messageHistory: z.infer<typeof ChatMessage>[] = [
       ...assistantMessages.map(([role, content]) => ({ content, role })),
       ...userMessages.slice(1).map(([role, content]) => ({ content, role })),
     ];

@@ -1,4 +1,4 @@
-import { z } from "../../deps.ts";
+import { z } from "../../../deps.ts";
 
 const TextEmbeddingsResult = z.object({
   data: z.array(z.array(z.number())).optional(),
