@@ -79,7 +79,7 @@ export interface ChatModelParams extends BaseModelParams {
    * If null, a random seed will be used.
    */
   seed?: number;
-  input?: BaseLanguageModelInput
+  input?: BaseLanguageModelInput;
 }
 
 export interface EmbeddingParams extends BaseModelParams {
@@ -96,7 +96,7 @@ export interface EmbeddingParams extends BaseModelParams {
    * Whether to strip new lines from the input text. Default to true
    */
   stripNewLines?: boolean;
-  input?: string[] | string,
+  input?: string[] | string;
 }
 
 export interface TranscriptionParams extends BaseModelParams {

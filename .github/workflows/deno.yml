@@ -50,7 +50,7 @@ jobs:
         run: deno lint
 
       - name: Run tests
-        run: deno test -A
+        run: deno task test
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6.0.1

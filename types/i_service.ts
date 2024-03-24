@@ -1,4 +1,4 @@
-import { Context, IterableReadableStream, z } from "../deps.ts";
+import { BaseMessageChunk, Context, IterableReadableStream, z } from "../deps.ts";
 import {
     BaseModelParams, ChatModelParams, ImageGenerationParams, EmbeddingParams, ImageEditParams,
     LangException, TranscriptionParams
@@ -17,7 +17,7 @@ export interface IModelService<TParams extends BaseModelParams, TOutput> {
 /**
  * Interface for chat service with specific parameter and result types.
  */
-export interface IChatService extends IModelService<ChatModelParams, string | IterableReadableStream> {
+export interface IChatService extends IModelService<ChatModelParams, string | BaseMessageChunk | IterableReadableStream> {
 }
 
 /**
