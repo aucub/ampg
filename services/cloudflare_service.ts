@@ -2,6 +2,7 @@ import {
   ChatCloudflareWorkersAI,
   CloudflareWorkersAIInput,
   Context,
+  env,
   z,
 } from "../deps.ts";
 import {
@@ -36,8 +37,8 @@ export class CloudflareWorkersAIChatService implements IChatService {
       model: cloudflareWorkersAITextEmbeddingsModel.includes(params.modelName as string)
         ? params.modelName as string
         : DEFAULT_CLOUDFLAREWORKERSAI_CHAT_MODEL,
-      cloudflareAccountId: params.user || c.env.CLOUDFLARE_ACCOUNT_ID,
-      cloudflareApiToken: params.apiKey || c.env.CLOUDFLARE_API_TOKEN,
+      cloudflareAccountId: params.user || env<{ CLOUDFLARE_ACCOUNT_ID: string }>(c)['CLOUDFLARE_ACCOUNT_ID'],
+      cloudflareApiToken: params.apiKey || env<{ CLOUDFLARE_API_TOKEN: string }>(c)['CLOUDFLARE_API_TOKEN'],
     };
     const chatModel = new ChatCloudflareWorkersAI(cloudflareWorkersAIInput);
     try {
@@ -67,7 +68,7 @@ export class CloudflareWorkersAIEmbeddingService implements IEmbeddingService {
     const user = params.user;
     const apiKey = params.apiKey;
     const inputText = params.input;
-    const baseUrl = c.env.CLOUDFLARE_BASE_URL || DEFAULT_CLOUDFLARE_BASE_URL;
+    const baseUrl = env<{ CLOUDFLARE_BASE_URL: string }>(c)['CLOUDFLARE_BASE_URL'] || DEFAULT_CLOUDFLARE_BASE_URL;
     if (!baseUrl || !user || !apiKey || !inputText) {
       throw new Error("Missing required parameters for embedding execution.");
     }
@@ -89,11 +90,11 @@ export class CloudflareWorkersAIEmbeddingService implements IEmbeddingService {
     if (response.ok) {
       const body: z.infer<typeof cloudflareSchemas.Response> = await response.json();
       if (!body.success) {
-        const errorMsg = body.error || 'Unknown error occurred during embedding generation';
+        const errorMsg = JSON.stringify(body.error) || 'Unknown error occurred during embedding generation';
         console.error("Embedding generation error:", errorMsg);
         throw new Error(errorMsg);
       }
-      return body.result.data ?? null;
+      return body.result.data as number[] | number[][] ?? null;
     } else {
       const statusText = response.statusText || 'No response text';
       console.error("HTTP error:", response.status, statusText);
@@ -118,7 +119,7 @@ export class CloudflareWorkersAITranscriptionService implements ITranscriptionSe
     const user = params.user;
     const apiKey = params.apiKey;
     const file = params.file;
-    const baseUrl = c.env.CLOUDFLARE_BASE_URL || DEFAULT_CLOUDFLARE_BASE_URL;
+    const baseUrl = env<{ CLOUDFLARE_BASE_URL: string }>(c)['CLOUDFLARE_BASE_URL'] || DEFAULT_CLOUDFLARE_BASE_URL;
     if (baseUrl && user && file) {
       const requestUrl = `${baseUrl}${user}/ai/run/${modelName}`;
       try {
@@ -137,7 +138,7 @@ export class CloudflareWorkersAITranscriptionService implements ITranscriptionSe
       if (response.ok) {
         const body: z.infer<typeof cloudflareSchemas.Response> = await response.json();
         if (!body.success) {
-          const errorMsg = body.error || 'Unknown error occurred during transcription';
+          const errorMsg = JSON.stringify(body.error) || 'Unknown error occurred during transcription';
           console.error("Transcription error:", errorMsg);
           throw new Error(errorMsg);
         }
@@ -147,7 +148,7 @@ export class CloudflareWorkersAITranscriptionService implements ITranscriptionSe
           language: result.language || "unknown",
           duration: Number(result.word_count),
           text: result.text,
-          words: result.words?.map(word => ({
+          words: (result.words as { start: number; end: number; word: string }[])?.map(word => ({
             word: word.word,
             start: word.start,
             end: word.end,
@@ -177,14 +178,14 @@ export class CloudflareWorkersAIImageEditService implements IImageEditService {
     const modelName = params.modelName;
     const user = params.user;
     const apiKey = params.apiKey;
-    const baseUrl = c.env.CLOUDFLARE_BASE_URL || DEFAULT_CLOUDFLARE_BASE_URL;
+    const baseUrl = await env<{ CLOUDFLARE_BASE_URL: string }>(c)['CLOUDFLARE_BASE_URL'] || DEFAULT_CLOUDFLARE_BASE_URL;
     const imageEditParams = {
       guidance: params.guidance,
       num_steps: params.num_steps,
       prompt: params.prompt,
       strength: params.strength,
-      image: params.image instanceof File ? await Array.from(new Uint8Array(await params.image.arrayBuffer())) : undefined,
-      mask: params.mask instanceof File ? await Array.from(new Uint8Array(await params.mask.arrayBuffer())) : undefined,
+      image: params.image instanceof File ? Array.from(new Uint8Array(await params.image.arrayBuffer())) : undefined,
+      mask: params.mask instanceof File ? Array.from(new Uint8Array(await params.mask.arrayBuffer())) : undefined,
     };
     let response;
     if (baseUrl && user) {

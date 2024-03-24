@@ -1,4 +1,4 @@
-import { BaseLanguageModelInput } from "./deps";
+import { BaseLanguageModelInput } from "./deps.ts";
 
 export interface BaseModelParams {
   /**

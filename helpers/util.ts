@@ -1,4 +1,4 @@
-import { IterableReadableStream } from "../deps";
+import { IterableReadableStream } from "../deps.ts";
 
 export async function urlToDataURL(url: string): Promise<string> {
     const response = await fetch(url);
@@ -6,7 +6,7 @@ export async function urlToDataURL(url: string): Promise<string> {
         throw new Error("Failed to download.");
     }
     const blob = await response.blob();
-    return blobToDataURL(blob);
+    return await blobToDataURL(blob);
 }
 
 // Convert a blob to a data URL string
@@ -23,10 +23,15 @@ export function blobToDataURL(blob: Blob): Promise<string> {
 export async function blobToBase64(blob: Blob): Promise<string> {
     const arrayBuffer = await blob.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
-    const base64String = btoa(
-        new TextDecoder('utf-8').decode(uint8Array)
-    );
-    return base64String;
+    let binaryString = "";
+    for (let i = 0; i < uint8Array.byteLength; i += 1024) {
+        const chunk = uint8Array.subarray(
+            i,
+            Math.min(i + 1024, uint8Array.byteLength),
+        );
+        binaryString += String.fromCharCode.apply(null, Array.from(chunk));
+    }
+    return btoa(binaryString);
 }
 
 export function isIterableReadableStream(obj: any): obj is IterableReadableStream {

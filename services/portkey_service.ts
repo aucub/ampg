@@ -1,4 +1,4 @@
-import { Context, Portkey } from "../deps.ts";
+import { Context, IterableReadableStream, Portkey } from "../deps.ts";
 import { ChatModelParams, PortkeyModelParams } from "../types.ts";
 import { IChatService } from "../types/i_service.ts";
 
@@ -8,7 +8,7 @@ export class PortkeyChatService implements IChatService {
     throw new Error("Method not implemented.");
   }
 
-  async executeModel(c: Context, params: PortkeyModelParams): Promise<any> {
+  async executeModel(c: Context, params: PortkeyModelParams): Promise<string | IterableReadableStream> {
     const model = new Portkey(params);
     if (!params.streaming) {
       return await model.invoke(params.input);
