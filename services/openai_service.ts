@@ -43,10 +43,9 @@ import {
   IExceptionHandling,
   IImageEditService,
   IImageGenerationService,
-  ITranscriptionService,
+  IAudioTranscriptionService,
 } from "../types/i_service.ts";
 import { schemas as openaiSchemas } from "../types/schemas/openai.ts";
-import { assignProvider } from "./model_service_provider.ts";
 
 export class OpenAIChatService implements IChatService {
   async prepareModelParams(c: Context): Promise<ChatModelParams> {
@@ -100,7 +99,6 @@ export class OpenAIChatService implements IChatService {
       }
     }
     mergedParams.input = chatHistory;
-    mergedParams = assignProvider(mergedParams) as ChatModelParams;
     c.set("params", mergedParams);
     return mergedParams;
   }
@@ -215,7 +213,7 @@ export class OpenAIChatService implements IChatService {
   }
 }
 
-export class OpenAITranscriptionService implements ITranscriptionService {
+export class OpenAITranscriptionService implements IAudioTranscriptionService {
   async prepareModelParams(c: Context): Promise<TranscriptionParams> {
     let params = await c.get("params") as TranscriptionParams;
     const formData = await c.req.parseBody({ all: true });
@@ -243,7 +241,6 @@ export class OpenAITranscriptionService implements ITranscriptionService {
         "No response format was provided or the provided response format is invalid.",
       );
     }
-    params = assignProvider(params) as TranscriptionParams;
     return params;
   }
 
@@ -309,7 +306,6 @@ export class OpenAIImageEditService implements IImageEditService {
     if (typeof formData["model"] === "string") {
       params["modelName"] = formData["model"];
     }
-    params = assignProvider(params) as ImageEditParams;
     c.set("params", params);
     return params;
   }
@@ -355,7 +351,6 @@ export class OpenAIEmbeddingService implements IEmbeddingService {
       modelName: body.model,
       input: body.input as string | string[],
     };
-    embeddingParams = assignProvider(embeddingParams) as EmbeddingParams;
     c.set("params", embeddingParams);
     return embeddingParams;
   }

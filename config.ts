@@ -76,7 +76,6 @@ interface CommunitySecretMap {
 
 export type SecretMap = CoreSecretMap & CommunitySecretMap & CustomSecretMap;
 
-
 export enum TaskType {
   CHAT = "chat",
   EMBEDDINGS = "embeddings",
@@ -85,7 +84,16 @@ export enum TaskType {
   AUDIO_TRANSLATIONS = "audio/translations",
   IMAGES_GENERATIONS = "images/generations",
   IMAGES_EDITS = "images/edits",
-  IMAGES_VARIATIONS = "images/variations"
+  IMAGES_VARIATIONS = "images/variations",
+}
+
+export enum Target {
+  JSON = 'json',
+  FORM = 'form',
+  QUERY = 'query',
+  PARAM = 'param',
+  HEADER = 'header',
+  COOKIE = 'cookie',
 }
 
 export enum Provider {
@@ -287,10 +295,3 @@ for await (const [key, value] of Object.entries(secretMap)) {
 }
 
 export default secretMap;
-
-export const openAIPaths: string[] = [
-  "/v1/chat/completions",
-  "/v1/embeddings",
-  "/v1/images/edits",
-  "/v1/audio/transcriptions",
-];

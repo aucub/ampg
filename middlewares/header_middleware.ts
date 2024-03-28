@@ -30,11 +30,6 @@ export const headersMiddleware = (): MiddlewareHandler => {
       params.user = authEmail;
     }
 
-    const provider = getHeader("x-portkey-provider");
-    if (provider) {
-      params.provider = provider;
-    }
-
     const baseURL = getHeader("x-portkey-baseURL");
     if (baseURL) {
       params.baseURL = baseURL;

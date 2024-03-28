@@ -1,4 +1,4 @@
-import { BaseLanguageModelInput } from "./deps.ts";
+import { BaseLanguageModelInput, z } from "./deps.ts";
 
 export interface BaseModelParams {
   /**
@@ -17,10 +17,6 @@ export interface BaseModelParams {
    * Override the default base URL for the API.
    */
   baseURL?: string;
-  /**
-   * The AI provider to use for your calls.
-   */
-  provider?: string;
   /**
    * Caching configuration.
    */
@@ -154,11 +150,31 @@ export interface ImageGenerationParams extends BaseModelParams {
 }
 
 export interface ImageEditParams extends BaseModelParams {
+  /**
+   * The image to edit.
+   */
   image?: File;
+  /**
+   * A text description of the desired image(s).
+   */
   prompt?: string;
+  /**
+   * An additional image used as a mask. Fully transparent areas (where alpha is zero)
+   * indicate where the image should be edited.
+   */
   mask?: File;
+  /**
+   * The number of images to generate.
+   * Defaults to 1 if not provided.
+   */
   n?: number;
+  /**
+   * The size of the generated images.
+   */
   size?: string;
+  /**
+   * The format in which the generated images are returned.
+   */
   response_format?: string;
   guidance?: number;
   num_steps?: number;
@@ -187,7 +203,6 @@ export class LangException extends Error {
   observation?: string;
 }
 
-
 export interface GatewayParams {
   /**
    * The provider to use for your calls. This is required.
@@ -213,4 +228,20 @@ export interface GatewayParams {
    * Additional model parameters (optional).
    */
   options?: any;
+  endpoint?: any;
 }
+
+const RetrySchema = z.object({
+  attempts: z.number().optional(),
+  onStatusCodes: z.array(z.number()).optional(),
+}).passthrough();
+
+export const GatewayParamsSchema = z.object({
+  provider: z.string().nonempty(),
+  cache: z.boolean().optional(),
+  retry: RetrySchema.optional(),
+  trace_id: z.string().optional(),
+  model: z.string().nonempty(),
+  options: z.any().optional(),
+  endpoint: z.any().optional(),
+}).passthrough();

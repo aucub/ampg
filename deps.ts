@@ -2,9 +2,10 @@ export {
   Hono,
   HTTPException,
   validator,
+  ValidationTargets,
 } from "https://deno.land/x/hono@v4.1.5/mod.ts";
 export { Context } from "https://deno.land/x/hono@v4.1.5/context.ts";
-export type { HonoRequest } from "https://deno.land/x/hono@v4.1.3/mod.ts";
+export type { HonoRequest } from "https://deno.land/x/hono@v4.1.5/mod.ts";
 export {
   env,
   stream,
@@ -25,7 +26,7 @@ export { assertEquals } from "https://deno.land/std@0.221.0/assert/mod.ts";
 export { it } from "https://deno.land/std@0.221.0/testing/bdd.ts";
 export { decodeBase64 } from "https://deno.land/std@0.221.0/encoding/base64.ts";
 export { zValidator } from "https://esm.sh/@hono/zod-validator@0.2.1";
-export { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+export { z, ZodSchema } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 export { makeApi, Zodios } from "https://esm.sh/@zodios/core@10.9.6";
 export type { ZodiosOptions } from "https://esm.sh/@zodios/core@10.9.6";
 export { configAsync } from "https://deno.land/x/dotenv@v3.2.2/mod.ts";
@@ -62,7 +63,7 @@ export type {
   ClientOptions,
   OpenAIChatInput,
   OpenAIEmbeddingsParams,
-} from "https://esm.sh/@langchain/openai@0.0.23";
+} from "https://esm.sh/@langchain/openai@0.0.24";
 export {
   ChatGoogleGenerativeAI,
   GoogleGenerativeAIEmbeddings,
