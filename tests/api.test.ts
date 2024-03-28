@@ -19,11 +19,11 @@ it.skip("POST /api/" + [TaskType.CHAT], async () => {
     ],
   };
   const gatewayParams: GatewayParams = {
-    provider: Provider.OPENAI,
+    provider: Provider.GOOGLE,
     model: Provider.OPENAI,
     endpoint: "/v1/chat/completions"
   }
-  const apiKey = Deno.env.get("OPENAI_API_KEY");
+  const apiKey = Deno.env.get("GOOGLE_API_KEY");
   if (!apiKey) {
     throw new Error("API_KEY is not set in the environment variables.");
   }
@@ -32,7 +32,6 @@ it.skip("POST /api/" + [TaskType.CHAT], async () => {
     json: payload,
     header: {
       "Content-Type": "application/json",
-      "x-portkey-provider": Provider.OPENAI,
       "Authorization": `Bearer ${apiKey}`,
     },
   });
@@ -65,11 +64,11 @@ it.skip("POST /api/" + [TaskType.CHAT] + " Stream", async () => {
     stream: true,
   };
   const gatewayParams: GatewayParams = {
-    provider: Provider.OPENAI,
+    provider: Provider.GOOGLE,
     model: Provider.OPENAI,
     endpoint: "/v1/chat/completions"
   }
-  const apiKey = Deno.env.get("OPENAI_API_KEY");
+  const apiKey = Deno.env.get("GOOGLE_API_KEY");
   if (!apiKey) {
     throw new Error("API_KEY is not set in the environment variables.");
   }
@@ -78,7 +77,6 @@ it.skip("POST /api/" + [TaskType.CHAT] + " Stream", async () => {
     json: payload,
     header: {
       "Content-Type": "application/json",
-      "x-portkey-provider": Provider.OPENAI,
       "Authorization": `Bearer ${apiKey}`,
     },
   });
@@ -133,7 +131,7 @@ it.skip("POST /api/" + [TaskType.CHAT] + " IMAGE_URL", async () => {
     ],
   };
   const gatewayParams: GatewayParams = {
-    provider: Provider.OPENAI,
+    provider: Provider.GOOGLE,
     model: Provider.OPENAI,
     endpoint: "/v1/chat/completions"
   }
@@ -146,7 +144,6 @@ it.skip("POST /api/" + [TaskType.CHAT] + " IMAGE_URL", async () => {
     json: payload,
     header: {
       "Content-Type": "application/json",
-      "x-portkey-provider": Provider.GOOGLE,
       "Authorization": `Bearer ${apiKey}`,
     },
   });
@@ -184,7 +181,6 @@ it.skip("POST /api/" + TaskType.EMBEDDINGS, async () => {
     json: payload,
     header: {
       "Content-Type": "application/json",
-      "x-portkey-provider": Provider.GOOGLE,
       "Authorization": `Bearer ${apiKey}`,
     },
   });
@@ -234,7 +230,6 @@ it.skip("POST /api/" + TaskType.AUDIO_TRANSCRIPTIONS, async () => {
           "response_format": "json",
         },
         header: {
-          "x-portkey-provider": Provider.CLOUDFLARE,
           "X-Auth-Email": Deno.env.get("CLOUDFLARE_ACCOUNT_ID"),
           "Authorization": "Bearer " + Deno.env.get("CLOUDFLARE_API_TOKEN"),
         },
@@ -260,7 +255,7 @@ it.skip("POST /api/" + TaskType.AUDIO_TRANSCRIPTIONS, async () => {
   }
 });
 
-it("POST " + TaskType.IMAGES_EDITS, async () => {
+it("POST /api/" + TaskType.IMAGES_EDITS, async () => {
   try {
     const imageFileResponse = await fetch(
       "https://pub-1fb693cb11cc46b2b2f656f51e015a2c.r2.dev/dog.png",
@@ -292,7 +287,6 @@ it("POST " + TaskType.IMAGES_EDITS, async () => {
             "model": "@cf/runwayml/stable-diffusion-v1-5-inpainting",
           },
           header: {
-            "x-portkey-provider": Provider.CLOUDFLARE,
             "X-Auth-Email": Deno.env.get("CLOUDFLARE_ACCOUNT_ID"),
             "Authorization": "Bearer " + Deno.env.get("CLOUDFLARE_API_TOKEN"),
           },

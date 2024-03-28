@@ -8,10 +8,6 @@ import {
   z,
 } from "../deps.ts";
 import {
-  cloudflareWorkersAISpeechRecognitionModel,
-  cloudflareWorkersAITextEmbeddingsModel,
-} from "../config.ts";
-import {
   ChatModelParams,
   EmbeddingParams,
   ImageEditParams,
@@ -28,13 +24,6 @@ import {
 const DEFAULT_CLOUDFLARE_BASE_URL =
   "https://api.cloudflare.com/client/v4/accounts/";
 
-const DEFAULT_CLOUDFLAREWORKERSAI_CHAT_MODEL = "@cf/meta/llama-2-7b-chat-int8";
-
-const DEFAULT_CLOUDFLAREWORKERSAI_EMBEDDING_MODEL =
-  "@cf/baai/bge-large-en-v1.5";
-
-const DEFAULT_CLOUDFLAREWORKERSAI_TRANSCRIPTION_MODEL = "@cf/openai/whisper";
-
 export class CloudflareWorkersAIChatService implements IChatService {
   prepareModelParams(c: Context): Promise<ChatModelParams> {
     throw new Error("Method not implemented.");
@@ -45,11 +34,7 @@ export class CloudflareWorkersAIChatService implements IChatService {
   ): Promise<string | BaseMessageChunk | IterableReadableStream<any>> {
     const cloudflareWorkersAIInput: CloudflareWorkersAIInput = {
       ...params,
-      model: cloudflareWorkersAITextEmbeddingsModel.includes(
-        params.modelName as string,
-      )
-        ? params.modelName as string
-        : DEFAULT_CLOUDFLAREWORKERSAI_CHAT_MODEL,
+      model: params.modelName as string,
       cloudflareAccountId: params.user ||
         env<{ CLOUDFLARE_ACCOUNT_ID: string }>(c)["CLOUDFLARE_ACCOUNT_ID"],
       cloudflareApiToken: params.apiKey ||
@@ -80,10 +65,7 @@ export class CloudflareWorkersAIEmbeddingService implements IEmbeddingService {
     c: Context,
     params: EmbeddingParams,
   ): Promise<number[] | number[][]> {
-    const modelName =
-      cloudflareWorkersAITextEmbeddingsModel.includes(params.modelName ?? "")
-        ? params.modelName
-        : DEFAULT_CLOUDFLAREWORKERSAI_EMBEDDING_MODEL;
+    const modelName = params.modelName
     const user = params.user;
     const apiKey = params.apiKey;
     const inputText = params.input;
@@ -135,10 +117,7 @@ export class CloudflareWorkersAITranscriptionService
     throw new Error("Method not implemented.");
   }
   async executeModel(c: Context, params: TranscriptionParams): Promise<any> {
-    const modelName =
-      cloudflareWorkersAISpeechRecognitionModel.includes(params.modelName ?? "")
-        ? params.modelName
-        : DEFAULT_CLOUDFLAREWORKERSAI_TRANSCRIPTION_MODEL;
+    const modelName = params.modelName
     let response;
     const user = params.user;
     const apiKey = params.apiKey;

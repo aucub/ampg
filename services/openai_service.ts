@@ -1,4 +1,3 @@
-import { openAIChatModel, openAIEmbeddingModel } from "../config.ts";
 import {
   AIMessage,
   AzureOpenAIInput,
@@ -114,18 +113,15 @@ export class OpenAIChatService implements IChatService {
       & {
         configuration?: ClientOptions;
       } = {
-        cache: chatModelParams.cache ?? true,
-        modelName: chatModelParams.modelName,
-        openAIApiKey: chatModelParams.apiKey ??
-          env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_API_KEY"],
-        configuration: {
-          baseURL: env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_BASE_URL"] ??
-            undefined,
-        },
-      };
-    if (!openAIChatModel.includes(chatModelParams.modelName ?? "")) {
-      openAIChatModelInput.modelName = undefined;
-    }
+      cache: chatModelParams.cache ?? true,
+      modelName: chatModelParams.modelName,
+      openAIApiKey: chatModelParams.apiKey ??
+        env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_API_KEY"],
+      configuration: {
+        baseURL: env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_BASE_URL"] ??
+          undefined,
+      },
+    };
     const openAIChatInput = { ...openAIChatModelInput, ...chatModelParams };
     const model = new ChatOpenAI(openAIChatInput);
     return chatModelParams.streaming
@@ -372,9 +368,6 @@ export class OpenAIEmbeddingService implements IEmbeddingService {
           env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_BASE_URL"],
       },
     };
-    if (!openAIEmbeddingModel.includes(params.modelName ?? "")) {
-      throw new Error(`Model name '${params.modelName}' is not supported.`);
-    }
     const embeddings = new OpenAIEmbeddings(embeddingsParams);
     return Array.isArray(params.input)
       ? await embeddings.embedDocuments(params.input)

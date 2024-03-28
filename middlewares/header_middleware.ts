@@ -1,5 +1,5 @@
 import { MiddlewareHandler } from "../deps.ts";
-import { BaseModelParams } from "../types.ts";
+import { BaseModelParams, GatewayParams } from "../types.ts";
 
 const TOKEN_PREFIX = "Bearer ";
 
@@ -17,7 +17,6 @@ export const headersMiddleware = (): MiddlewareHandler => {
     }
 
     let apiKey = getHeader("X-Auth-Key") ||
-      getHeader("x-portkey-api-key") ||
       extractBearerToken(getHeader("Authorization") || "") ||
       c.req.query("key");
 
@@ -30,35 +29,12 @@ export const headersMiddleware = (): MiddlewareHandler => {
       params.user = authEmail;
     }
 
-    const baseURL = getHeader("x-portkey-baseURL");
-    if (baseURL) {
-      params.baseURL = baseURL;
+    const gatewayParams: GatewayParams = c.req.query();
+    const mergedParams = {
+      ...(gatewayParams.options || {}),
+      ...params
     }
-
-    const cache = getHeader("x-portkey-cache");
-    if (cache) {
-      params.cache = true;
-    }
-
-    const retryHeader = getHeader("x-portkey-retry");
-    if (retryHeader) {
-      const retry = parseInt(retryHeader, 10);
-      if (!isNaN(retry)) {
-        params.retry = { attempts: retry };
-        const onStatusCodes = getHeader("x-portkey-on-status-codes");
-        if (onStatusCodes) {
-          params.retry.onStatusCodes = onStatusCodes.split(",").map(Number)
-            .filter((n) => !isNaN(n));
-        }
-      }
-    }
-
-    const traceId = getHeader("x-portkey-trace-id");
-    if (traceId) {
-      params.traceId = traceId;
-    }
-
-    c.set("params", params);
+    c.set("params", mergedParams);
     await next();
   };
 };

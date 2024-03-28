@@ -1,8 +1,5 @@
 import { IExceptionHandling } from "../types/i_service.ts";
 import {
-  cloudflareWorkersAIModel,
-  googleGenaiModel,
-  openAIModel,
   Provider,
   Target,
   TaskType,
@@ -31,17 +28,6 @@ import {
 } from "./hf_service.ts";
 import { PortkeyChatService } from "./portkey_service.ts";
 import { GlideChatService } from "./glide_service.ts";
-
-export function getProviderByModelName(modelName: string): Provider | undefined {
-  if (openAIModel.includes(modelName)) {
-    return Provider.OPENAI;
-  } else if (googleGenaiModel.includes(modelName)) {
-    return Provider.GOOGLE;
-  } else if (cloudflareWorkersAIModel.includes(modelName)) {
-    return Provider.CLOUDFLARE;
-  }
-  return undefined;
-}
 
 /**
  * 获取服务实例的通用函数。
