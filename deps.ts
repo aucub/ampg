@@ -2,10 +2,9 @@ export {
   Hono,
   HTTPException,
   validator,
-  ValidationTargets,
 } from "https://deno.land/x/hono@v4.1.5/mod.ts";
 export { Context } from "https://deno.land/x/hono@v4.1.5/context.ts";
-export type { HonoRequest } from "https://deno.land/x/hono@v4.1.5/mod.ts";
+export type { HonoRequest, ValidationTargets } from "https://deno.land/x/hono@v4.1.5/mod.ts";
 export {
   env,
   stream,
