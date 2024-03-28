@@ -93,45 +93,38 @@ export function getModelService(taskType: TaskType, provider: Provider) {
   return new Constructor();
 }
 
-export function getZodValidatorSchema(target: Target, taskType: TaskType, provider: Provider) {
+export function getZodValidatorSchema(taskType: TaskType, provider: Provider, target: Target) {
   const zodValidatorModelRequestMap = {
-    [Target.JSON]: {
-      [TaskType.CHAT]: {
-        [Provider.OPENAI]: openaiSchemas.CreateChatCompletionRequest,
-      },
-      [TaskType.EMBEDDINGS]: {
-        [Provider.OPENAI]: openaiSchemas.CreateEmbeddingRequest,
-      },
-      [TaskType.IMAGES_GENERATIONS]: {
-        [Provider.OPENAI]: openaiSchemas.CreateImageRequest,
+    [TaskType.CHAT]: {
+      [Provider.OPENAI]: {
+        [Target.JSON]: openaiSchemas.CreateChatCompletionRequest,
       },
     },
-    [Target.FORM]: {
-      [TaskType.AUDIO_TRANSCRIPTIONS]: {
-        [Provider.OPENAI]: openaiSchemas.CreateTranslationRequest,
-      },
-      [TaskType.IMAGES_EDITS]: {
-        [Provider.OPENAI]: openaiSchemas.CreateImageEditRequest,
-      },
+    [TaskType.EMBEDDINGS]: {
+      [Provider.OPENAI]: {
+        [Target.JSON]: openaiSchemas.CreateEmbeddingRequest,
+      }
+    },
+    [TaskType.IMAGES_GENERATIONS]: {
+      [Provider.OPENAI]: {
+        [Target.JSON]: openaiSchemas.CreateImageRequest,
+      }
+    },
+    [TaskType.AUDIO_TRANSCRIPTIONS]: {
+      [Provider.OPENAI]: {
+        [Target.FORM]: openaiSchemas.CreateTranslationRequest,
+      }
+    },
+    [TaskType.IMAGES_EDITS]: {
+      [Provider.OPENAI]: {
+        [Target.FORM]: openaiSchemas.CreateImageEditRequest,
+      }
     },
   };
-
-  const targetMap = zodValidatorModelRequestMap[target];
-  if (!targetMap) {
-    throw new Error(`Unknown target: ${targetMap}`);
-  }
-
-  const taskMap = targetMap[taskType];
-  if (!taskMap) {
-    throw new Error(`Unknown type ${targetMap}: ${taskMap}`);
-  }
-
-  const schema = taskMap[provider];
-  if (!schema) {
-    throw new Error(`Unknown provider ${targetMap}: ${taskMap}: ${provider}`);
-  }
-
-  return schema;
+  try {
+    const schema = zodValidatorModelRequestMap[taskType][provider][target];
+    return schema;
+  } catch (error) { return null }
 }
 
 export function getExceptionHandling(provider: Provider): IExceptionHandling {

@@ -9,9 +9,6 @@ import {
   secureHeaders,
   timing,
   ToolInputParsingException,
-  validator,
-  z,
-  ZodSchema,
   zValidator,
 } from "./deps.ts";
 import { headersMiddleware } from "./middlewares/header_middleware.ts";
@@ -19,9 +16,9 @@ import { GatewayParams, GatewayParamsSchema, LangException } from "./types.ts";
 import {
   getExceptionHandling,
   getModelService,
-  getZodValidatorSchema,
 } from "./services/model_service_provider.ts";
 import { Provider, Target, TaskType } from "./config.ts";
+import { validatorMiddleware } from "./middlewares/validator_middleware.ts";
 
 const app = new Hono();
 
@@ -30,7 +27,6 @@ app.use(
   cors(),
   secureHeaders(),
   timing(),
-  headersMiddleware(),
   compress(),
   prettyJSON(),
 );
@@ -42,12 +38,12 @@ function createModelRequestHandler(
     const gatewayParams: GatewayParams = c.req.query();
     const modelService = getModelService(
       taskType,
-      Provider[gatewayParams.model as keyof typeof Provider],
+      gatewayParams.model as Provider,
     );
     const params = await modelService.prepareModelParams(c);
     const providerService = getModelService(
       taskType,
-      Provider[gatewayParams.provider as keyof typeof Provider],
+      gatewayParams.provider as Provider,
     );
     const output = await providerService.executeModel(c, params);
     return await modelService.deliverOutput(c, output);
@@ -55,24 +51,7 @@ function createModelRequestHandler(
 }
 
 Object.values(TaskType).forEach((taskType) => {
-  const zodValidator = (target: Target) => validator(async (value, c) => {
-    const gatewayParams: GatewayParams = c.req.query();
-    try {
-      const schema = getZodValidatorSchema(target, taskType, Provider[gatewayParams.provider as keyof typeof Provider])
-      const result = await schema.safeParseAsync(value)
-      if (!result.success) {
-        return c.json(result, 400)
-      }
-      const data = result.data as z.infer<ZodSchema>
-      return data
-    } catch (error) {
-      console.error(`${error}`);
-      return null
-    }
-  });
-  app.post("/api/" + [taskType], zValidator(Target.QUERY, GatewayParamsSchema), zodValidator(Target.JSON),
-    zodValidator(Target.FORM),
-    createModelRequestHandler(taskType));
+  app.post("/api/" + [taskType], zValidator([Target.QUERY], GatewayParamsSchema), headersMiddleware(), validatorMiddleware(), createModelRequestHandler(taskType));
 });
 
 app.onError((err, c) => {
@@ -89,7 +68,7 @@ app.onError((err, c) => {
   }
   if (langException.message) {
     try {
-      const exceptionHandling = getExceptionHandling(Provider[c.req.query('provider') as keyof typeof Provider]);
+      const exceptionHandling = getExceptionHandling(c.req.query('model') as Provider);
       return exceptionHandling.handleException(langException);
     }
     catch (error) {

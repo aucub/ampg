@@ -1,9 +1,10 @@
 import { app } from "../app.ts";
 import { assertEquals, decodeBase64, it, testClient } from "../deps.ts";
 import { schemas as openaiSchemas } from "../types/schemas/openai.ts";
-import { Provider } from "../config.ts";
+import { Provider, TaskType } from "../config.ts";
+import { GatewayParams } from "../types.ts";
 
-it.skip("POST /v1/chat/completions", async () => {
+it.skip("POST /api/" + [TaskType.CHAT], async () => {
   const payload = {
     model: "gemini-pro",
     messages: [
@@ -17,11 +18,17 @@ it.skip("POST /v1/chat/completions", async () => {
       },
     ],
   };
+  const gatewayParams: GatewayParams = {
+    provider: Provider.OPENAI,
+    model: Provider.OPENAI,
+    endpoint: "/v1/chat/completions"
+  }
   const apiKey = Deno.env.get("OPENAI_API_KEY");
   if (!apiKey) {
     throw new Error("API_KEY is not set in the environment variables.");
   }
-  const res = await testClient(app)["/v1/chat/completions"].$post({
+  const res = await testClient(app)["/api/" + [TaskType.CHAT]].$post({
+    query: gatewayParams,
     json: payload,
     header: {
       "Content-Type": "application/json",
@@ -42,7 +49,7 @@ it.skip("POST /v1/chat/completions", async () => {
   }
 });
 
-it.skip("POST /v1/chat/completions Stream", async () => {
+it.skip("POST /api/" + [TaskType.CHAT] + " Stream", async () => {
   const payload = {
     model: "gemini-pro",
     messages: [
@@ -57,12 +64,17 @@ it.skip("POST /v1/chat/completions Stream", async () => {
     ],
     stream: true,
   };
-
+  const gatewayParams: GatewayParams = {
+    provider: Provider.OPENAI,
+    model: Provider.OPENAI,
+    endpoint: "/v1/chat/completions"
+  }
   const apiKey = Deno.env.get("OPENAI_API_KEY");
   if (!apiKey) {
     throw new Error("API_KEY is not set in the environment variables.");
   }
-  const res = await testClient(app)["/v1/chat/completions"].$post({
+  const res = await testClient(app)["/api/" + [TaskType.CHAT]].$post({
+    query: gatewayParams,
     json: payload,
     header: {
       "Content-Type": "application/json",
@@ -98,7 +110,7 @@ it.skip("POST /v1/chat/completions Stream", async () => {
   }
 });
 
-it.skip("POST /v1/chat/completions IMAGE_URL", async () => {
+it.skip("POST /api/" + [TaskType.CHAT] + " IMAGE_URL", async () => {
   const payload = {
     model: "gemini-pro-vision",
     messages: [
@@ -120,12 +132,17 @@ it.skip("POST /v1/chat/completions IMAGE_URL", async () => {
       },
     ],
   };
-
+  const gatewayParams: GatewayParams = {
+    provider: Provider.OPENAI,
+    model: Provider.OPENAI,
+    endpoint: "/v1/chat/completions"
+  }
   const apiKey = Deno.env.get("GOOGLE_API_KEY");
   if (!apiKey) {
     throw new Error("API_KEY is not set in the environment variables.");
   }
-  const res: Response = await testClient(app)["/v1/chat/completions"].$post({
+  const res: Response = await testClient(app)["/api/" + [TaskType.CHAT]].$post({
+    query: gatewayParams,
     json: payload,
     header: {
       "Content-Type": "application/json",
@@ -147,17 +164,23 @@ it.skip("POST /v1/chat/completions IMAGE_URL", async () => {
   }
 });
 
-it.skip("POST /v1/embeddings", async () => {
+it.skip("POST /api/" + TaskType.EMBEDDINGS, async () => {
   const payload = {
     input: "The food was delicious and the waiter...",
     model: "embedding-001",
     encoding_format: "float",
   };
+  const gatewayParams: GatewayParams = {
+    provider: Provider.GOOGLE,
+    model: Provider.OPENAI,
+    endpoint: "/v1/embeddings"
+  }
   const apiKey = Deno.env.get("GOOGLE_API_KEY");
   if (!apiKey) {
     throw new Error("API_KEY is not set in the environment variables.");
   }
-  const res = await testClient(app)["/v1/embeddings"].$post({
+  const res = await testClient(app)["/api/" + [TaskType.EMBEDDINGS]].$post({
+    query: gatewayParams,
     json: payload,
     header: {
       "Content-Type": "application/json",
@@ -180,7 +203,7 @@ it.skip("POST /v1/embeddings", async () => {
   }
 });
 
-it.skip("POST /v1/audio/transcriptions", async () => {
+it.skip("POST /api/" + TaskType.AUDIO_TRANSCRIPTIONS, async () => {
   try {
     const audioFileResponse = await fetch(
       "https://raw.githubusercontent.com/ggerganov/whisper.cpp/master/samples/jfk.wav",
@@ -195,11 +218,16 @@ it.skip("POST /v1/audio/transcriptions", async () => {
     const arrayBuffer = await audioFileResponse.arrayBuffer();
     const blob = new Blob([arrayBuffer], { type: "audio/wav" });
     const file = new File([blob], "jfk.wav");
-
+    const gatewayParams: GatewayParams = {
+      provider: Provider.CLOUDFLARE,
+      model: Provider.OPENAI,
+      endpoint: "/v1/audio/transcriptions"
+    }
     const transcriptionResponse: Response = await testClient(
       app,
-    )["/v1/audio/transcriptions"].$post(
+    )["/api/" + [TaskType.AUDIO_TRANSCRIPTIONS]].$post(
       {
+        query: gatewayParams,
         form: {
           "file": file,
           "model": "@cf/openai/whisper",
@@ -232,7 +260,7 @@ it.skip("POST /v1/audio/transcriptions", async () => {
   }
 });
 
-it("POST /v1/images/edits", async () => {
+it("POST " + TaskType.IMAGES_EDITS, async () => {
   try {
     const imageFileResponse = await fetch(
       "https://pub-1fb693cb11cc46b2b2f656f51e015a2c.r2.dev/dog.png",
@@ -246,9 +274,15 @@ it("POST /v1/images/edits", async () => {
     const blob = new Blob([arrayBuffer], { type: "image/png" });
     const imageFile = new File([blob], "otter.png");
     const maskFile = new File([blob], "mask.png");
-    const editResponse: Response = await testClient(app)["/v1/images/edits"]
+    const gatewayParams: GatewayParams = {
+      provider: Provider.CLOUDFLARE,
+      model: Provider.OPENAI,
+      endpoint: "/v1/images/edits"
+    }
+    const editResponse: Response = await testClient(app)["/api/" + [TaskType.IMAGES_EDITS]]
       .$post(
         {
+          query: gatewayParams,
           form: {
             "image": imageFile,
             "mask": maskFile,

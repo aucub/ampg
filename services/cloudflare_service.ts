@@ -46,8 +46,8 @@ export class CloudflareWorkersAIChatService implements IChatService {
     const cloudflareWorkersAIInput: CloudflareWorkersAIInput = {
       ...params,
       model: cloudflareWorkersAITextEmbeddingsModel.includes(
-          params.modelName as string,
-        )
+        params.modelName as string,
+      )
         ? params.modelName as string
         : DEFAULT_CLOUDFLAREWORKERSAI_CHAT_MODEL,
       cloudflareAccountId: params.user ||
