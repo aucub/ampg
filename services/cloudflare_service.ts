@@ -22,7 +22,7 @@ import {
   IChatService,
   IEmbeddingService,
   IImageEditService,
-  ITranscriptionService,
+  IAudioTranscriptionService,
 } from "../types/i_service.ts";
 
 const DEFAULT_CLOUDFLARE_BASE_URL =
@@ -130,7 +130,7 @@ export class CloudflareWorkersAIEmbeddingService implements IEmbeddingService {
 }
 
 export class CloudflareWorkersAITranscriptionService
-  implements ITranscriptionService {
+  implements IAudioTranscriptionService {
   prepareModelParams(c: Context): Promise<TranscriptionParams> {
     throw new Error("Method not implemented.");
   }

@@ -1,7 +1,7 @@
 import { BaseMessageChunk, Context, IterableReadableStream, z } from "../deps.ts";
 import {
     BaseModelParams, ChatModelParams, ImageGenerationParams, EmbeddingParams, ImageEditParams,
-    LangException, TranscriptionParams
+    LangException, TranscriptionParams as AudioTranscriptionParams
 } from "../types.ts";
 import { schemas as openaiSchemas } from "../types/schemas/openai.ts";
 
@@ -21,9 +21,9 @@ export interface IChatService extends IModelService<ChatModelParams, string | Ba
 }
 
 /**
- * Interface for transcription service with specific parameter and result types.
+ * Interface for audio transcription service with specific parameter and result types.
  */
-export interface ITranscriptionService extends IModelService<TranscriptionParams, z.infer<typeof openaiSchemas.CreateTranscriptionResponseVerboseJson> | z.infer<typeof openaiSchemas.CreateTranscriptionResponseJson> | z.infer<typeof openaiSchemas.CreateTranscriptionResponseJson>> {
+export interface IAudioTranscriptionService extends IModelService<AudioTranscriptionParams, z.infer<typeof openaiSchemas.CreateTranscriptionResponseVerboseJson> | z.infer<typeof openaiSchemas.CreateTranscriptionResponseJson> | z.infer<typeof openaiSchemas.CreateTranscriptionResponseJson>> {
 }
 
 /**

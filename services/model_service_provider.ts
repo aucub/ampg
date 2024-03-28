@@ -4,6 +4,7 @@ import {
   googleGenaiModel,
   openAIModel,
   Provider,
+  Target,
   TaskType,
 } from "../config.ts";
 import {
@@ -23,7 +24,7 @@ import {
   CloudflareWorkersAIImageEditService,
   CloudflareWorkersAITranscriptionService,
 } from "./cloudflare_service.ts";
-import { BaseModelParams } from "../types.ts";
+import { schemas as openaiSchemas } from "../types/schemas/openai.ts";
 import {
   HuggingFaceInferenceChatService,
   HuggingFaceInferenceEmbeddingService,
@@ -31,7 +32,7 @@ import {
 import { PortkeyChatService } from "./portkey_service.ts";
 import { GlideChatService } from "./glide_service.ts";
 
-function getProviderByModelName(modelName: string): Provider | undefined {
+export function getProviderByModelName(modelName: string): Provider | undefined {
   if (openAIModel.includes(modelName)) {
     return Provider.OPENAI;
   } else if (googleGenaiModel.includes(modelName)) {
@@ -40,19 +41,6 @@ function getProviderByModelName(modelName: string): Provider | undefined {
     return Provider.CLOUDFLARE;
   }
   return undefined;
-}
-
-export function assignProvider(params: BaseModelParams): BaseModelParams {
-  const { provider, modelName } = params;
-
-  if (
-    !provider ||
-    !Object.values(Provider).includes(params["provider"] as Provider)
-  ) {
-    params.provider = modelName ? getProviderByModelName(modelName) : undefined;
-  }
-
-  return params;
 }
 
 /**
@@ -105,7 +93,48 @@ export function getModelService(taskType: TaskType, provider: Provider) {
   return new Constructor();
 }
 
-export function getExceptionHandling(provider: string): IExceptionHandling {
+export function getZodValidatorSchema(target: Target, taskType: TaskType, provider: Provider) {
+  const zodValidatorModelRequestMap = {
+    [Target.JSON]: {
+      [TaskType.CHAT]: {
+        [Provider.OPENAI]: openaiSchemas.CreateChatCompletionRequest,
+      },
+      [TaskType.EMBEDDINGS]: {
+        [Provider.OPENAI]: openaiSchemas.CreateEmbeddingRequest,
+      },
+      [TaskType.IMAGES_GENERATIONS]: {
+        [Provider.OPENAI]: openaiSchemas.CreateImageRequest,
+      },
+    },
+    [Target.FORM]: {
+      [TaskType.AUDIO_TRANSCRIPTIONS]: {
+        [Provider.OPENAI]: openaiSchemas.CreateTranslationRequest,
+      },
+      [TaskType.IMAGES_EDITS]: {
+        [Provider.OPENAI]: openaiSchemas.CreateImageEditRequest,
+      },
+    },
+  };
+
+  const targetMap = zodValidatorModelRequestMap[target];
+  if (!targetMap) {
+    throw new Error(`Unknown target: ${targetMap}`);
+  }
+
+  const taskMap = targetMap[taskType];
+  if (!taskMap) {
+    throw new Error(`Unknown type ${targetMap}: ${taskMap}`);
+  }
+
+  const schema = taskMap[provider];
+  if (!schema) {
+    throw new Error(`Unknown provider ${targetMap}: ${taskMap}: ${provider}`);
+  }
+
+  return schema;
+}
+
+export function getExceptionHandling(provider: Provider): IExceptionHandling {
   switch (provider) {
     case Provider.OPENAI:
       return new OpenAIExceptionHandling();
