@@ -1,7 +1,7 @@
 import { app } from "../app.ts";
 import { assertEquals, decodeBase64, it, testClient } from "../deps.ts";
 import { schemas as openaiSchemas } from "../types/schemas/openai.ts";
-import { Providers } from "../config.ts";
+import { Provider } from "../config.ts";
 
 it.skip("POST /v1/chat/completions", async () => {
   const payload = {
@@ -25,7 +25,7 @@ it.skip("POST /v1/chat/completions", async () => {
     json: payload,
     header: {
       "Content-Type": "application/json",
-      "x-portkey-provider": Providers.OPENAI,
+      "x-portkey-provider": Provider.OPENAI,
       "Authorization": `Bearer ${apiKey}`,
     },
   });
@@ -66,7 +66,7 @@ it.skip("POST /v1/chat/completions Stream", async () => {
     json: payload,
     header: {
       "Content-Type": "application/json",
-      "x-portkey-provider": Providers.OPENAI,
+      "x-portkey-provider": Provider.OPENAI,
       "Authorization": `Bearer ${apiKey}`,
     },
   });
@@ -129,7 +129,7 @@ it.skip("POST /v1/chat/completions IMAGE_URL", async () => {
     json: payload,
     header: {
       "Content-Type": "application/json",
-      "x-portkey-provider": Providers.GOOGLE,
+      "x-portkey-provider": Provider.GOOGLE,
       "Authorization": `Bearer ${apiKey}`,
     },
   });
@@ -161,7 +161,7 @@ it.skip("POST /v1/embeddings", async () => {
     json: payload,
     header: {
       "Content-Type": "application/json",
-      "x-portkey-provider": Providers.GOOGLE,
+      "x-portkey-provider": Provider.GOOGLE,
       "Authorization": `Bearer ${apiKey}`,
     },
   });
@@ -206,7 +206,7 @@ it.skip("POST /v1/audio/transcriptions", async () => {
           "response_format": "json",
         },
         header: {
-          "x-portkey-provider": Providers.CLOUDFLARE,
+          "x-portkey-provider": Provider.CLOUDFLARE,
           "X-Auth-Email": Deno.env.get("CLOUDFLARE_ACCOUNT_ID"),
           "Authorization": "Bearer " + Deno.env.get("CLOUDFLARE_API_TOKEN"),
         },
@@ -258,7 +258,7 @@ it("POST /v1/images/edits", async () => {
             "model": "@cf/runwayml/stable-diffusion-v1-5-inpainting",
           },
           header: {
-            "x-portkey-provider": Providers.CLOUDFLARE,
+            "x-portkey-provider": Provider.CLOUDFLARE,
             "X-Auth-Email": Deno.env.get("CLOUDFLARE_ACCOUNT_ID"),
             "Authorization": "Bearer " + Deno.env.get("CLOUDFLARE_API_TOKEN"),
           },

@@ -76,7 +76,19 @@ interface CommunitySecretMap {
 
 export type SecretMap = CoreSecretMap & CommunitySecretMap & CustomSecretMap;
 
-export enum Providers {
+
+export enum TaskType {
+  CHAT = "chat",
+  EMBEDDINGS = "embeddings",
+  AUDIO_TRANSCRIPTIONS = "audio/transcriptions",
+  AUDIO_SPEECH = "audio/speech",
+  AUDIO_TRANSLATIONS = "audio/translations",
+  IMAGES_GENERATIONS = "images/generations",
+  IMAGES_EDITS = "images/edits",
+  IMAGES_VARIATIONS = "images/variations"
+}
+
+export enum Provider {
   OPENAI = "openai",
   ANTHROPIC = "anthropic",
   AZURE_OPENAI = "azure-openai",
@@ -99,7 +111,7 @@ export enum Providers {
   AI21 = "ai21",
   GROQ = "groq",
   SEGMIND = "segmind",
-  HUGGINGFACEHUB = "hf",
+  HUGGINGFACEHUB = "huggingface",
   PORTKEY = "portkey",
   GLIDE = "glide",
 }

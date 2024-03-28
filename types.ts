@@ -186,3 +186,31 @@ export class LangException extends Error {
   toolOutput?: string;
   observation?: string;
 }
+
+
+export interface GatewayParams {
+  /**
+   * The provider to use for your calls. This is required.
+   */
+  provider: string;
+  /**
+   * Caching configuration (optional).
+   */
+  cache?: boolean;
+  /**
+   * Retry configuration (optional).
+   */
+  retry?: Retry;
+  /**
+   * Returns a unique trace id for each response (optional).
+   */
+  trace_id?: string;
+  /**
+   * The name of the format provider used to determine how the request body should be parsed.
+   */
+  model: string;
+  /**
+   * Additional model parameters (optional).
+   */
+  options?: any;
+}

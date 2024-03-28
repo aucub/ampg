@@ -3,7 +3,8 @@ import {
   cloudflareWorkersAIModel,
   googleGenaiModel,
   openAIModel,
-  Providers,
+  Provider,
+  TaskType,
 } from "../config.ts";
 import {
   OpenAIChatService,
@@ -30,13 +31,13 @@ import {
 import { PortkeyChatService } from "./portkey_service.ts";
 import { GlideChatService } from "./glide_service.ts";
 
-function getProviderByModelName(modelName: string): Providers | undefined {
+function getProviderByModelName(modelName: string): Provider | undefined {
   if (openAIModel.includes(modelName)) {
-    return Providers.OPENAI;
+    return Provider.OPENAI;
   } else if (googleGenaiModel.includes(modelName)) {
-    return Providers.GOOGLE;
+    return Provider.GOOGLE;
   } else if (cloudflareWorkersAIModel.includes(modelName)) {
-    return Providers.CLOUDFLARE;
+    return Provider.CLOUDFLARE;
   }
   return undefined;
 }
@@ -46,7 +47,7 @@ export function assignProvider(params: BaseModelParams): BaseModelParams {
 
   if (
     !provider ||
-    !Object.values(Providers).includes(params["provider"] as Providers)
+    !Object.values(Provider).includes(params["provider"] as Provider)
   ) {
     params.provider = modelName ? getProviderByModelName(modelName) : undefined;
   }
@@ -57,47 +58,47 @@ export function assignProvider(params: BaseModelParams): BaseModelParams {
 /**
  * 获取服务实例的通用函数。
  *
- * @param serviceType 服务类型（例如："chat"、"transcription"）
+ * @param taskType 任务类型（例如：TaskType.CHAT）
  * @param provider 服务提供者（例如：Providers.OPENAI）
  * @returns 对应的服务实例
  */
-export function getModelService(serviceType, provider) {
+export function getModelService(taskType: TaskType, provider: Provider) {
   const modelServiceConstructorMap = {
-    chat: {
-      [Providers.OPENAI]: OpenAIChatService,
-      [Providers.GOOGLE]: GoogleGenerativeAIChatService,
-      [Providers.CLOUDFLARE]: CloudflareWorkersAIChatService,
-      [Providers.HUGGINGFACEHUB]: HuggingFaceInferenceChatService,
-      [Providers.PORTKEY]: PortkeyChatService,
-      [Providers.GLIDE]: GlideChatService,
+    [TaskType.CHAT]: {
+      [Provider.OPENAI]: OpenAIChatService,
+      [Provider.GOOGLE]: GoogleGenerativeAIChatService,
+      [Provider.CLOUDFLARE]: CloudflareWorkersAIChatService,
+      [Provider.HUGGINGFACEHUB]: HuggingFaceInferenceChatService,
+      [Provider.PORTKEY]: PortkeyChatService,
+      [Provider.GLIDE]: GlideChatService,
     },
-    transcription: {
-      [Providers.OPENAI]: OpenAITranscriptionService,
-      [Providers.CLOUDFLARE]: CloudflareWorkersAITranscriptionService,
+    [TaskType.EMBEDDINGS]: {
+      [Provider.OPENAI]: OpenAIEmbeddingService,
+      [Provider.GOOGLE]: GoogleGenerativeAIEmbeddingService,
+      [Provider.CLOUDFLARE]: CloudflareWorkersAIEmbeddingService,
+      [Provider.HUGGINGFACEHUB]: HuggingFaceInferenceEmbeddingService,
     },
-    imageEdit: {
-      [Providers.CLOUDFLARE]: CloudflareWorkersAIImageEditService,
+    [TaskType.AUDIO_TRANSCRIPTIONS]: {
+      [Provider.OPENAI]: OpenAITranscriptionService,
+      [Provider.CLOUDFLARE]: CloudflareWorkersAITranscriptionService,
     },
-    imageGeneration: {
-      [Providers.OPENAI]: OpenAIImageGenerationService,
+    [TaskType.IMAGES_EDITS]: {
+      [Provider.CLOUDFLARE]: CloudflareWorkersAIImageEditService,
     },
-    embedding: {
-      [Providers.OPENAI]: OpenAIEmbeddingService,
-      [Providers.GOOGLE]: GoogleGenerativeAIEmbeddingService,
-      [Providers.CLOUDFLARE]: CloudflareWorkersAIEmbeddingService,
-      [Providers.HUGGINGFACEHUB]: HuggingFaceInferenceEmbeddingService,
+    [TaskType.IMAGES_GENERATIONS]: {
+      [Provider.OPENAI]: OpenAIImageGenerationService,
     },
   };
 
-  const constructorMap = modelServiceConstructorMap[serviceType];
+  const constructorMap = modelServiceConstructorMap[taskType];
   if (!constructorMap) {
-    throw new Error(`Unknown service type: ${serviceType}`);
+    throw new Error(`Unknown service type: ${taskType}`);
   }
 
   const Constructor = constructorMap[provider];
   if (!Constructor) {
     throw new Error(
-      `Unknown provider for service type ${serviceType}: ${provider}`,
+      `Unknown provider for service type ${taskType}: ${provider}`,
     );
   }
 
@@ -106,7 +107,7 @@ export function getModelService(serviceType, provider) {
 
 export function getExceptionHandling(provider: string): IExceptionHandling {
   switch (provider) {
-    case Providers.OPENAI:
+    case Provider.OPENAI:
       return new OpenAIExceptionHandling();
     default:
       throw new Error(`Unknown provider: ${provider}`);
