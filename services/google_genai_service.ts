@@ -9,12 +9,9 @@ import {
   IterableReadableStream,
 } from "../deps.ts";
 import { ChatModelParams, EmbeddingParams } from "../types.ts";
-import { IChatService, IEmbeddingService } from "../types/i_service.ts";
+import { AbstractChatService, AbstractEmbeddingService } from "../types/i_service.ts";
 
-export class GoogleGenerativeAIChatService implements IChatService {
-  prepareModelParams(c: Context): Promise<ChatModelParams> {
-    throw new Error("Method not implemented.");
-  }
+export class GoogleGenerativeAIChatService extends AbstractChatService {
   async executeModel(
     c: Context,
     params: ChatModelParams,
@@ -33,25 +30,19 @@ export class GoogleGenerativeAIChatService implements IChatService {
       return await model.stream(params.input);
     }
   }
-  deliverOutput(c: Context, output: any): Promise<Response> {
-    throw new Error("Method not implemented.");
-  }
 }
 
-export class GoogleGenerativeAIEmbeddingService implements IEmbeddingService {
-  prepareModelParams(c: Context): Promise<EmbeddingParams> {
-    throw new Error("Method not implemented.");
-  }
+export class GoogleGenerativeAIEmbeddingService extends AbstractEmbeddingService {
   async executeModel(
     c: Context,
     params: EmbeddingParams,
   ): Promise<number[] | number[][]> {
     const googleGenerativeAIEmbeddingsParams:
       GoogleGenerativeAIEmbeddingsParams = {
-        ...params,
-        apiKey: params.apiKey ||
-          env<{ GOOGLE_API_KEY: string }>(c)["GOOGLE_API_KEY"],
-      };
+      ...params,
+      apiKey: params.apiKey ||
+        env<{ GOOGLE_API_KEY: string }>(c)["GOOGLE_API_KEY"],
+    };
     const embeddings = new GoogleGenerativeAIEmbeddings(
       googleGenerativeAIEmbeddingsParams,
     );
@@ -60,8 +51,5 @@ export class GoogleGenerativeAIEmbeddingService implements IEmbeddingService {
     } else {
       return await embeddings.embedQuery(params.input);
     }
-  }
-  deliverOutput(c: Context, output: number[] | number[][]): Promise<Response> {
-    throw new Error("Method not implemented.");
   }
 }

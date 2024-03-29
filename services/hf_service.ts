@@ -7,37 +7,28 @@ import {
   IterableReadableStream,
 } from "../deps.ts";
 import { ChatModelParams, EmbeddingParams } from "../types.ts";
-import { IChatService, IEmbeddingService } from "../types/i_service.ts";
+import { AbstractChatService, AbstractEmbeddingService } from "../types/i_service.ts";
 
-export class HuggingFaceInferenceChatService implements IChatService {
-  prepareModelParams(c: Context): Promise<ChatModelParams> {
-    throw new Error("Method not implemented.");
-  }
+export class HuggingFaceInferenceChatService extends AbstractChatService {
   async executeModel(
     c: Context,
     params: ChatModelParams,
-  ): Promise<string | BaseMessageChunk | IterableReadableStream<any>> {
+  ): Promise<string | BaseMessageChunk | IterableReadableStream> {
     const { baseURL, stop, modelName, ...rest } = params;
     const hfInput = {
+      ...rest,
       endpointUrl: baseURL,
       stopSequences: stop,
       model: modelName,
-      ...rest,
     };
     const model = new HuggingFaceInference(hfInput);
     return params.streaming
       ? await model.stream(params.input)
       : await model.invoke(params.input);
   }
-  deliverOutput(c: Context, output: any): Promise<Response> {
-    throw new Error("Method not implemented.");
-  }
 }
 
-export class HuggingFaceInferenceEmbeddingService implements IEmbeddingService {
-  prepareModelParams(c: Context): Promise<EmbeddingParams> {
-    throw new Error("Method not implemented.");
-  }
+export class HuggingFaceInferenceEmbeddingService extends AbstractEmbeddingService {
   async executeModel(
     c: Context,
     params: EmbeddingParams,
@@ -58,9 +49,5 @@ export class HuggingFaceInferenceEmbeddingService implements IEmbeddingService {
     return Array.isArray(params.input)
       ? await embeddings.embedDocuments(params.input)
       : await embeddings.embedQuery(params.input);
-  }
-
-  deliverOutput(c: Context, output: number[] | number[][]): Promise<Response> {
-    throw new Error("Method not implemented.");
   }
 }

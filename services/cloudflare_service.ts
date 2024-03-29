@@ -15,19 +15,14 @@ import {
 } from "../types.ts";
 import { schemas as cloudflareSchemas } from "../types/schemas/custom/cloudflare.ts";
 import {
-  IAudioTranscriptionService,
-  IChatService,
-  IEmbeddingService,
-  IImageEditService,
+  AbstractAudioTranscriptionService,
+  AbstractChatService,
+  AbstractEmbeddingService,
+  AbstractImageEditService,
 } from "../types/i_service.ts";
+import secretMap from "../config.ts";
 
-const DEFAULT_CLOUDFLARE_BASE_URL =
-  "https://api.cloudflare.com/client/v4/accounts/";
-
-export class CloudflareWorkersAIChatService implements IChatService {
-  prepareModelParams(c: Context): Promise<ChatModelParams> {
-    throw new Error("Method not implemented.");
-  }
+export class CloudflareWorkersAIChatService extends AbstractChatService {
   async executeModel(
     c: Context,
     params: ChatModelParams,
@@ -52,15 +47,9 @@ export class CloudflareWorkersAIChatService implements IChatService {
       throw error;
     }
   }
-  deliverOutput(c: Context, output: any): Promise<Response> {
-    throw new Error("Method not implemented.");
-  }
 }
 
-export class CloudflareWorkersAIEmbeddingService implements IEmbeddingService {
-  prepareModelParams(c: Context): Promise<EmbeddingParams> {
-    throw new Error("Method not implemented.");
-  }
+export class CloudflareWorkersAIEmbeddingService extends AbstractEmbeddingService {
   async executeModel(
     c: Context,
     params: EmbeddingParams,
@@ -71,7 +60,7 @@ export class CloudflareWorkersAIEmbeddingService implements IEmbeddingService {
     const inputText = params.input;
     const baseUrl =
       env<{ CLOUDFLARE_BASE_URL: string }>(c)["CLOUDFLARE_BASE_URL"] ||
-      DEFAULT_CLOUDFLARE_BASE_URL;
+      secretMap.DEFAULT_CLOUDFLARE_BASE_URL;
     if (!baseUrl || !user || !apiKey || !inputText) {
       throw new Error("Missing required parameters for embedding execution.");
     }
@@ -106,16 +95,10 @@ export class CloudflareWorkersAIEmbeddingService implements IEmbeddingService {
       throw new Error(`HTTP error: ${response.status} - ${statusText}`);
     }
   }
-  deliverOutput(c: Context, output: number[] | number[][]): Promise<Response> {
-    throw new Error("Method not implemented.");
-  }
 }
 
 export class CloudflareWorkersAITranscriptionService
-  implements IAudioTranscriptionService {
-  prepareModelParams(c: Context): Promise<TranscriptionParams> {
-    throw new Error("Method not implemented.");
-  }
+  extends AbstractAudioTranscriptionService {
   async executeModel(c: Context, params: TranscriptionParams): Promise<any> {
     const modelName = params.modelName;
     let response;
@@ -124,7 +107,7 @@ export class CloudflareWorkersAITranscriptionService
     const file = params.file;
     const baseUrl =
       env<{ CLOUDFLARE_BASE_URL: string }>(c)["CLOUDFLARE_BASE_URL"] ||
-      DEFAULT_CLOUDFLARE_BASE_URL;
+      secretMap.DEFAULT_CLOUDFLARE_BASE_URL;
     if (baseUrl && user && file) {
       const requestUrl = `${baseUrl}${user}/ai/run/${modelName}`;
       try {
@@ -173,15 +156,9 @@ export class CloudflareWorkersAITranscriptionService
       throw new Error("Base URL, user information, or file is missing.");
     }
   }
-  deliverOutput(c: Context, output: any): Promise<Response> {
-    throw new Error("Method not implemented.");
-  }
 }
 
-export class CloudflareWorkersAIImageEditService implements IImageEditService {
-  prepareModelParams(c: Context): Promise<ImageEditParams> {
-    throw new Error("Method not implemented.");
-  }
+export class CloudflareWorkersAIImageEditService extends AbstractImageEditService {
   async executeModel(
     c: Context,
     params: ImageEditParams,
@@ -191,7 +168,7 @@ export class CloudflareWorkersAIImageEditService implements IImageEditService {
     const apiKey = params.apiKey;
     const baseUrl =
       await env<{ CLOUDFLARE_BASE_URL: string }>(c)["CLOUDFLARE_BASE_URL"] ||
-      DEFAULT_CLOUDFLARE_BASE_URL;
+      secretMap.DEFAULT_CLOUDFLARE_BASE_URL;
     const imageEditParams = {
       guidance: params.guidance,
       num_steps: params.num_steps,
@@ -236,8 +213,5 @@ export class CloudflareWorkersAIImageEditService implements IImageEditService {
     } else {
       throw new Error("Base URL or user information is missing.");
     }
-  }
-  deliverOutput(c: Context, output: string | Blob): Promise<Response> {
-    throw new Error("Method not implemented.");
   }
 }

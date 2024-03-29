@@ -6,7 +6,7 @@ import {
   ChatResponse,
   ErrorSchema,
 } from "../types/schemas/glide.ts";
-import { IChatService } from "../types/i_service.ts";
+import { AbstractChatService } from "../types/i_service.ts";
 
 type StringWithAutocomplete<T> = T | (string & Record<never, never>);
 
@@ -15,10 +15,7 @@ type BaseMessageLikeComplex = [
   MessageContent,
 ];
 
-export class GlideChatService implements IChatService {
-  prepareModelParams(c: Context): Promise<ChatModelParams> {
-    throw new Error("Method not implemented.");
-  }
+export class GlideChatService extends AbstractChatService {
   async executeModel(c: Context, params: ChatModelParams): Promise<any> {
     const requestPayload = this.createChatRequest(params.input);
     const baseUrl = params["baseURL"] ||
@@ -50,9 +47,6 @@ export class GlideChatService implements IChatService {
         throw new LangException(validationResult.data.message);
       }
     }
-  }
-  deliverOutput(c: Context, output: any): Promise<Response> {
-    throw new Error("Method not implemented.");
   }
 
   private createChatRequest(

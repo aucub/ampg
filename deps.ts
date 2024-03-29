@@ -31,6 +31,7 @@ export { zValidator } from "https://esm.sh/@hono/zod-validator@0.2.1";
 export { z, ZodSchema } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 export { makeApi, Zodios } from "https://esm.sh/@zodios/core@10.9.6";
 export type { ZodiosOptions } from "https://esm.sh/@zodios/core@10.9.6";
+export * as qs from "https://esm.sh/qs@6.12.0";
 export { configAsync } from "https://deno.land/x/dotenv@v3.2.2/mod.ts";
 export type {
   BaseLanguageModelInput,

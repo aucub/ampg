@@ -16,7 +16,7 @@ export const validatorMiddleware = (): MiddlewareHandler => {
     );
     if (schema) {
       value = await c.req.json();
-      target = [Target.JSON];
+      target = Target.JSON;
     } else {
       schema = getZodValidatorSchema(
         taskType,
@@ -25,7 +25,7 @@ export const validatorMiddleware = (): MiddlewareHandler => {
       );
       if (schema) {
         value = await c.req.parseBody();
-        target = [Target.FORM];
+        target = Target.FORM;
       }
     }
     if (value) {

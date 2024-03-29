@@ -4,14 +4,10 @@ import {
   IterableReadableStream,
   Portkey,
 } from "../deps.ts";
-import { ChatModelParams, PortkeyModelParams } from "../types.ts";
-import { IChatService } from "../types/i_service.ts";
+import { PortkeyModelParams } from "../types.ts";
+import { AbstractChatService } from "../types/i_service.ts";
 
-export class PortkeyChatService implements IChatService {
-  prepareModelParams(c: Context): Promise<ChatModelParams> {
-    throw new Error("Method not implemented.");
-  }
-
+export class PortkeyChatService extends AbstractChatService {
   async executeModel(
     c: Context,
     params: PortkeyModelParams,
@@ -23,9 +19,5 @@ export class PortkeyChatService implements IChatService {
     } else {
       return await model.stream(params.input);
     }
-  }
-
-  deliverOutput(c: Context, output: any): Promise<Response> {
-    throw new Error("Method not implemented.");
   }
 }
