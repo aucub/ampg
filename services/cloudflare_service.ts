@@ -15,10 +15,10 @@ import {
 } from "../types.ts";
 import { schemas as cloudflareSchemas } from "../types/schemas/custom/cloudflare.ts";
 import {
+  IAudioTranscriptionService,
   IChatService,
   IEmbeddingService,
   IImageEditService,
-  IAudioTranscriptionService,
 } from "../types/i_service.ts";
 
 const DEFAULT_CLOUDFLARE_BASE_URL =
@@ -65,7 +65,7 @@ export class CloudflareWorkersAIEmbeddingService implements IEmbeddingService {
     c: Context,
     params: EmbeddingParams,
   ): Promise<number[] | number[][]> {
-    const modelName = params.modelName
+    const modelName = params.modelName;
     const user = params.user;
     const apiKey = params.apiKey;
     const inputText = params.input;
@@ -117,7 +117,7 @@ export class CloudflareWorkersAITranscriptionService
     throw new Error("Method not implemented.");
   }
   async executeModel(c: Context, params: TranscriptionParams): Promise<any> {
-    const modelName = params.modelName
+    const modelName = params.modelName;
     let response;
     const user = params.user;
     const apiKey = params.apiKey;

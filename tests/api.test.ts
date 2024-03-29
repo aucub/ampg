@@ -21,8 +21,8 @@ it.skip("POST /api/" + [TaskType.CHAT], async () => {
   const gatewayParams: GatewayParams = {
     provider: Provider.GOOGLE,
     model: Provider.OPENAI,
-    endpoint: "/v1/chat/completions"
-  }
+    endpoint: "/v1/chat/completions",
+  };
   const apiKey = Deno.env.get("GOOGLE_API_KEY");
   if (!apiKey) {
     throw new Error("API_KEY is not set in the environment variables.");
@@ -66,8 +66,8 @@ it.skip("POST /api/" + [TaskType.CHAT] + " Stream", async () => {
   const gatewayParams: GatewayParams = {
     provider: Provider.GOOGLE,
     model: Provider.OPENAI,
-    endpoint: "/v1/chat/completions"
-  }
+    endpoint: "/v1/chat/completions",
+  };
   const apiKey = Deno.env.get("GOOGLE_API_KEY");
   if (!apiKey) {
     throw new Error("API_KEY is not set in the environment variables.");
@@ -133,8 +133,8 @@ it.skip("POST /api/" + [TaskType.CHAT] + " IMAGE_URL", async () => {
   const gatewayParams: GatewayParams = {
     provider: Provider.GOOGLE,
     model: Provider.OPENAI,
-    endpoint: "/v1/chat/completions"
-  }
+    endpoint: "/v1/chat/completions",
+  };
   const apiKey = Deno.env.get("GOOGLE_API_KEY");
   if (!apiKey) {
     throw new Error("API_KEY is not set in the environment variables.");
@@ -170,8 +170,8 @@ it.skip("POST /api/" + TaskType.EMBEDDINGS, async () => {
   const gatewayParams: GatewayParams = {
     provider: Provider.GOOGLE,
     model: Provider.OPENAI,
-    endpoint: "/v1/embeddings"
-  }
+    endpoint: "/v1/embeddings",
+  };
   const apiKey = Deno.env.get("GOOGLE_API_KEY");
   if (!apiKey) {
     throw new Error("API_KEY is not set in the environment variables.");
@@ -217,8 +217,8 @@ it.skip("POST /api/" + TaskType.AUDIO_TRANSCRIPTIONS, async () => {
     const gatewayParams: GatewayParams = {
       provider: Provider.CLOUDFLARE,
       model: Provider.OPENAI,
-      endpoint: "/v1/audio/transcriptions"
-    }
+      endpoint: "/v1/audio/transcriptions",
+    };
     const transcriptionResponse: Response = await testClient(
       app,
     )["/api/" + [TaskType.AUDIO_TRANSCRIPTIONS]].$post(
@@ -272,9 +272,11 @@ it("POST /api/" + TaskType.IMAGES_EDITS, async () => {
     const gatewayParams: GatewayParams = {
       provider: Provider.CLOUDFLARE,
       model: Provider.OPENAI,
-      endpoint: "/v1/images/edits"
-    }
-    const editResponse: Response = await testClient(app)["/api/" + [TaskType.IMAGES_EDITS]]
+      endpoint: "/v1/images/edits",
+    };
+    const editResponse: Response = await testClient(
+      app,
+    )["/api/" + [TaskType.IMAGES_EDITS]]
       .$post(
         {
           query: gatewayParams,
