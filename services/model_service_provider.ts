@@ -1,4 +1,4 @@
-import { IExceptionHandling } from "../types/i_service.ts";
+import { IExceptionHandling, IModelService } from "../types/i_service.ts";
 import { Provider, Target, TaskType } from "../config.ts";
 import {
   OpenAIChatService,
@@ -32,7 +32,7 @@ import { GlideChatService } from "./glide_service.ts";
  * @param provider 服务提供者（例如：Providers.OPENAI）
  * @returns 对应的服务实例
  */
-export function getModelService(taskType: TaskType, provider: Provider) {
+export function getModelService(taskType: TaskType, provider: Provider): IModelService<any, any> {
   const modelServiceConstructorMap = {
     [TaskType.CHAT]: {
       [Provider.OPENAI]: OpenAIChatService,

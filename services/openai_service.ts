@@ -37,16 +37,16 @@ import {
   TranscriptionParams,
 } from "../types.ts";
 import {
-  IAudioTranscriptionService,
-  IChatService,
-  IEmbeddingService,
+  AbstractAudioTranscriptionService,
+  AbstractChatService,
+  AbstractEmbeddingService,
   IExceptionHandling,
-  IImageEditService,
-  IImageGenerationService,
+  AbstractImageEditService,
+  AbstractImageGenerationService,
 } from "../types/i_service.ts";
 import { schemas as openaiSchemas } from "../types/schemas/openai.ts";
 
-export class OpenAIChatService implements IChatService {
+export class OpenAIChatService extends AbstractChatService {
   async prepareModelParams(c: Context): Promise<ChatModelParams> {
     const params: Partial<ChatModelParams> = await c.get("params") ?? {};
     // @ts-ignore
@@ -59,7 +59,7 @@ export class OpenAIChatService implements IChatService {
     let mergedParams: ChatModelParams = {
       ...params,
       ...body,
-      modelName: body["model"] || params["modelName"],
+      modelName: params["modelName"] || body["model"],
       streaming: body["stream"] || false,
       topP: body["top_p"],
       maxTokens: body["max_tokens"],
@@ -113,15 +113,15 @@ export class OpenAIChatService implements IChatService {
       & {
         configuration?: ClientOptions;
       } = {
-        cache: chatModelParams.cache ?? true,
-        modelName: chatModelParams.modelName,
-        openAIApiKey: chatModelParams.apiKey ??
-          env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_API_KEY"],
-        configuration: {
-          baseURL: env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_BASE_URL"] ??
-            undefined,
-        },
-      };
+      cache: chatModelParams.cache ?? true,
+      modelName: chatModelParams.modelName,
+      openAIApiKey: chatModelParams.apiKey ??
+        env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_API_KEY"],
+      configuration: {
+        baseURL: env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_BASE_URL"] ??
+          undefined,
+      },
+    };
     const openAIChatInput = { ...openAIChatModelInput, ...chatModelParams };
     const model = new ChatOpenAI(openAIChatInput);
     return chatModelParams.streaming
@@ -209,7 +209,7 @@ export class OpenAIChatService implements IChatService {
   }
 }
 
-export class OpenAITranscriptionService implements IAudioTranscriptionService {
+export class OpenAITranscriptionService extends AbstractAudioTranscriptionService {
   async prepareModelParams(c: Context): Promise<TranscriptionParams> {
     let params = await c.get("params") as TranscriptionParams;
     const formData = await c.req.parseBody({ all: true });
@@ -267,13 +267,9 @@ export class OpenAITranscriptionService implements IAudioTranscriptionService {
       throw new Error(`Audio transcription failed: ${error.message}`);
     }
   }
-
-  async deliverOutput(c: Context, output: any): Promise<Response> {
-    return c.json(output);
-  }
 }
 
-export class OpenAIImageEditService implements IImageEditService {
+export class OpenAIImageEditService extends AbstractImageEditService {
   async prepareModelParams(c: Context): Promise<ImageEditParams> {
     const defaultParams: ImageEditParams = {};
     let params: ImageEditParams = await c.get("params") ?? defaultParams;
@@ -305,10 +301,6 @@ export class OpenAIImageEditService implements IImageEditService {
     c.set("params", params);
     return params;
   }
-
-  executeModel(c: Context, params: ImageEditParams): Promise<string | Blob> {
-    throw new Error("Method not implemented.");
-  }
   async deliverOutput(c: Context, output: string | Blob): Promise<Response> {
     const params = await c.get("params") as ImageEditParams;
     const currentTime = Math.floor(Date.now() / 1000);
@@ -329,7 +321,7 @@ export class OpenAIImageEditService implements IImageEditService {
   }
 }
 
-export class OpenAIEmbeddingService implements IEmbeddingService {
+export class OpenAIEmbeddingService extends AbstractEmbeddingService {
   async prepareModelParams(c: Context): Promise<EmbeddingParams> {
     const baseModelParams: BaseModelParams = await c.get("params");
     if (!baseModelParams) {
@@ -415,10 +407,7 @@ export class OpenAIEmbeddingService implements IEmbeddingService {
   }
 }
 
-export class OpenAIImageGenerationService implements IImageGenerationService {
-  prepareModelParams(c: Context): Promise<ImageGenerationParams> {
-    throw new Error("Method not implemented.");
-  }
+export class OpenAIImageGenerationService extends AbstractImageGenerationService {
   async executeModel(c: Context, params: ImageGenerationParams) {
     const { apiKey, prompt } = params;
     const apiParams = {
@@ -433,10 +422,6 @@ export class OpenAIImageGenerationService implements IImageGenerationService {
       console.error("An error occurred while invoking the Dall-E API:", error);
       throw new Error("Failed to execute the model for image generation.");
     }
-  }
-
-  deliverOutput(c: Context, output: string | Blob): Promise<Response> {
-    throw new Error("Method not implemented.");
   }
 }
 

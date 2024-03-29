@@ -1,4 +1,4 @@
-import { MiddlewareHandler } from "../deps.ts";
+import { MiddlewareHandler, qs } from "../deps.ts";
 import { BaseModelParams, GatewayParams } from "../types.ts";
 
 const TOKEN_PREFIX = "Bearer ";
@@ -28,12 +28,13 @@ export const headersMiddleware = (): MiddlewareHandler => {
     if (authEmail) {
       params.user = authEmail;
     }
-
-    const gatewayParams: GatewayParams = c.req.query();
+    const queryString = new URL(c.req.url).search.slice(1);
+    const gatewayParams: GatewayParams = qs.parse(queryString);
     const mergedParams = {
       ...(gatewayParams.options || {}),
       ...params,
     };
+    c.set("query", gatewayParams);
     c.set("params", mergedParams);
     await next();
   };
