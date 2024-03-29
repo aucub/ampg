@@ -35,6 +35,7 @@ function createModelRequestHandler(
   taskType: TaskType,
 ) {
   return async (c) => {
+    console.log(c.req)
     const gatewayParams: GatewayParams = c.req.query();
     const modelService = getModelService(
       taskType,
@@ -51,7 +52,24 @@ function createModelRequestHandler(
 }
 
 Object.values(TaskType).forEach((taskType) => {
-  app.post("/api/" + [taskType], zValidator([Target.QUERY], GatewayParamsSchema), headersMiddleware(), validatorMiddleware(), createModelRequestHandler(taskType));
+  app.post(
+    "/api/" + [taskType],
+    zValidator([Target.QUERY], GatewayParamsSchema),
+    headersMiddleware(),
+    validatorMiddleware(),
+    createModelRequestHandler(taskType),
+  );
+});
+
+app.all("/proxy/*", async (c) => {
+  const urlString = "https://" +
+    c.req.raw.url.toString().replace(/.*\/proxy\//, "");
+  const url = new URL(urlString);
+  url.searchParams.delete("route");
+  const request = new Request(url, c.req.raw);
+  const response = await fetch(request);
+  const newResponse = new Response(response.body, response)
+  return newResponse
 });
 
 app.onError((err, c) => {
@@ -68,10 +86,11 @@ app.onError((err, c) => {
   }
   if (langException.message) {
     try {
-      const exceptionHandling = getExceptionHandling(c.req.query('model') as Provider);
+      const exceptionHandling = getExceptionHandling(
+        c.req.query("model") as Provider,
+      );
       return exceptionHandling.handleException(langException);
-    }
-    catch (error) {
+    } catch (error) {
       console.error(`${error}`);
     }
   }

@@ -37,12 +37,12 @@ import {
   TranscriptionParams,
 } from "../types.ts";
 import {
+  IAudioTranscriptionService,
   IChatService,
   IEmbeddingService,
   IExceptionHandling,
   IImageEditService,
   IImageGenerationService,
-  IAudioTranscriptionService,
 } from "../types/i_service.ts";
 import { schemas as openaiSchemas } from "../types/schemas/openai.ts";
 
@@ -113,15 +113,15 @@ export class OpenAIChatService implements IChatService {
       & {
         configuration?: ClientOptions;
       } = {
-      cache: chatModelParams.cache ?? true,
-      modelName: chatModelParams.modelName,
-      openAIApiKey: chatModelParams.apiKey ??
-        env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_API_KEY"],
-      configuration: {
-        baseURL: env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_BASE_URL"] ??
-          undefined,
-      },
-    };
+        cache: chatModelParams.cache ?? true,
+        modelName: chatModelParams.modelName,
+        openAIApiKey: chatModelParams.apiKey ??
+          env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_API_KEY"],
+        configuration: {
+          baseURL: env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_BASE_URL"] ??
+            undefined,
+        },
+      };
     const openAIChatInput = { ...openAIChatModelInput, ...chatModelParams };
     const model = new ChatOpenAI(openAIChatInput);
     return chatModelParams.streaming

@@ -4,7 +4,10 @@ export {
   validator,
 } from "https://deno.land/x/hono@v4.1.5/mod.ts";
 export { Context } from "https://deno.land/x/hono@v4.1.5/context.ts";
-export type { HonoRequest, ValidationTargets } from "https://deno.land/x/hono@v4.1.5/mod.ts";
+export type {
+  HonoRequest,
+  ValidationTargets,
+} from "https://deno.land/x/hono@v4.1.5/mod.ts";
 export {
   env,
   stream,
@@ -55,14 +58,14 @@ export {
   DallEAPIWrapper,
   OpenAIClient,
   OpenAIEmbeddings,
-} from "https://esm.sh/@langchain/openai@0.0.24";
-export { OpenAI } from "https://deno.land/x/openai@v4.29.2/mod.ts";
+} from "https://esm.sh/@langchain/openai@0.0.25";
+export { OpenAI } from "https://deno.land/x/openai@v4.30.0/mod.ts";
 export type {
   AzureOpenAIInput,
   ClientOptions,
   OpenAIChatInput,
   OpenAIEmbeddingsParams,
-} from "https://esm.sh/@langchain/openai@0.0.24";
+} from "https://esm.sh/@langchain/openai@0.0.25";
 export {
   ChatGoogleGenerativeAI,
   GoogleGenerativeAIEmbeddings,

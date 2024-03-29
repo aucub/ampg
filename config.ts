@@ -88,12 +88,12 @@ export enum TaskType {
 }
 
 export enum Target {
-  JSON = 'json',
-  FORM = 'form',
-  QUERY = 'query',
-  PARAM = 'param',
-  HEADER = 'header',
-  COOKIE = 'cookie',
+  JSON = "json",
+  FORM = "form",
+  QUERY = "query",
+  PARAM = "param",
+  HEADER = "header",
+  COOKIE = "cookie",
 }
 
 export enum Provider {

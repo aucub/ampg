@@ -1,9 +1,5 @@
 import { IExceptionHandling } from "../types/i_service.ts";
-import {
-  Provider,
-  Target,
-  TaskType,
-} from "../config.ts";
+import { Provider, Target, TaskType } from "../config.ts";
 import {
   OpenAIChatService,
   OpenAIEmbeddingService,
@@ -79,7 +75,11 @@ export function getModelService(taskType: TaskType, provider: Provider) {
   return new Constructor();
 }
 
-export function getZodValidatorSchema(taskType: TaskType, provider: Provider, target: Target) {
+export function getZodValidatorSchema(
+  taskType: TaskType,
+  provider: Provider,
+  target: Target,
+) {
   const zodValidatorModelRequestMap = {
     [TaskType.CHAT]: {
       [Provider.OPENAI]: {
@@ -89,28 +89,30 @@ export function getZodValidatorSchema(taskType: TaskType, provider: Provider, ta
     [TaskType.EMBEDDINGS]: {
       [Provider.OPENAI]: {
         [Target.JSON]: openaiSchemas.CreateEmbeddingRequest,
-      }
+      },
     },
     [TaskType.IMAGES_GENERATIONS]: {
       [Provider.OPENAI]: {
         [Target.JSON]: openaiSchemas.CreateImageRequest,
-      }
+      },
     },
     [TaskType.AUDIO_TRANSCRIPTIONS]: {
       [Provider.OPENAI]: {
         [Target.FORM]: openaiSchemas.CreateTranslationRequest,
-      }
+      },
     },
     [TaskType.IMAGES_EDITS]: {
       [Provider.OPENAI]: {
         [Target.FORM]: openaiSchemas.CreateImageEditRequest,
-      }
+      },
     },
   };
   try {
     const schema = zodValidatorModelRequestMap[taskType][provider][target];
     return schema;
-  } catch (error) { return null }
+  } catch (error) {
+    return null;
+  }
 }
 
 export function getExceptionHandling(provider: Provider): IExceptionHandling {

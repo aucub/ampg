@@ -32,8 +32,8 @@ export const headersMiddleware = (): MiddlewareHandler => {
     const gatewayParams: GatewayParams = c.req.query();
     const mergedParams = {
       ...(gatewayParams.options || {}),
-      ...params
-    }
+      ...params,
+    };
     c.set("params", mergedParams);
     await next();
   };
