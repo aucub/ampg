@@ -188,6 +188,7 @@ export interface PortkeyModelParams extends ChatModelParams {
    * or "fallback"(uses all providers in the given order).If the mode does not match these options, null is returned.
    */
   mode?: string;
+  cache?: boolean;
 }
 
 export interface OpenAIError {

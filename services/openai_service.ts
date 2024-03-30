@@ -8,6 +8,7 @@ import {
   ClientOptions,
   Context,
   DallEAPIWrapper,
+  Document,
   env,
   HumanMessage,
   isBaseMessage,
@@ -27,7 +28,6 @@ import {
   urlToDataURL,
 } from "../helpers/util.ts";
 import {
-  BaseModelParams,
   ChatModelParams,
   EmbeddingParams,
   ImageEditParams,
@@ -40,9 +40,9 @@ import {
   AbstractAudioTranscriptionService,
   AbstractChatService,
   AbstractEmbeddingService,
-  IExceptionHandling,
   AbstractImageEditService,
   AbstractImageGenerationService,
+  IExceptionHandling,
 } from "../types/i_service.ts";
 import { schemas as openaiSchemas } from "../types/schemas/openai.ts";
 
@@ -113,16 +113,16 @@ export class OpenAIChatService extends AbstractChatService {
       & {
         configuration?: ClientOptions;
       } = {
-      cache: chatModelParams.cache ?? true,
-      modelName: chatModelParams.modelName,
-      openAIApiKey: chatModelParams.apiKey ??
-        env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_API_KEY"],
-      configuration: {
-        baseURL: env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_BASE_URL"] ??
-          undefined,
-      },
-    };
-    const openAIChatInput = { ...openAIChatModelInput, ...chatModelParams };
+        cache: chatModelParams.cache ?? true,
+        modelName: chatModelParams.modelName,
+        openAIApiKey: chatModelParams.apiKey ??
+          env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_API_KEY"],
+        configuration: {
+          baseURL: env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_BASE_URL"] ??
+            undefined,
+        },
+      };
+    const openAIChatInput = { ...chatModelParams, ...openAIChatModelInput };
     const model = new ChatOpenAI(openAIChatInput);
     return chatModelParams.streaming
       ? await model.stream(chatModelParams.input)
@@ -163,7 +163,7 @@ export class OpenAIChatService extends AbstractChatService {
       return c.json(this.createCompletion(output, modelName));
     } else {
       throw new Error(
-        "Output type is neither string nor IterableReadableStream.",
+        "The output types are incompatible.",
       );
     }
   }
@@ -209,78 +209,55 @@ export class OpenAIChatService extends AbstractChatService {
   }
 }
 
-export class OpenAITranscriptionService extends AbstractAudioTranscriptionService {
+export class OpenAITranscriptionService
+  extends AbstractAudioTranscriptionService {
   async prepareModelParams(c: Context): Promise<TranscriptionParams> {
     let params = await c.get("params") as TranscriptionParams;
     const formData = await c.req.parseBody({ all: true });
-    const file = Array.isArray(formData["file"])
-      ? formData["file"].pop()
-      : formData["file"];
-    const modelName = formData["model"];
-    const responseFormat = formData["response_format"];
-    if (file instanceof File) {
-      params.file = file;
-    } else {
-      throw new Error("No file was provided or the provided file is invalid.");
-    }
-    if (typeof modelName === "string") {
-      params.modelName = modelName;
-    } else {
-      throw new Error(
-        "No model name was provided or the provided model name is invalid.",
-      );
-    }
-    if (typeof responseFormat === "string") {
-      params.response_format = responseFormat;
-    } else {
-      throw new Error(
-        "No response format was provided or the provided response format is invalid.",
-      );
-    }
+    params.file =
+      (Array.isArray(formData["file"])
+        ? formData["file"].pop()
+        : formData["file"]) as File;
+    params.modelName = (params.modelName || formData["model"]) as string;
+    params.response_format = (params.response_format ||
+      formData["response_format"]) as string;
     return params;
   }
 
   async executeModel(
     c: Context,
     params: TranscriptionParams,
-  ): Promise<z.infer<typeof openaiSchemas.CreateTranscriptionResponseJson>> {
-    if (!(params.file instanceof Blob)) {
-      throw new Error("The provided file must be a Blob.");
-    }
+  ): Promise<Document[]> {
     const clientOptions: ClientOptions = params as ClientOptions;
-    try {
-      const audioLoader = new OpenAIWhisperAudio(params.file, {
-        clientOptions: clientOptions,
-      });
-      const transcription = await audioLoader.load();
-      let text = "";
-      for (const document of transcription) {
-        text += document.pageContent;
-      }
-      const transcriptionResponse = openaiSchemas
-        .CreateTranscriptionResponseJson.parse({
-          "text": text,
-        });
-      return transcriptionResponse;
-    } catch (error) {
-      console.error("Audio transcription failed:", error);
-      throw new Error(`Audio transcription failed: ${error.message}`);
+    const audioLoader = new OpenAIWhisperAudio(params.file, {
+      clientOptions: clientOptions,
+    });
+    return await audioLoader.load();
+  }
+
+  async deliverOutput(c: Context, output: Document[]): Promise<Response> {
+    let text = "";
+    let words = [];
+    for (const document of output) {
+      text += document.pageContent;
+      words.concat(document.metadata["words"] || []);
     }
+    const transcriptionResponse = openaiSchemas
+      .CreateTranscriptionResponseVerboseJson.parse({
+        "text": text,
+        "words": words,
+      });
+    return c.json(transcriptionResponse);
   }
 }
 
 export class OpenAIImageEditService extends AbstractImageEditService {
   async prepareModelParams(c: Context): Promise<ImageEditParams> {
-    const defaultParams: ImageEditParams = {};
-    let params: ImageEditParams = await c.get("params") ?? defaultParams;
+    let params: ImageEditParams = await c.get("params") ?? {};
     const formData = await c.req.parseBody();
     const fileFields = ["image", "mask"];
     for (const field of fileFields) {
-      if (formData[field] instanceof Blob) {
-        params[field] = formData[field];
-      } else {
-        throw new Error(`The field '${field}' must be a Blob.`);
-      }
+      params[field] = formData[field];
     }
     const otherFields = [
       "prompt",
@@ -292,23 +269,28 @@ export class OpenAIImageEditService extends AbstractImageEditService {
     ];
     for (const field of otherFields) {
       if (formData[field]) {
-        params[field] = formData[field];
+        params[field] = params[field] || formData[field];
       }
     }
-    if (typeof formData["model"] === "string") {
-      params["modelName"] = formData["model"];
-    }
+    params["modelName"] = (params["modelName"] || formData["model"]) as string;
     c.set("params", params);
     return params;
   }
   async deliverOutput(c: Context, output: string | Blob): Promise<Response> {
     const params = await c.get("params") as ImageEditParams;
     const currentTime = Math.floor(Date.now() / 1000);
-    if (params.response_format === "url" && typeof output === "string") {
-      return c.json({
-        created: currentTime,
-        data: [{ url: output }],
-      });
+    if (typeof output === "string") {
+      if (params.response_format === "url") {
+        return c.json({
+          created: currentTime,
+          data: [{ url: output }],
+        });
+      } else if (params.response_format === "b64_json") {
+        return c.json({
+          created: currentTime,
+          data: [{ b64_json: output }],
+        });
+      }
     } else if (output instanceof Blob) {
       const b64Json = await blobToBase64(output);
       return c.json({
@@ -316,27 +298,21 @@ export class OpenAIImageEditService extends AbstractImageEditService {
         data: [{ b64_json: b64Json }],
       });
     } else {
-      throw new Error(`Invalid output format`);
+      throw new Error(`The output types are incompatible.`);
     }
   }
 }
 
 export class OpenAIEmbeddingService extends AbstractEmbeddingService {
   async prepareModelParams(c: Context): Promise<EmbeddingParams> {
-    const baseModelParams: BaseModelParams = await c.get("params");
-    if (!baseModelParams) {
-      throw new Error("Model parameters are not available in the context.");
-    }
+    const baseModelParams: EmbeddingParams = await c.get("params");
     // @ts-ignore
     const body: z.infer<typeof openaiSchemas.CreateEmbeddingRequest> = await c
       .req.valid("json");
-    if (!body) {
-      throw new Error("Invalid JSON in the request body.");
-    }
     let embeddingParams: EmbeddingParams = {
       ...baseModelParams,
       ...body,
-      modelName: body.model,
+      modelName: baseModelParams.modelName || body.model,
       input: body.input as string | string[],
     };
     c.set("params", embeddingParams);
@@ -371,12 +347,6 @@ export class OpenAIEmbeddingService extends AbstractEmbeddingService {
     output: number[] | number[][],
   ): Promise<Response> {
     const embeddingParams: EmbeddingParams = await c.get("params");
-    if (
-      !embeddingParams || typeof embeddingParams !== "object" ||
-      !embeddingParams.modelName
-    ) {
-      throw new Error("Embedding parameters are not available or invalid.");
-    }
     let embeddingData;
     if (Array.isArray(output) && Array.isArray(output[0])) {
       // Multiple embeddings
@@ -393,12 +363,12 @@ export class OpenAIEmbeddingService extends AbstractEmbeddingService {
         index: 0,
       }];
     } else {
-      throw new Error("Invalid embedding output format.");
+      throw new Error("The output types are incompatible.");
     }
     return c.json({
       object: "list",
       data: embeddingData,
-      model: embeddingParams.modelName || "unknown",
+      model: embeddingParams.modelName,
       usage: {
         prompt_tokens: 0,
         total_tokens: 0,
@@ -407,7 +377,8 @@ export class OpenAIEmbeddingService extends AbstractEmbeddingService {
   }
 }
 
-export class OpenAIImageGenerationService extends AbstractImageGenerationService {
+export class OpenAIImageGenerationService
+  extends AbstractImageGenerationService {
   async executeModel(c: Context, params: ImageGenerationParams) {
     const { apiKey, prompt } = params;
     const apiParams = {
@@ -416,12 +387,7 @@ export class OpenAIImageGenerationService extends AbstractImageGenerationService
       responseFormat: params.response_format as ("url" | "b64_json"),
     };
     const tool = new DallEAPIWrapper(apiParams);
-    try {
-      return await tool.invoke(prompt);
-    } catch (error) {
-      console.error("An error occurred while invoking the Dall-E API:", error);
-      throw new Error("Failed to execute the model for image generation.");
-    }
+    return await tool.invoke(prompt);
   }
 }
 

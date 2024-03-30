@@ -40,12 +40,11 @@ function createModelRequestHandler(
       taskType,
       gatewayParams.model as Provider,
     );
-    let params = await modelService.prepareModelParams(c);
+    const params = await modelService.prepareModelParams(c);
     const providerService = getModelService(
       taskType,
       gatewayParams.provider as Provider,
     );
-    params = await providerService.readyForModel(c, params);
     const output = await providerService.executeModel(c, params);
     return await modelService.deliverOutput(c, output);
   };
@@ -54,6 +53,7 @@ function createModelRequestHandler(
 Object.values(TaskType).forEach((taskType) => {
   app.post(
     "/api/" + [taskType],
+    // @ts-ignore
     zValidator(Target.QUERY, GatewayParamsSchema),
     headersMiddleware(),
     validatorMiddleware(),
@@ -68,8 +68,8 @@ app.all("/proxy/*", async (c) => {
   url.searchParams.delete("route");
   const request = new Request(url, c.req.raw);
   const response = await fetch(request);
-  const newResponse = new Response(response.body, response)
-  return newResponse
+  const newResponse = new Response(response.body, response);
+  return newResponse;
 });
 
 app.onError((err, c) => {

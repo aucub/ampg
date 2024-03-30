@@ -1,4 +1,9 @@
-import { BaseLanguageModelInput, IterableReadableStream, isBaseMessage, isBaseMessageChunk } from "../deps.ts";
+import {
+  BaseLanguageModelInput,
+  isBaseMessage,
+  isBaseMessageChunk,
+  IterableReadableStream,
+} from "../deps.ts";
 
 export async function urlToDataURL(url: string): Promise<string> {
   const response = await fetch(url);
@@ -36,8 +41,9 @@ export async function blobToBase64(blob: Blob): Promise<string> {
 
 export function isIterableReadableStream(
   obj: any,
-): obj is IterableReadableStream {
-  return typeof obj === 'object' && obj !== null && "locked" in obj && "cancel" in obj &&
+): obj is IterableReadableStream<any> {
+  return typeof obj === "object" && obj !== null && "locked" in obj &&
+    "cancel" in obj &&
     "getReader" in obj;
 }
 
@@ -46,7 +52,7 @@ export function removeSystemMessage(input: BaseLanguageModelInput) {
     for (let i = input.length - 1; i >= 0; i--) {
       const message = input[i];
       if (isBaseMessage(message) || isBaseMessageChunk(message)) {
-        if (message._getType() === 'system') {
+        if (message._getType() === "system") {
           input.splice(i, 1);
         }
       }

@@ -8,7 +8,6 @@ interface CustomSecretMap {
 }
 
 interface DefaultSecretMap {
-  DEFAULT_CLOUDFLARE_BASE_URL?: string;
 }
 
 interface CoreSecretMap {
@@ -78,9 +77,14 @@ interface CommunitySecretMap {
   ZEP_API_URL?: string;
 }
 
-export type SecretMap = CoreSecretMap & CommunitySecretMap & CustomSecretMap & DefaultSecretMap;
+export type SecretMap =
+  & CoreSecretMap
+  & CommunitySecretMap
+  & CustomSecretMap
+  & DefaultSecretMap;
 
 export enum TaskType {
+  GENERATE = "generate",
   CHAT = "chat",
   EMBEDDINGS = "embeddings",
   AUDIO_TRANSCRIPTIONS = "audio/transcriptions",
@@ -128,13 +132,10 @@ export enum Provider {
   GLIDE = "glide",
 }
 
-
 const secretMap: SecretMap = await configAsync();
 
 for await (const [key, value] of Object.entries(secretMap)) {
   Deno.env.set(key, value);
 }
-
-secretMap.DEFAULT_CLOUDFLARE_BASE_URL = "https://api.cloudflare.com/client/v4/accounts/";
 
 export default secretMap;

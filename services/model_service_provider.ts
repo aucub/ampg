@@ -23,7 +23,6 @@ import {
   HuggingFaceInferenceEmbeddingService,
 } from "./hf_service.ts";
 import { PortkeyChatService } from "./portkey_service.ts";
-import { GlideChatService } from "./glide_service.ts";
 
 /**
  * 获取服务实例的通用函数。
@@ -32,15 +31,19 @@ import { GlideChatService } from "./glide_service.ts";
  * @param provider 服务提供者（例如：Providers.OPENAI）
  * @returns 对应的服务实例
  */
-export function getModelService(taskType: TaskType, provider: Provider): IModelService<any, any> {
+export function getModelService(
+  taskType: TaskType,
+  provider: Provider,
+): IModelService<any, any> {
   const modelServiceConstructorMap = {
+    [TaskType.GENERATE]: {
+      [Provider.HUGGINGFACEHUB]: HuggingFaceInferenceChatService,
+    },
     [TaskType.CHAT]: {
       [Provider.OPENAI]: OpenAIChatService,
       [Provider.GOOGLE]: GoogleGenerativeAIChatService,
       [Provider.CLOUDFLARE]: CloudflareWorkersAIChatService,
-      [Provider.HUGGINGFACEHUB]: HuggingFaceInferenceChatService,
       [Provider.PORTKEY]: PortkeyChatService,
-      [Provider.GLIDE]: GlideChatService,
     },
     [TaskType.EMBEDDINGS]: {
       [Provider.OPENAI]: OpenAIEmbeddingService,

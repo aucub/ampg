@@ -7,13 +7,16 @@ import {
   IterableReadableStream,
 } from "../deps.ts";
 import { ChatModelParams, EmbeddingParams } from "../types.ts";
-import { AbstractChatService, AbstractEmbeddingService } from "../types/i_service.ts";
+import {
+  AbstractChatService,
+  AbstractEmbeddingService,
+} from "../types/i_service.ts";
 
 export class HuggingFaceInferenceChatService extends AbstractChatService {
   async executeModel(
     c: Context,
     params: ChatModelParams,
-  ): Promise<string | BaseMessageChunk | IterableReadableStream> {
+  ): Promise<string | BaseMessageChunk | IterableReadableStream<any>> {
     const { baseURL, stop, modelName, ...rest } = params;
     const hfInput = {
       ...rest,
@@ -28,7 +31,8 @@ export class HuggingFaceInferenceChatService extends AbstractChatService {
   }
 }
 
-export class HuggingFaceInferenceEmbeddingService extends AbstractEmbeddingService {
+export class HuggingFaceInferenceEmbeddingService
+  extends AbstractEmbeddingService {
   async executeModel(
     c: Context,
     params: EmbeddingParams,

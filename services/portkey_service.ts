@@ -13,6 +13,7 @@ export class PortkeyChatService extends AbstractChatService {
     params: PortkeyModelParams,
   ): Promise<string | BaseMessageChunk | IterableReadableStream<any>> {
     params.cache = undefined;
+    // @ts-ignore
     const model = new Portkey(params);
     if (!params.streaming) {
       return await model.invoke(params.input);
