@@ -9,7 +9,10 @@ import {
   IterableReadableStream,
 } from "../deps.ts";
 import { ChatModelParams, EmbeddingParams } from "../types.ts";
-import { AbstractChatService, AbstractEmbeddingService } from "../types/i_service.ts";
+import {
+  AbstractChatService,
+  AbstractEmbeddingService,
+} from "../types/i_service.ts";
 
 export class GoogleGenerativeAIChatService extends AbstractChatService {
   async executeModel(
@@ -25,6 +28,7 @@ export class GoogleGenerativeAIChatService extends AbstractChatService {
     const model = new ChatGoogleGenerativeAI(googleGenerativeAIChatInput);
 
     if (!params.streaming) {
+      // @ts-ignore
       return await model.invoke(params.input);
     } else {
       return await model.stream(params.input);
@@ -32,17 +36,18 @@ export class GoogleGenerativeAIChatService extends AbstractChatService {
   }
 }
 
-export class GoogleGenerativeAIEmbeddingService extends AbstractEmbeddingService {
+export class GoogleGenerativeAIEmbeddingService
+  extends AbstractEmbeddingService {
   async executeModel(
     c: Context,
     params: EmbeddingParams,
   ): Promise<number[] | number[][]> {
     const googleGenerativeAIEmbeddingsParams:
       GoogleGenerativeAIEmbeddingsParams = {
-      ...params,
-      apiKey: params.apiKey ||
-        env<{ GOOGLE_API_KEY: string }>(c)["GOOGLE_API_KEY"],
-    };
+        ...params,
+        apiKey: params.apiKey ||
+          env<{ GOOGLE_API_KEY: string }>(c)["GOOGLE_API_KEY"],
+      };
     const embeddings = new GoogleGenerativeAIEmbeddings(
       googleGenerativeAIEmbeddingsParams,
     );
