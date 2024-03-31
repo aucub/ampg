@@ -1,5 +1,4 @@
 import {
-  AsyncCallerParams,
   chunkArray,
   Embeddings,
   EmbeddingsParams,
@@ -8,8 +7,7 @@ import {
 } from "../../deps.ts";
 import { schemas as cloudflareSchemas } from "../../types/schemas/custom/cloudflare.ts";
 
-export interface CloudflareWorkersAIEmbeddingsParams
-  extends AsyncCallerParams, EmbeddingsParams {
+export interface CloudflareWorkersAIEmbeddingsParams extends EmbeddingsParams {
   /** Model name to use */
   modelName?: string;
 

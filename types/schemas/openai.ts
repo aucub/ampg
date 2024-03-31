@@ -1,4 +1,5 @@
-import { makeApi, z, Zodios, type ZodiosOptions } from "../../deps.ts";
+import { makeApi, Zodios, type ZodiosOptions } from "../../deps.ts";
+import { z } from "../../deps.ts";
 
 const ChatCompletionRequestSystemMessage = z
   .object({
@@ -188,7 +189,7 @@ const ChatCompletionTokenLogprob = z
           logprob: z.number(),
           bytes: z.array(z.number()).nullable(),
         })
-        .passthrough(),
+        .passthrough()
     ),
   })
   .passthrough();
@@ -219,7 +220,7 @@ const CreateChatCompletionResponse = z
             .passthrough()
             .nullable(),
         })
-        .passthrough(),
+        .passthrough()
     ),
     created: z.number().int(),
     model: z.string(),
@@ -285,7 +286,7 @@ const CreateCompletionResponse = z
             .nullable(),
           text: z.string(),
         })
-        .passthrough(),
+        .passthrough()
     ),
     created: z.number().int(),
     model: z.string(),
@@ -633,7 +634,7 @@ const CreateModerationResponse = z
             })
             .passthrough(),
         })
-        .passthrough(),
+        .passthrough()
     ),
   })
   .passthrough();
@@ -661,7 +662,7 @@ const AssistantObject = z
           AssistantToolsCode,
           AssistantToolsRetrieval,
           AssistantToolsFunction,
-        ]),
+        ])
       )
       .max(128)
       .default([]),
@@ -689,7 +690,7 @@ const CreateAssistantRequest = z.object({
         AssistantToolsCode,
         AssistantToolsRetrieval,
         AssistantToolsFunction,
-      ]),
+      ])
     )
     .max(128)
     .optional()
@@ -709,7 +710,7 @@ const ModifyAssistantRequest = z
           AssistantToolsCode,
           AssistantToolsRetrieval,
           AssistantToolsFunction,
-        ]),
+        ])
       )
       .max(128)
       .default([]),
@@ -725,7 +726,7 @@ const DeleteAssistantResponse = z
   })
   .passthrough();
 const CreateMessageRequest = z.object({
-  role: z.literal("user"),
+  role: z.enum(["user", "assistant"]),
   content: z.string().min(1).max(32768),
   file_ids: z.array(z.string()).min(1).max(10).optional().default([]),
   metadata: z.object({}).partial().passthrough().nullish(),
@@ -790,7 +791,7 @@ const MessageContentTextObject = z
           z.union([
             MessageContentTextAnnotationsFileCitationObject,
             MessageContentTextAnnotationsFilePathObject,
-          ]),
+          ])
         ),
       })
       .passthrough(),
@@ -802,9 +803,24 @@ const MessageObject = z
     object: z.literal("thread.message"),
     created_at: z.number().int(),
     thread_id: z.string(),
+    status: z.enum(["in_progress", "incomplete", "completed"]),
+    incomplete_details: z
+      .object({
+        reason: z.enum([
+          "content_filter",
+          "max_tokens",
+          "run_cancelled",
+          "run_expired",
+          "run_failed",
+        ]),
+      })
+      .passthrough()
+      .nullable(),
+    completed_at: z.number().int().nullable(),
+    incomplete_at: z.number().int().nullable(),
     role: z.enum(["user", "assistant"]),
     content: z.array(
-      z.union([MessageContentImageFileObject, MessageContentTextObject]),
+      z.union([MessageContentImageFileObject, MessageContentTextObject])
     ),
     assistant_id: z.string().nullable(),
     run_id: z.string().nullable(),
@@ -835,11 +851,13 @@ const CreateThreadAndRunRequest = z.object({
         AssistantToolsCode,
         AssistantToolsRetrieval,
         AssistantToolsFunction,
-      ]),
+      ])
     )
     .max(20)
     .nullish(),
   metadata: z.object({}).partial().passthrough().nullish(),
+  temperature: z.number().gte(0).lte(2).nullish().default(1),
+  stream: z.boolean().nullish(),
 });
 const RunToolCallObject = z
   .object({
@@ -890,7 +908,7 @@ const RunObject = z
       })
       .passthrough()
       .nullable(),
-    expires_at: z.number().int(),
+    expires_at: z.number().int().nullable(),
     started_at: z.number().int().nullable(),
     cancelled_at: z.number().int().nullable(),
     failed_at: z.number().int().nullable(),
@@ -903,13 +921,14 @@ const RunObject = z
           AssistantToolsCode,
           AssistantToolsRetrieval,
           AssistantToolsFunction,
-        ]),
+        ])
       )
       .max(20)
       .default([]),
     file_ids: z.array(z.string()).default([]),
     metadata: z.object({}).partial().passthrough().nullable(),
     usage: RunCompletionUsage.nullable(),
+    temperature: z.number().nullish(),
   })
   .passthrough();
 const ListRunsResponse = z
@@ -932,11 +951,13 @@ const CreateRunRequest = z.object({
         AssistantToolsCode,
         AssistantToolsRetrieval,
         AssistantToolsFunction,
-      ]),
+      ])
     )
     .max(20)
     .nullish(),
   metadata: z.object({}).partial().passthrough().nullish(),
+  temperature: z.number().gte(0).lte(2).nullish().default(1),
+  stream: z.boolean().nullish(),
 });
 const ModifyRunRequest = z
   .object({ metadata: z.object({}).partial().passthrough().nullable() })
@@ -946,8 +967,9 @@ const SubmitToolOutputsRunRequest = z.object({
     z
       .object({ tool_call_id: z.string(), output: z.string() })
       .partial()
-      .passthrough(),
+      .passthrough()
   ),
+  stream: z.boolean().nullish(),
 });
 const RunStepDetailsMessageCreationObject = z
   .object({
@@ -975,7 +997,7 @@ const RunStepDetailsToolCallsCodeObject = z
           z.union([
             RunStepDetailsToolCallsCodeOutputLogsObject,
             RunStepDetailsToolCallsCodeOutputImageObject,
-          ]),
+          ])
         ),
       })
       .passthrough(),
@@ -1009,7 +1031,7 @@ const RunStepDetailsToolCallsObject = z
         RunStepDetailsToolCallsCodeObject,
         RunStepDetailsToolCallsRetrievalObject,
         RunStepDetailsToolCallsFunctionObject,
-      ]),
+      ])
     ),
   })
   .passthrough();

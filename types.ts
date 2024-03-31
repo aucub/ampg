@@ -22,24 +22,9 @@ export interface BaseModelParams {
    */
   cache?: boolean;
   /**
-   * Retry configuration.
+   * The maximum number of retries that can be made for a single call.
    */
-  retry?: Retry;
-  /**
-   * Returns a unique trace id for each response.
-   */
-  traceId?: string;
-}
-
-export interface Retry {
-  /**
-   * Number of retry attempts.
-   */
-  attempts?: number;
-  /**
-   * Status codes to trigger retries.
-   */
-  onStatusCodes?: number[];
+  maxRetries?: number;
 }
 
 export interface ChatModelParams extends BaseModelParams {
@@ -71,25 +56,16 @@ export interface ChatModelParams extends BaseModelParams {
    *  List of stop words to use when generating
    */
   stop?: string[];
-  /**
-   * If null, a random seed will be used.
-   */
-  seed?: number;
   input?: BaseLanguageModelInput;
 }
 
 export interface EmbeddingParams extends BaseModelParams {
-  encoding_format?: string;
-  /**
-   * An optional title for the text.
-   */
-  title?: string;
   /**
    * The maximum number of documents to embed in a single request.
    */
   batchSize?: number;
   /**
-   * Whether to strip new lines from the input text. Default to true
+   * Whether to strip new lines from the input text.
    */
   stripNewLines?: boolean;
   input?: string[] | string;
@@ -105,21 +81,13 @@ export interface TranscriptionParams extends BaseModelParams {
    */
   prompt?: string;
   /**
-   * The format of the transcript output, in one of these options: `json`, `text`, `srt`, `verbose_json`, or `vtt`.
-   */
-  response_format?: string;
-  /**
-   * The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
+   * The sampling temperature, between 0 and 1.
    */
   temperature?: boolean;
   /**
-   * The audio file object (not file name) to transcribe, in one of these formats: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, or webm.
+   * The audio file object (not file name) to transcribe.
    */
   file?: File;
-  /**
-   * The timestamp granularities to populate for this transcription. `response_format` must be set `verbose_json` to use timestamp granularities. Either or both of these options are supported: `word`, or `segment`. Note: There is no additional latency for segment timestamps, but generating word timestamps incurs additional latency.
-   */
-  timestampGranularities?: ("word" | "segment")[];
 }
 
 export interface ImageGenerationParams extends BaseModelParams {
@@ -140,13 +108,29 @@ export interface ImageGenerationParams extends BaseModelParams {
    */
   quality?: string;
   /**
-   * The size of the generated images.
+   * image height, in pixel space.
    */
-  size?: string;
+  height?: number;
+  /**
+   * image width, in pixel space.
+   */
+  width?: number;
   /**
    * The style of the generated images.
    */
   style?: string;
+  /**
+   * Sampling steps.
+   */
+  steps?: number;
+  /**
+   * CFG Scale.
+   */
+  cfgScale?: number;
+  /**
+   * Random noise seed.
+   */
+  seed?: number;
 }
 
 export interface ImageEditParams extends BaseModelParams {
@@ -164,31 +148,29 @@ export interface ImageEditParams extends BaseModelParams {
    */
   mask?: File;
   /**
-   * The number of images to generate.
-   * Defaults to 1 if not provided.
+   * image height, in pixel space.
    */
-  n?: number;
+  height?: number;
   /**
-   * The size of the generated images.
+   * image width, in pixel space.
    */
-  size?: string;
+  width?: number;
   /**
    * The format in which the generated images are returned.
    */
   response_format?: string;
-  guidance?: number;
-  num_steps?: number;
-  strength?: number;
-}
-
-export interface PortkeyModelParams extends ChatModelParams {
   /**
-   * Gets the provider options based on the specified mode.
-   * Modes can be "single"(uses the first provider), "loadbalance"(selects one provider based on weights),
-   * or "fallback"(uses all providers in the given order).If the mode does not match these options, null is returned.
+   * The scale for the guided sampling.
    */
-  mode?: string;
-  cache?: boolean;
+  guidance?: number;
+  /**
+   * number of steps (controls image quality).
+   */
+  num_steps?: number;
+  /**
+   * strength for noising/unnoising. 1.0 corresponds to full destruction of information in init image.
+   */
+  strength?: number;
 }
 
 export interface OpenAIError {
@@ -210,18 +192,6 @@ export interface GatewayParams {
    */
   provider: string;
   /**
-   * Caching configuration (optional).
-   */
-  cache?: boolean;
-  /**
-   * Retry configuration (optional).
-   */
-  retry?: Retry;
-  /**
-   * Returns a unique trace id for each response (optional).
-   */
-  trace_id?: string;
-  /**
    * The name of the format provider used to determine how the request body should be parsed.
    */
   model: string;
@@ -232,17 +202,9 @@ export interface GatewayParams {
   endpoint?: any;
 }
 
-const RetrySchema = z.object({
-  attempts: z.number().optional(),
-  onStatusCodes: z.array(z.number()).optional(),
-}).passthrough();
-
 export const GatewayParamsSchema = z.object({
-  provider: z.string().nonempty(),
-  cache: z.boolean().optional(),
-  retry: RetrySchema.optional(),
-  trace_id: z.string().optional(),
-  model: z.string().nonempty(),
+  provider: z.string().min(1),
+  model: z.string().min(1),
   options: z.any().optional(),
   endpoint: z.any().optional(),
 }).passthrough();
