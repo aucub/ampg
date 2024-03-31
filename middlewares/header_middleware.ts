@@ -1,10 +1,10 @@
-import { MiddlewareHandler, qs } from "../deps.ts";
+import { createMiddleware, MiddlewareHandler, qs } from "../deps.ts";
 import { BaseModelParams } from "../types.ts";
 
 const TOKEN_PREFIX = "Bearer ";
 
 export const headersMiddleware = (): MiddlewareHandler => {
-  return async function headersMiddleware(c, next) {
+  return createMiddleware(async (c, next) => {
     const params: BaseModelParams = {};
     function getHeader(headerName: string): string | null {
       return c.req.header(headerName) || null;
@@ -37,5 +37,5 @@ export const headersMiddleware = (): MiddlewareHandler => {
     c.set("query", gatewayParams);
     c.set("params", mergedParams);
     await next();
-  };
+  });
 };

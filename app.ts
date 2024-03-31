@@ -13,7 +13,12 @@ import {
   zValidator,
 } from "./deps.ts";
 import { headersMiddleware } from "./middlewares/header_middleware.ts";
-import { GatewayParams, GatewayParamsSchema, LangException } from "./types.ts";
+import {
+  BaseModelParams,
+  GatewayParams,
+  GatewayParamsSchema,
+  LangException,
+} from "./types.ts";
 import {
   getExceptionHandling,
   getModelService,
@@ -21,7 +26,12 @@ import {
 import { Provider, Target, TaskType } from "./config.ts";
 import { validatorMiddleware } from "./middlewares/validator_middleware.ts";
 
-const app = new Hono();
+type Variables = {
+  query: GatewayParams;
+  params: BaseModelParams;
+};
+
+const app = new Hono<{ Variables: Variables }>();
 
 app.use(
   logger(),
