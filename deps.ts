@@ -6,6 +6,7 @@ export {
 export { Context } from "https://deno.land/x/hono@v4.1.7/context.ts";
 export type { HonoRequest } from "https://deno.land/x/hono@v4.1.7/mod.ts";
 export {
+  createMiddleware,
   env,
   stream,
   streamSSE,

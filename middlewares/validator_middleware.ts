@@ -1,9 +1,9 @@
 import { Provider, Target, TaskType } from "../config.ts";
-import { MiddlewareHandler, z, ZodSchema } from "../deps.ts";
+import { createMiddleware, MiddlewareHandler, z, ZodSchema } from "../deps.ts";
 import { getZodValidatorSchema } from "../services/model_service_provider.ts";
 
 export const validatorMiddleware = (): MiddlewareHandler => {
-  return async function validatorMiddleware(c, next) {
+  return createMiddleware(async (c, next) => {
     const taskType = c.req.path.replace(/^\/api\//, "") as TaskType;
     const gatewayParams = c.req.query();
     let value;
@@ -36,5 +36,5 @@ export const validatorMiddleware = (): MiddlewareHandler => {
       c.req.addValidatedData(target, data as never);
     }
     await next();
-  };
+  });
 };
