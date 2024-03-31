@@ -43,6 +43,7 @@ it.skip("POST /api/" + [TaskType.CHAT], async () => {
     const validationResult = openaiSchemas.CreateChatCompletionResponse
       .safeParse(data);
     if (!validationResult.success) {
+      //@ts-ignore
       console.error(validationResult.error);
     }
   }
@@ -91,6 +92,7 @@ it.skip("POST /api/" + [TaskType.CHAT] + " Stream", async () => {
         if (done) {
           break;
         }
+        //@ts-ignore
         result = new TextDecoder("utf-8").decode(value);
         if (
           result.startsWith("data:") && !result.trimEnd().endsWith("[DONE]")
@@ -154,6 +156,7 @@ it.skip("POST /api/" + [TaskType.CHAT] + " IMAGE_URL", async () => {
     const validationResult = openaiSchemas.CreateChatCompletionResponse
       .safeParse(data);
     if (!validationResult.success) {
+      //@ts-ignore
       console.error(validationResult.error);
     }
   } else {
@@ -192,6 +195,7 @@ it.skip("POST /api/" + TaskType.EMBEDDINGS, async () => {
       data,
     );
     if (!validationResult.success) {
+      //@ts-ignore
       console.error(validationResult.error);
     }
   } else {
@@ -242,6 +246,7 @@ it.skip("POST /api/" + TaskType.AUDIO_TRANSCRIPTIONS, async () => {
       const validationResult = openaiSchemas.CreateTranscriptionResponseJson
         .safeParse(data);
       if (!validationResult.success) {
+        //@ts-ignore
         console.error(validationResult.error);
       }
     } else {
@@ -298,7 +303,9 @@ it("POST /api/" + TaskType.IMAGES_EDITS, async () => {
     if (editResponse.ok) {
       const data = await editResponse.json();
       console.log(data);
+      //@ts-ignore
       for (let index = 0; index < data.data.length; index++) {
+        //@ts-ignore
         const imageDict = data.data[index];
         const imageData = decodeBase64(imageDict.b64_json);
         const imageFilePath = `dog_edited_${index}.png`;

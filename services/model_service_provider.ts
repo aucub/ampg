@@ -22,7 +22,6 @@ import {
   HuggingFaceInferenceChatService,
   HuggingFaceInferenceEmbeddingService,
 } from "./hf_service.ts";
-import { PortkeyChatService } from "./portkey_service.ts";
 
 /**
  * 获取服务实例的通用函数。
@@ -43,7 +42,6 @@ export function getModelService(
       [Provider.OPENAI]: OpenAIChatService,
       [Provider.GOOGLE]: GoogleGenerativeAIChatService,
       [Provider.CLOUDFLARE]: CloudflareWorkersAIChatService,
-      [Provider.PORTKEY]: PortkeyChatService,
     },
     [TaskType.EMBEDDINGS]: {
       [Provider.OPENAI]: OpenAIEmbeddingService,

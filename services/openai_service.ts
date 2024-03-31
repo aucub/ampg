@@ -1,6 +1,5 @@
 import {
   AIMessage,
-  AzureOpenAIInput,
   BaseChatModelParams,
   BaseMessageChunk,
   BaseMessageLike,
@@ -51,6 +50,7 @@ export class OpenAIChatService extends AbstractChatService {
     const params: Partial<ChatModelParams> = await c.get("params") ?? {};
     // @ts-ignore
     const body: z.infer<typeof openaiSchemas.CreateChatCompletionRequest> =
+      // @ts-ignore
       await c.req.valid("json");
     if (typeof body.stop === "string") {
       body.stop = [body.stop];
@@ -108,7 +108,6 @@ export class OpenAIChatService extends AbstractChatService {
   ): Promise<string | BaseMessageChunk | IterableReadableStream<any>> {
     const openAIChatModelInput:
       & Partial<OpenAIChatInput>
-      & Partial<AzureOpenAIInput>
       & BaseChatModelParams
       & {
         configuration?: ClientOptions;
@@ -219,8 +218,6 @@ export class OpenAITranscriptionService
         ? formData["file"].pop()
         : formData["file"]) as File;
     params.modelName = (params.modelName || formData["model"]) as string;
-    params.response_format = (params.response_format ||
-      formData["response_format"]) as string;
     return params;
   }
 
@@ -308,6 +305,7 @@ export class OpenAIEmbeddingService extends AbstractEmbeddingService {
     const baseModelParams: EmbeddingParams = await c.get("params");
     // @ts-ignore
     const body: z.infer<typeof openaiSchemas.CreateEmbeddingRequest> = await c
+      // @ts-ignore
       .req.valid("json");
     let embeddingParams: EmbeddingParams = {
       ...baseModelParams,

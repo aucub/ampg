@@ -4,10 +4,6 @@ interface CustomSecretMap {
   CLOUDFLARE_ACCOUNT_ID?: string;
   CLOUDFLARE_BASE_URL?: string;
   OPENAI_BASE_URL?: string;
-  HUGGINGFACEHUB_BASE_URL?: string;
-}
-
-interface DefaultSecretMap {
 }
 
 interface CoreSecretMap {
@@ -80,8 +76,7 @@ interface CommunitySecretMap {
 export type SecretMap =
   & CoreSecretMap
   & CommunitySecretMap
-  & CustomSecretMap
-  & DefaultSecretMap;
+  & CustomSecretMap;
 
 export enum TaskType {
   GENERATE = "generate",
@@ -128,8 +123,6 @@ export enum Provider {
   GROQ = "groq",
   SEGMIND = "segmind",
   HUGGINGFACEHUB = "huggingface",
-  PORTKEY = "portkey",
-  GLIDE = "glide",
 }
 
 const secretMap: SecretMap = await configAsync();

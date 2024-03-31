@@ -6,6 +6,7 @@ import {
   logger,
   OutputParserException,
   prettyJSON,
+  qs,
   secureHeaders,
   timing,
   ToolInputParsingException,
@@ -67,6 +68,23 @@ app.all("/proxy/*", async (c) => {
   const url = new URL(urlString);
   url.searchParams.delete("route");
   const request = new Request(url, c.req.raw);
+  const response = await fetch(request);
+  const newResponse = new Response(response.body, response);
+  return newResponse;
+});
+
+app.all("/portkey-ai/gateway", async (c) => {
+  const queryString = new URL(c.req.url).search.slice(1);
+  const gatewayParams = qs.parse(queryString);
+  const url = new URL(gatewayParams.url as string);
+  const rawRequest = c.req.raw;
+  const headers = new Headers(rawRequest.headers);
+  Object.entries(gatewayParams.options as Record<string, string>).forEach(
+    ([key, value]) => {
+      headers.set(key, value);
+    },
+  );
+  const request = new Request(url, new Request(rawRequest, { headers }));
   const response = await fetch(request);
   const newResponse = new Response(response.body, response);
   return newResponse;
