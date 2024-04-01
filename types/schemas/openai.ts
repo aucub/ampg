@@ -116,6 +116,8 @@ const CreateChatCompletionRequest = z
     model: z.union([
       z.string(),
       z.enum([
+        "gpt-4-turbo",
+        "gpt-4-turbo-2024-04-09",
         "gpt-4-0125-preview",
         "gpt-4-turbo-preview",
         "gpt-4-1106-preview",
@@ -512,6 +514,37 @@ const CreateFineTuningJobRequest = z
       .optional(),
     suffix: z.string().min(1).max(40).nullish(),
     validation_file: z.string().nullish(),
+    integrations: z
+      .array(
+        z
+          .object({
+            type: z.literal("wandb"),
+            wandb: z
+              .object({
+                project: z.string(),
+                name: z.string().nullish(),
+                entity: z.string().nullish(),
+                tags: z.array(z.string()).optional(),
+              })
+              .passthrough(),
+          })
+          .passthrough()
+      )
+      .nullish(),
+    seed: z.number().int().gte(0).lte(2147483647).nullish(),
+  })
+  .passthrough();
+const FineTuningIntegration = z
+  .object({
+    type: z.literal("wandb"),
+    wandb: z
+      .object({
+        project: z.string(),
+        name: z.string().nullish(),
+        entity: z.string().nullish(),
+        tags: z.array(z.string()).optional(),
+      })
+      .passthrough(),
   })
   .passthrough();
 const FineTuningJob = z
@@ -548,6 +581,8 @@ const FineTuningJob = z
     trained_tokens: z.number().int().nullable(),
     training_file: z.string(),
     validation_file: z.string().nullable(),
+    integrations: z.array(FineTuningIntegration).max(5).nullish(),
+    seed: z.number().int(),
   })
   .passthrough();
 const ListPaginatedFineTuningJobsResponse = z
@@ -568,6 +603,102 @@ const FineTuningJobEvent = z
   .passthrough();
 const ListFineTuningJobEventsResponse = z
   .object({ data: z.array(FineTuningJobEvent), object: z.literal("list") })
+  .passthrough();
+const FineTuningJobCheckpoint = z
+  .object({
+    id: z.string(),
+    created_at: z.number().int(),
+    fine_tuned_model_checkpoint: z.string(),
+    step_number: z.number().int(),
+    metrics: z
+      .object({
+        step: z.number(),
+        train_loss: z.number(),
+        train_mean_token_accuracy: z.number(),
+        valid_loss: z.number(),
+        valid_mean_token_accuracy: z.number(),
+        full_valid_loss: z.number(),
+        full_valid_mean_token_accuracy: z.number(),
+      })
+      .partial()
+      .passthrough(),
+    fine_tuning_job_id: z.string(),
+    object: z.literal("fine_tuning.job.checkpoint"),
+  })
+  .passthrough();
+const ListFineTuningJobCheckpointsResponse = z
+  .object({
+    data: z.array(FineTuningJobCheckpoint),
+    object: z.literal("list"),
+    first_id: z.string().nullish(),
+    last_id: z.string().nullish(),
+    has_more: z.boolean(),
+  })
+  .passthrough();
+const createBatch_Body = z
+  .object({
+    input_file_id: z.string(),
+    endpoint: z.literal("/v1/chat/completions"),
+    completion_window: z.literal("24h"),
+    metadata: z.record(z.string()).nullish(),
+  })
+  .passthrough();
+const Batch = z
+  .object({
+    id: z.string(),
+    object: z.literal("batch"),
+    endpoint: z.string(),
+    errors: z
+      .object({
+        object: z.string(),
+        data: z.array(
+          z
+            .object({
+              code: z.string(),
+              message: z.string(),
+              param: z.string().nullable(),
+              line: z.number().int().nullable(),
+            })
+            .partial()
+            .passthrough()
+        ),
+      })
+      .partial()
+      .passthrough()
+      .optional(),
+    input_file_id: z.string(),
+    completion_window: z.string(),
+    status: z.enum([
+      "validating",
+      "failed",
+      "in_progress",
+      "finalizing",
+      "completed",
+      "expired",
+      "cancelling",
+      "cancelled",
+    ]),
+    output_file_id: z.string().optional(),
+    error_file_id: z.string().optional(),
+    created_at: z.string(),
+    in_progress_at: z.string().optional(),
+    expires_at: z.string().optional(),
+    finalizing_at: z.string().optional(),
+    completed_at: z.string().optional(),
+    failed_at: z.string().optional(),
+    expired_at: z.string().optional(),
+    cancelling_at: z.string().optional(),
+    cancelled_at: z.string().optional(),
+    request_counts: z
+      .object({
+        total: z.number().int(),
+        completed: z.number().int(),
+        failed: z.number().int(),
+      })
+      .passthrough()
+      .optional(),
+    metadata: z.object({}).partial().passthrough().nullish(),
+  })
   .passthrough();
 const Model = z
   .object({
@@ -655,7 +786,7 @@ const AssistantObject = z
     name: z.string().max(256).nullable(),
     description: z.string().max(512).nullable(),
     model: z.string(),
-    instructions: z.string().max(32768).nullable(),
+    instructions: z.string().max(256000).nullable(),
     tools: z
       .array(
         z.union([
@@ -680,10 +811,32 @@ const ListAssistantsResponse = z
   })
   .passthrough();
 const CreateAssistantRequest = z.object({
-  model: z.string(),
+  model: z.union([
+    z.string(),
+    z.enum([
+      "gpt-4-turbo",
+      "gpt-4-turbo-2024-04-09",
+      "gpt-4-0125-preview",
+      "gpt-4-turbo-preview",
+      "gpt-4-1106-preview",
+      "gpt-4-vision-preview",
+      "gpt-4",
+      "gpt-4-0314",
+      "gpt-4-0613",
+      "gpt-4-32k",
+      "gpt-4-32k-0314",
+      "gpt-4-32k-0613",
+      "gpt-3.5-turbo",
+      "gpt-3.5-turbo-16k",
+      "gpt-3.5-turbo-0613",
+      "gpt-3.5-turbo-1106",
+      "gpt-3.5-turbo-0125",
+      "gpt-3.5-turbo-16k-0613",
+    ]),
+  ]),
   name: z.string().max(256).nullish(),
   description: z.string().max(512).nullish(),
-  instructions: z.string().max(32768).nullish(),
+  instructions: z.string().max(256000).nullish(),
   tools: z
     .array(
       z.union([
@@ -703,7 +856,7 @@ const ModifyAssistantRequest = z
     model: z.string(),
     name: z.string().max(256).nullable(),
     description: z.string().max(512).nullable(),
-    instructions: z.string().max(32768).nullable(),
+    instructions: z.string().max(256000).nullable(),
     tools: z
       .array(
         z.union([
@@ -727,7 +880,7 @@ const DeleteAssistantResponse = z
   .passthrough();
 const CreateMessageRequest = z.object({
   role: z.enum(["user", "assistant"]),
-  content: z.string().min(1).max(32768),
+  content: z.string().min(1).max(256000),
   file_ids: z.array(z.string()).min(1).max(10).optional().default([]),
   metadata: z.object({}).partial().passthrough().nullish(),
 });
@@ -840,10 +993,58 @@ const ListMessagesResponse = z
 const ModifyMessageRequest = z
   .object({ metadata: z.object({}).partial().passthrough().nullable() })
   .partial();
+const TruncationObject = z
+  .object({
+    type: z.enum(["auto", "last_messages"]),
+    last_messages: z.number().int().gte(1).nullish(),
+  })
+  .passthrough();
+const AssistantsApiNamedToolChoice = z
+  .object({
+    type: z.enum(["function", "code_interpreter", "retrieval"]),
+    function: z.object({ name: z.string() }).passthrough().optional(),
+  })
+  .passthrough();
+const AssistantsApiToolChoiceOption = z.union([
+  z.enum(["none", "auto"]),
+  AssistantsApiNamedToolChoice,
+]);
+const AssistantsApiResponseFormat = z
+  .object({ type: z.enum(["text", "json_object"]).default("text") })
+  .partial()
+  .passthrough();
+const AssistantsApiResponseFormatOption = z.union([
+  z.enum(["none", "auto"]),
+  AssistantsApiResponseFormat,
+]);
 const CreateThreadAndRunRequest = z.object({
   assistant_id: z.string(),
   thread: CreateThreadRequest.optional(),
-  model: z.string().nullish(),
+  model: z
+    .union([
+      z.string(),
+      z.enum([
+        "gpt-4-turbo",
+        "gpt-4-turbo-2024-04-09",
+        "gpt-4-0125-preview",
+        "gpt-4-turbo-preview",
+        "gpt-4-1106-preview",
+        "gpt-4-vision-preview",
+        "gpt-4",
+        "gpt-4-0314",
+        "gpt-4-0613",
+        "gpt-4-32k",
+        "gpt-4-32k-0314",
+        "gpt-4-32k-0613",
+        "gpt-3.5-turbo",
+        "gpt-3.5-turbo-16k",
+        "gpt-3.5-turbo-0613",
+        "gpt-3.5-turbo-1106",
+        "gpt-3.5-turbo-0125",
+        "gpt-3.5-turbo-16k-0613",
+      ]),
+    ])
+    .nullish(),
   instructions: z.string().nullish(),
   tools: z
     .array(
@@ -858,6 +1059,11 @@ const CreateThreadAndRunRequest = z.object({
   metadata: z.object({}).partial().passthrough().nullish(),
   temperature: z.number().gte(0).lte(2).nullish().default(1),
   stream: z.boolean().nullish(),
+  max_prompt_tokens: z.number().int().gte(256).nullish(),
+  max_completion_tokens: z.number().int().gte(256).nullish(),
+  truncation_strategy: TruncationObject.optional(),
+  tool_choice: AssistantsApiToolChoiceOption.optional(),
+  response_format: AssistantsApiResponseFormatOption.optional(),
 });
 const RunToolCallObject = z
   .object({
@@ -913,6 +1119,13 @@ const RunObject = z
     cancelled_at: z.number().int().nullable(),
     failed_at: z.number().int().nullable(),
     completed_at: z.number().int().nullable(),
+    incomplete_details: z
+      .object({
+        reason: z.enum(["max_completion_tokens", "max_prompt_tokens"]),
+      })
+      .partial()
+      .passthrough()
+      .nullable(),
     model: z.string(),
     instructions: z.string(),
     tools: z
@@ -929,6 +1142,11 @@ const RunObject = z
     metadata: z.object({}).partial().passthrough().nullable(),
     usage: RunCompletionUsage.nullable(),
     temperature: z.number().nullish(),
+    max_prompt_tokens: z.number().int().gte(256).nullable(),
+    max_completion_tokens: z.number().int().gte(256).nullable(),
+    truncation_strategy: TruncationObject,
+    tool_choice: AssistantsApiToolChoiceOption,
+    response_format: AssistantsApiResponseFormatOption,
   })
   .passthrough();
 const ListRunsResponse = z
@@ -942,9 +1160,34 @@ const ListRunsResponse = z
   .passthrough();
 const CreateRunRequest = z.object({
   assistant_id: z.string(),
-  model: z.string().nullish(),
+  model: z
+    .union([
+      z.string(),
+      z.enum([
+        "gpt-4-turbo",
+        "gpt-4-turbo-2024-04-09",
+        "gpt-4-0125-preview",
+        "gpt-4-turbo-preview",
+        "gpt-4-1106-preview",
+        "gpt-4-vision-preview",
+        "gpt-4",
+        "gpt-4-0314",
+        "gpt-4-0613",
+        "gpt-4-32k",
+        "gpt-4-32k-0314",
+        "gpt-4-32k-0613",
+        "gpt-3.5-turbo",
+        "gpt-3.5-turbo-16k",
+        "gpt-3.5-turbo-0613",
+        "gpt-3.5-turbo-1106",
+        "gpt-3.5-turbo-0125",
+        "gpt-3.5-turbo-16k-0613",
+      ]),
+    ])
+    .nullish(),
   instructions: z.string().nullish(),
   additional_instructions: z.string().nullish(),
+  additional_messages: z.array(CreateMessageRequest).nullish(),
   tools: z
     .array(
       z.union([
@@ -958,6 +1201,11 @@ const CreateRunRequest = z.object({
   metadata: z.object({}).partial().passthrough().nullish(),
   temperature: z.number().gte(0).lte(2).nullish().default(1),
   stream: z.boolean().nullish(),
+  max_prompt_tokens: z.number().int().gte(256).nullish(),
+  max_completion_tokens: z.number().int().gte(256).nullish(),
+  truncation_strategy: TruncationObject.optional(),
+  tool_choice: AssistantsApiToolChoiceOption.optional(),
+  response_format: AssistantsApiResponseFormatOption.optional(),
 });
 const ModifyRunRequest = z
   .object({ metadata: z.object({}).partial().passthrough().nullable() })
@@ -1177,10 +1425,15 @@ export const schemas = {
   CreateFileRequest,
   DeleteFileResponse,
   CreateFineTuningJobRequest,
+  FineTuningIntegration,
   FineTuningJob,
   ListPaginatedFineTuningJobsResponse,
   FineTuningJobEvent,
   ListFineTuningJobEventsResponse,
+  FineTuningJobCheckpoint,
+  ListFineTuningJobCheckpointsResponse,
+  createBatch_Body,
+  Batch,
   Model,
   ListModelsResponse,
   DeleteModelResponse,
@@ -1206,6 +1459,11 @@ export const schemas = {
   MessageObject,
   ListMessagesResponse,
   ModifyMessageRequest,
+  TruncationObject,
+  AssistantsApiNamedToolChoice,
+  AssistantsApiToolChoiceOption,
+  AssistantsApiResponseFormat,
+  AssistantsApiResponseFormatOption,
   CreateThreadAndRunRequest,
   RunToolCallObject,
   RunCompletionUsage,
@@ -1472,6 +1730,48 @@ const endpoints = makeApi([
   },
   {
     method: "post",
+    path: "/batches",
+    alias: "createBatch",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: createBatch_Body,
+      },
+    ],
+    response: Batch,
+  },
+  {
+    method: "get",
+    path: "/batches/:batch_id",
+    alias: "retrieveBatch",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "batch_id",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: Batch,
+  },
+  {
+    method: "post",
+    path: "/batches/:batch_id/cancel",
+    alias: "cancelBatch",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "batch_id",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: Batch,
+  },
+  {
+    method: "post",
     path: "/chat/completions",
     alias: "createChatCompletion",
     requestFormat: "json",
@@ -1674,6 +1974,30 @@ const endpoints = makeApi([
       },
     ],
     response: FineTuningJob,
+  },
+  {
+    method: "get",
+    path: "/fine_tuning/jobs/:fine_tuning_job_id/checkpoints",
+    alias: "listFineTuningJobCheckpoints",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "fine_tuning_job_id",
+        type: "Path",
+        schema: z.string(),
+      },
+      {
+        name: "after",
+        type: "Query",
+        schema: z.string().optional(),
+      },
+      {
+        name: "limit",
+        type: "Query",
+        schema: z.number().int().optional().default(10),
+      },
+    ],
+    response: ListFineTuningJobCheckpointsResponse,
   },
   {
     method: "get",
@@ -1894,6 +2218,11 @@ const endpoints = makeApi([
       },
       {
         name: "before",
+        type: "Query",
+        schema: z.string().optional(),
+      },
+      {
+        name: "run_id",
         type: "Query",
         schema: z.string().optional(),
       },
