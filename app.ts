@@ -63,7 +63,7 @@ function createModelRequestHandler(
 
 Object.values(TaskType).forEach((taskType) => {
   app.post(
-    "/api/" + [taskType],
+    "/api/" + taskType,
     // @ts-ignore
     zValidator(Target.QUERY, GatewayParamsSchema),
     headersMiddleware(),

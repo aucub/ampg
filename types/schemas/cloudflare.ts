@@ -937,6 +937,70 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
   },
   {
     method: "post",
+    path: "/accounts/:account_id/ai/run/@cf/meta-llama/llama-2-7b-chat-hf-lora",
+    alias: "workers-ai-post-run-cf-meta-llama-llama-2-7b-chat-hf-lora",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: z.union([
+          z
+            .object({
+              lora: z.string().optional(),
+              max_tokens: z.number().int().optional().default(256),
+              prompt: z.string().min(1).max(6144),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
+            })
+            .passthrough(),
+          z
+            .object({
+              max_tokens: z.number().int().optional().default(256),
+              messages: z.array(
+                z
+                  .object({ content: z.string().max(6144), role: z.string() })
+                  .passthrough()
+              ),
+              stream: z.boolean().optional(),
+            })
+            .passthrough(),
+        ]),
+      },
+      {
+        name: "account_id",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: z
+      .object({
+        result: z.union([
+          z.object({ response: z.string() }).partial().passthrough(),
+          z.instanceof(File),
+        ]),
+        success: z.boolean().default("true"),
+      })
+      .partial()
+      .passthrough(),
+    errors: [
+      {
+        status: 400,
+        description: `Bad request`,
+        schema: z
+          .object({
+            errors: z.array(
+              z.object({ code: z.string(), message: z.string() }).passthrough()
+            ),
+            result: z.object({}).partial().passthrough(),
+            success: z.boolean(),
+          })
+          .passthrough(),
+      },
+    ],
+  },
+  {
+    method: "post",
     path: "/accounts/:account_id/ai/run/@cf/meta/llama-2-7b-chat-fp16",
     alias: "workers-ai-post-run-cf-meta-llama-2-7b-chat-fp16",
     requestFormat: "json",

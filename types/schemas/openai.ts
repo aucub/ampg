@@ -945,6 +945,7 @@ const CreateRunRequest = z.object({
   model: z.string().nullish(),
   instructions: z.string().nullish(),
   additional_instructions: z.string().nullish(),
+  additional_messages: z.array(CreateMessageRequest).nullish(),
   tools: z
     .array(
       z.union([
@@ -1894,6 +1895,11 @@ const endpoints = makeApi([
       },
       {
         name: "before",
+        type: "Query",
+        schema: z.string().optional(),
+      },
+      {
+        name: "run_id",
         type: "Query",
         schema: z.string().optional(),
       },
