@@ -1,30 +1,30 @@
+import { Provider, Target, TaskType } from "./config.ts";
 import {
+  HTTPException,
+  Hono,
+  OutputParserException,
+  ToolInputParsingException,
   compress,
   cors,
-  Hono,
-  HTTPException,
   logger,
-  OutputParserException,
   prettyJSON,
   qs,
   secureHeaders,
   timing,
-  ToolInputParsingException,
   zValidator,
 } from "./deps.ts";
 import { headersMiddleware } from "./middlewares/header_middleware.ts";
+import { validatorMiddleware } from "./middlewares/validator_middleware.ts";
+import {
+  getExceptionHandling,
+  getModelService,
+} from "./services/model_service_provider.ts";
 import {
   BaseModelParams,
   GatewayParams,
   GatewayParamsSchema,
   LangException,
 } from "./types.ts";
-import {
-  getExceptionHandling,
-  getModelService,
-} from "./services/model_service_provider.ts";
-import { Provider, Target, TaskType } from "./config.ts";
-import { validatorMiddleware } from "./middlewares/validator_middleware.ts";
 
 type Variables = {
   query: GatewayParams;

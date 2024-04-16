@@ -1,8 +1,8 @@
 import { app } from "../app.ts";
-import { assertEquals, decodeBase64, it, testClient } from "../deps.ts";
-import { schemas as openaiSchemas } from "../types/schemas/openai.ts";
 import { Provider, TaskType } from "../config.ts";
+import { assertEquals, decodeBase64, it, testClient } from "../deps.ts";
 import { GatewayParams } from "../types.ts";
+import { schemas as openaiSchemas } from "../types/schemas/openai.ts";
 
 it.skip("POST /api/" + [TaskType.CHAT], async () => {
   const payload = {

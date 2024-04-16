@@ -6,6 +6,8 @@ import {
   GoogleGenerativeAIChatInput,
   GoogleGenerativeAIEmbeddings,
   GoogleGenerativeAIEmbeddingsParams,
+  HarmBlockThreshold,
+  HarmCategory,
   IterableReadableStream,
 } from "../deps.ts";
 import { ChatModelParams, EmbeddingParams } from "../types.ts";
@@ -22,9 +24,26 @@ export class GoogleGenerativeAIChatService extends AbstractChatService {
     const googleGenerativeAIChatInput: GoogleGenerativeAIChatInput = {
       ...params,
       maxOutputTokens: params.maxTokens,
-      stopSequences: params.stop,
       apiKey: params.apiKey ||
         env<{ GOOGLE_API_KEY: string }>(c)["GOOGLE_API_KEY"],
+      safetySettings: [
+        {
+          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+          threshold: HarmBlockThreshold.BLOCK_NONE,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+          threshold: HarmBlockThreshold.BLOCK_NONE,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+          threshold: HarmBlockThreshold.BLOCK_NONE,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+          threshold: HarmBlockThreshold.BLOCK_NONE,
+        },
+      ],
     };
     const model = new ChatGoogleGenerativeAI(googleGenerativeAIChatInput);
     return await model.invoke(params.input);

@@ -1,5 +1,16 @@
-import { IExceptionHandling, IModelService } from "../types/i_service.ts";
 import { Provider, Target, TaskType } from "../config.ts";
+import { IExceptionHandling, IModelService } from "../types/i_service.ts";
+import { schemas as openaiSchemas } from "../types/schemas/openai.ts";
+import {
+  CloudflareWorkersAIChatService,
+} from "./cloudflare_service.ts";
+import {
+  GoogleGenerativeAIChatService,
+  GoogleGenerativeAIEmbeddingService,
+} from "./google_genai_service.ts";
+import {
+  HuggingFaceInferenceEmbeddingService,
+} from "./hf_service.ts";
 import {
   OpenAIChatService,
   OpenAIEmbeddingService,
@@ -7,17 +18,6 @@ import {
   OpenAIImageGenerationService,
   OpenAITranscriptionService,
 } from "./openai_service.ts";
-import {
-  GoogleGenerativeAIChatService,
-  GoogleGenerativeAIEmbeddingService,
-} from "./google_genai_service.ts";
-import {
-  CloudflareWorkersAIChatService,
-} from "./cloudflare_service.ts";
-import { schemas as openaiSchemas } from "../types/schemas/openai.ts";
-import {
-  HuggingFaceInferenceEmbeddingService,
-} from "./hf_service.ts";
 
 export function getModelService(
   taskType: TaskType,

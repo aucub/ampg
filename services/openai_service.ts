@@ -52,8 +52,13 @@ export class OpenAIChatService extends AbstractChatService {
     const body: z.infer<typeof openaiSchemas.CreateChatCompletionRequest> =
       // @ts-ignore
       await c.req.valid("json");
-    if (typeof body.stop === "string") {
-      body.stop = [body.stop];
+    if (body.stop) {
+      if (typeof body.stop === "string") {
+        body.stopSequences = [body.stop];
+      }
+      else {
+        body.stopSequences = body.stop;
+      }
     }
     // @ts-ignore
     let mergedParams: ChatModelParams = {

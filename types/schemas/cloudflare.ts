@@ -1,5 +1,4 @@
-import { makeApi, Zodios, type ZodiosOptions } from "../../deps.ts";
-import { z } from "../../deps.ts";
+import { makeApi, z, Zodios, type ZodiosOptions } from "../../deps.ts";
 
 const workers_ai_post_run_cf_baai_bge_base_en_v1_5_Body = z
   .object({ text: z.union([z.string(), z.array(z.string())]) })
@@ -73,8 +72,8 @@ const workers_ai_post_run_model_Body = z.union([
         lora: z.string().optional(),
         max_tokens: z.number().int().optional().default(256),
         prompt: z.string().min(1).max(6144),
-        raw: z.boolean().optional().default(false),
-        stream: z.boolean().optional().default(false),
+        raw: z.boolean().optional(),
+        stream: z.boolean().optional(),
       })
       .passthrough(),
     z
@@ -85,7 +84,7 @@ const workers_ai_post_run_model_Body = z.union([
             .object({ content: z.string().max(6144), role: z.string() })
             .passthrough()
         ),
-        stream: z.boolean().optional().default(false),
+        stream: z.boolean().optional(),
       })
       .passthrough(),
   ]),
@@ -427,8 +426,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -439,7 +438,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -491,8 +490,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -503,7 +502,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -652,8 +651,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -664,7 +663,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -716,8 +715,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -728,7 +727,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -950,8 +949,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -962,7 +961,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -1014,8 +1013,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -1026,7 +1025,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -1078,8 +1077,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -1090,7 +1089,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -1185,8 +1184,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -1197,7 +1196,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -1294,8 +1293,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -1306,7 +1305,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -1358,8 +1357,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -1370,7 +1369,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -1422,8 +1421,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -1434,7 +1433,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -1486,8 +1485,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -1498,7 +1497,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -1724,8 +1723,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -1736,7 +1735,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -1788,8 +1787,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -1800,7 +1799,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -1852,8 +1851,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -1864,7 +1863,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -1916,8 +1915,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -1928,7 +1927,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -1980,8 +1979,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -1992,7 +1991,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -2149,8 +2148,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -2161,7 +2160,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -2213,8 +2212,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -2225,7 +2224,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -2277,8 +2276,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -2289,7 +2288,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -2341,8 +2340,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -2353,7 +2352,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -2405,8 +2404,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -2417,7 +2416,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -2469,8 +2468,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -2481,7 +2480,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -2533,8 +2532,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -2545,7 +2544,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -2597,8 +2596,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -2609,7 +2608,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -2702,8 +2701,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -2714,7 +2713,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -2766,8 +2765,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -2778,7 +2777,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -2830,8 +2829,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -2842,7 +2841,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -2894,8 +2893,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -2906,7 +2905,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -2958,8 +2957,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -2970,7 +2969,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -3022,8 +3021,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -3034,7 +3033,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -3086,8 +3085,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -3098,7 +3097,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -3150,8 +3149,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -3162,7 +3161,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -3214,8 +3213,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -3226,7 +3225,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),
@@ -3278,8 +3277,8 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
               lora: z.string().optional(),
               max_tokens: z.number().int().optional().default(256),
               prompt: z.string().min(1).max(6144),
-              raw: z.boolean().optional().default(false),
-              stream: z.boolean().optional().default(false),
+              raw: z.boolean().optional(),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
           z
@@ -3290,7 +3289,7 @@ Model specific inputs available in [Cloudflare Docs](https://developers.cloudfla
                   .object({ content: z.string().max(6144), role: z.string() })
                   .passthrough()
               ),
-              stream: z.boolean().optional().default(false),
+              stream: z.boolean().optional(),
             })
             .passthrough(),
         ]),

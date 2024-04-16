@@ -55,7 +55,7 @@ export interface ChatModelParams extends BaseModelParams {
   /**
    *  List of stop words to use when generating
    */
-  stop?: string[];
+  stopSequences?: string[];
   input?: BaseLanguageModelInput;
 }
 

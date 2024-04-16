@@ -1,5 +1,4 @@
-import { makeApi, Zodios, type ZodiosOptions } from "../../deps.ts";
-import { z } from "../../deps.ts";
+import { makeApi, z, Zodios, type ZodiosOptions } from "../../deps.ts";
 
 const ChatCompletionRequestSystemMessage = z
   .object({
@@ -137,13 +136,13 @@ const CreateChatCompletionRequest = z
         "gpt-3.5-turbo-16k-0613",
       ]),
     ]),
-    frequency_penalty: z.number().gte(-2).lte(2).nullish().default(0),
-    logit_bias: z.record(z.number().int()).nullish().default(null),
-    logprobs: z.boolean().nullish().default(false),
+    frequency_penalty: z.number().gte(-2).lte(2).nullish(),
+    logit_bias: z.record(z.number().int()).nullish(),
+    logprobs: z.boolean().nullish(),
     top_logprobs: z.number().int().gte(0).lte(20).nullish(),
     max_tokens: z.number().int().nullish(),
     n: z.number().int().gte(1).lte(128).nullish().default(1),
-    presence_penalty: z.number().gte(-2).lte(2).nullish().default(0),
+    presence_penalty: z.number().gte(-2).lte(2).nullish(),
     response_format: z
       .object({ type: z.enum(["text", "json_object"]).default("text") })
       .partial()
@@ -155,11 +154,8 @@ const CreateChatCompletionRequest = z
       .gte(-9223372036854776000)
       .lte(9223372036854776000)
       .nullish(),
-    stop: z
-      .union([z.string(), z.array(z.string())])
-      .optional()
-      .default(null),
-    stream: z.boolean().nullish().default(false),
+    stop: z.union([z.string(), z.array(z.string())]).optional(),
+    stream: z.boolean().nullish(),
     temperature: z.number().gte(0).lte(2).nullish().default(1),
     top_p: z.number().gte(0).lte(1).nullish().default(1),
     tools: z.array(ChatCompletionTool).optional(),
@@ -250,25 +246,22 @@ const CreateCompletionRequest = z
       .nullable()
       .default("<|endoftext|>"),
     best_of: z.number().int().gte(0).lte(20).nullish().default(1),
-    echo: z.boolean().nullish().default(false),
-    frequency_penalty: z.number().gte(-2).lte(2).nullish().default(0),
-    logit_bias: z.record(z.number().int()).nullish().default(null),
-    logprobs: z.number().int().gte(0).lte(5).nullish().default(null),
+    echo: z.boolean().nullish(),
+    frequency_penalty: z.number().gte(-2).lte(2).nullish(),
+    logit_bias: z.record(z.number().int()).nullish(),
+    logprobs: z.number().int().gte(0).lte(5).nullish(),
     max_tokens: z.number().int().gte(0).nullish().default(16),
     n: z.number().int().gte(1).lte(128).nullish().default(1),
-    presence_penalty: z.number().gte(-2).lte(2).nullish().default(0),
+    presence_penalty: z.number().gte(-2).lte(2).nullish(),
     seed: z
       .number()
       .int()
       .gte(-9223372036854776000)
       .lte(9223372036854776000)
       .nullish(),
-    stop: z
-      .union([z.string(), z.array(z.string())])
-      .nullish()
-      .default(null),
-    stream: z.boolean().nullish().default(false),
-    suffix: z.string().nullish().default(null),
+    stop: z.union([z.string(), z.array(z.string())]).nullish(),
+    stream: z.boolean().nullish(),
+    suffix: z.string().nullish(),
     temperature: z.number().gte(0).lte(2).nullish().default(1),
     top_p: z.number().gte(0).lte(1).nullish().default(1),
     user: z.string().optional(),
@@ -420,7 +413,7 @@ const CreateTranscriptionRequest = z.object({
     .enum(["json", "text", "srt", "verbose_json", "vtt"])
     .optional()
     .default("json"),
-  temperature: z.number().optional().default(0),
+  temperature: z.number().optional(),
   "timestamp_granularities[]": z
     .array(z.enum(["word", "segment"]))
     .optional()
@@ -460,7 +453,7 @@ const CreateTranslationRequest = z.object({
   model: z.union([z.string(), z.literal("whisper-1")]),
   prompt: z.string().optional(),
   response_format: z.string().optional().default("json"),
-  temperature: z.number().optional().default(0),
+  temperature: z.number().optional(),
 });
 const CreateTranslationResponseJson = z
   .object({ text: z.string() })
@@ -518,7 +511,7 @@ const CreateFineTuningJobRequest = z
       .partial()
       .passthrough()
       .optional(),
-    suffix: z.string().min(1).max(40).nullish().default(null),
+    suffix: z.string().min(1).max(40).nullish(),
     validation_file: z.string().nullish(),
     integrations: z
       .array(
