@@ -1,7 +1,4 @@
 import {
-  BaseLanguageModelInput,
-  isBaseMessage,
-  isBaseMessageChunk,
   IterableReadableStream,
 } from "../deps.ts";
 
@@ -14,7 +11,6 @@ export async function urlToDataURL(url: string): Promise<string> {
   return await blobToDataURL(blob);
 }
 
-// Convert a blob to a data URL string
 export function blobToDataURL(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -24,7 +20,6 @@ export function blobToDataURL(blob: Blob): Promise<string> {
   });
 }
 
-// Convert a blob to a base64 string
 export async function blobToBase64(blob: Blob): Promise<string> {
   const arrayBuffer = await blob.arrayBuffer();
   const uint8Array = new Uint8Array(arrayBuffer);
@@ -45,18 +40,4 @@ export function isIterableReadableStream(
   return typeof obj === "object" && obj !== null && "locked" in obj &&
     "cancel" in obj &&
     "getReader" in obj;
-}
-
-export function removeSystemMessage(input: BaseLanguageModelInput) {
-  if (Array.isArray(input)) {
-    for (let i = input.length - 1; i >= 0; i--) {
-      const message = input[i];
-      if (isBaseMessage(message) || isBaseMessageChunk(message)) {
-        if (message._getType() === "system") {
-          input.splice(i, 1);
-        }
-      }
-    }
-  }
-  return input;
 }

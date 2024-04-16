@@ -20,7 +20,7 @@ it.skip("POST /api/" + [TaskType.CHAT], async () => {
   };
   const gatewayParams: GatewayParams = {
     provider: Provider.GOOGLE,
-    model: Provider.OPENAI,
+    model: Provider.OPEN_AI,
     endpoint: "/v1/chat/completions",
   };
   const apiKey = Deno.env.get("GOOGLE_API_KEY");
@@ -66,7 +66,7 @@ it.skip("POST /api/" + [TaskType.CHAT] + " Stream", async () => {
   };
   const gatewayParams: GatewayParams = {
     provider: Provider.GOOGLE,
-    model: Provider.OPENAI,
+    model: Provider.OPEN_AI,
     endpoint: "/v1/chat/completions",
   };
   const apiKey = Deno.env.get("GOOGLE_API_KEY");
@@ -134,7 +134,7 @@ it.skip("POST /api/" + [TaskType.CHAT] + " IMAGE_URL", async () => {
   };
   const gatewayParams: GatewayParams = {
     provider: Provider.GOOGLE,
-    model: Provider.OPENAI,
+    model: Provider.OPEN_AI,
     endpoint: "/v1/chat/completions",
   };
   const apiKey = Deno.env.get("GOOGLE_API_KEY");
@@ -172,7 +172,7 @@ it.skip("POST /api/" + TaskType.EMBEDDINGS, async () => {
   };
   const gatewayParams: GatewayParams = {
     provider: Provider.GOOGLE,
-    model: Provider.OPENAI,
+    model: Provider.OPEN_AI,
     endpoint: "/v1/embeddings",
   };
   const apiKey = Deno.env.get("GOOGLE_API_KEY");
@@ -219,8 +219,8 @@ it.skip("POST /api/" + TaskType.AUDIO_TRANSCRIPTIONS, async () => {
     const blob = new Blob([arrayBuffer], { type: "audio/wav" });
     const file = new File([blob], "jfk.wav");
     const gatewayParams: GatewayParams = {
-      provider: Provider.CLOUDFLARE,
-      model: Provider.OPENAI,
+      provider: Provider.WORKERS_AI,
+      model: Provider.OPEN_AI,
       endpoint: "/v1/audio/transcriptions",
     };
     const transcriptionResponse: Response = await testClient(
@@ -275,8 +275,8 @@ it("POST /api/" + TaskType.IMAGES_EDITS, async () => {
     const imageFile = new File([blob], "otter.png");
     const maskFile = new File([blob], "mask.png");
     const gatewayParams: GatewayParams = {
-      provider: Provider.CLOUDFLARE,
-      model: Provider.OPENAI,
+      provider: Provider.WORKERS_AI,
+      model: Provider.OPEN_AI,
       endpoint: "/v1/images/edits",
     };
     const editResponse: Response = await testClient(

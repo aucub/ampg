@@ -23,16 +23,11 @@ export class GoogleGenerativeAIChatService extends AbstractChatService {
       ...params,
       maxOutputTokens: params.maxTokens,
       stopSequences: params.stop,
+      apiKey: params.apiKey ||
+        env<{ GOOGLE_API_KEY: string }>(c)["GOOGLE_API_KEY"],
     };
-
     const model = new ChatGoogleGenerativeAI(googleGenerativeAIChatInput);
-
-    if (!params.streaming) {
-      // @ts-ignore
-      return await model.invoke(params.input);
-    } else {
-      return await model.stream(params.input);
-    }
+    return await model.invoke(params.input);
   }
 }
 
@@ -44,10 +39,10 @@ export class GoogleGenerativeAIEmbeddingService
   ): Promise<number[] | number[][]> {
     const googleGenerativeAIEmbeddingsParams:
       GoogleGenerativeAIEmbeddingsParams = {
-        ...params,
-        apiKey: params.apiKey ||
-          env<{ GOOGLE_API_KEY: string }>(c)["GOOGLE_API_KEY"],
-      };
+      ...params,
+      apiKey: params.apiKey ||
+        env<{ GOOGLE_API_KEY: string }>(c)["GOOGLE_API_KEY"],
+    };
     const embeddings = new GoogleGenerativeAIEmbeddings(
       googleGenerativeAIEmbeddingsParams,
     );

@@ -13,51 +13,32 @@ import {
 } from "./google_genai_service.ts";
 import {
   CloudflareWorkersAIChatService,
-  CloudflareWorkersAIEmbeddingService,
-  CloudflareWorkersAIImageEditService,
-  CloudflareWorkersAITranscriptionService,
 } from "./cloudflare_service.ts";
 import { schemas as openaiSchemas } from "../types/schemas/openai.ts";
 import {
-  HuggingFaceInferenceChatService,
   HuggingFaceInferenceEmbeddingService,
 } from "./hf_service.ts";
 
-/**
- * 获取服务实例的通用函数。
- *
- * @param taskType 任务类型（例如：TaskType.CHAT）
- * @param provider 服务提供者（例如：Providers.OPENAI）
- * @returns 对应的服务实例
- */
 export function getModelService(
   taskType: TaskType,
   provider: Provider,
 ): IModelService<any, any> {
   const modelServiceConstructorMap = {
-    [TaskType.GENERATE]: {
-      [Provider.HUGGINGFACEHUB]: HuggingFaceInferenceChatService,
-    },
     [TaskType.CHAT]: {
-      [Provider.OPENAI]: OpenAIChatService,
+      [Provider.OPEN_AI]: OpenAIChatService,
       [Provider.GOOGLE]: GoogleGenerativeAIChatService,
-      [Provider.CLOUDFLARE]: CloudflareWorkersAIChatService,
+      [Provider.WORKERS_AI]: CloudflareWorkersAIChatService,
     },
     [TaskType.EMBEDDINGS]: {
-      [Provider.OPENAI]: OpenAIEmbeddingService,
+      [Provider.OPEN_AI]: OpenAIEmbeddingService,
       [Provider.GOOGLE]: GoogleGenerativeAIEmbeddingService,
-      [Provider.CLOUDFLARE]: CloudflareWorkersAIEmbeddingService,
-      [Provider.HUGGINGFACEHUB]: HuggingFaceInferenceEmbeddingService,
+      [Provider.HUGGINGFACE_INFERENCE]: HuggingFaceInferenceEmbeddingService,
     },
     [TaskType.AUDIO_TRANSCRIPTIONS]: {
-      [Provider.OPENAI]: OpenAITranscriptionService,
-      [Provider.CLOUDFLARE]: CloudflareWorkersAITranscriptionService,
-    },
-    [TaskType.IMAGES_EDITS]: {
-      [Provider.CLOUDFLARE]: CloudflareWorkersAIImageEditService,
+      [Provider.OPEN_AI]: OpenAITranscriptionService,
     },
     [TaskType.IMAGES_GENERATIONS]: {
-      [Provider.OPENAI]: OpenAIImageGenerationService,
+      [Provider.OPEN_AI]: OpenAIImageGenerationService,
     },
   };
 
@@ -83,27 +64,27 @@ export function getZodValidatorSchema(
 ) {
   const zodValidatorModelRequestMap = {
     [TaskType.CHAT]: {
-      [Provider.OPENAI]: {
+      [Provider.OPEN_AI]: {
         [Target.JSON]: openaiSchemas.CreateChatCompletionRequest,
       },
     },
     [TaskType.EMBEDDINGS]: {
-      [Provider.OPENAI]: {
+      [Provider.OPEN_AI]: {
         [Target.JSON]: openaiSchemas.CreateEmbeddingRequest,
       },
     },
     [TaskType.IMAGES_GENERATIONS]: {
-      [Provider.OPENAI]: {
+      [Provider.OPEN_AI]: {
         [Target.JSON]: openaiSchemas.CreateImageRequest,
       },
     },
     [TaskType.AUDIO_TRANSCRIPTIONS]: {
-      [Provider.OPENAI]: {
+      [Provider.OPEN_AI]: {
         [Target.FORM]: openaiSchemas.CreateTranslationRequest,
       },
     },
     [TaskType.IMAGES_EDITS]: {
-      [Provider.OPENAI]: {
+      [Provider.OPEN_AI]: {
         [Target.FORM]: openaiSchemas.CreateImageEditRequest,
       },
     },
@@ -118,7 +99,7 @@ export function getZodValidatorSchema(
 
 export function getExceptionHandling(provider: Provider): IExceptionHandling {
   switch (provider) {
-    case Provider.OPENAI:
+    case Provider.OPEN_AI:
       return new OpenAIExceptionHandling();
     default:
       throw new Error(`Unknown provider: ${provider}`);

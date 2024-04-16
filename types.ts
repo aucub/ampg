@@ -8,7 +8,7 @@ export interface BaseModelParams {
   /**
    * Model name to use.
    */
-  modelName?: string;
+  model?: string;
   /**
    * API key to use when making requests.
    */

@@ -59,7 +59,7 @@ export class OpenAIChatService extends AbstractChatService {
     let mergedParams: ChatModelParams = {
       ...params,
       ...body,
-      modelName: params["modelName"] || body["model"],
+      model: params["model"] || body["model"],
       streaming: body["stream"] || false,
       topP: body["top_p"],
       maxTokens: body["max_tokens"],
@@ -112,20 +112,18 @@ export class OpenAIChatService extends AbstractChatService {
       & {
         configuration?: ClientOptions;
       } = {
-        cache: chatModelParams.cache ?? true,
-        modelName: chatModelParams.modelName,
-        openAIApiKey: chatModelParams.apiKey ??
-          env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_API_KEY"],
-        configuration: {
-          baseURL: env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_BASE_URL"] ??
-            undefined,
-        },
-      };
+      cache: chatModelParams.cache ?? true,
+      openAIApiKey: chatModelParams.apiKey ??
+        env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_API_KEY"],
+      configuration: {
+        baseURL: env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_BASE_URL"] ??
+          undefined,
+      },
+    };
     const openAIChatInput = { ...chatModelParams, ...openAIChatModelInput };
+    // @ts-ignore
     const model = new ChatOpenAI(openAIChatInput);
-    return chatModelParams.streaming
-      ? await model.stream(chatModelParams.input)
-      : await model.invoke(chatModelParams.input);
+    return await model.invoke(chatModelParams.input);
   }
 
   async deliverOutput(
@@ -133,7 +131,7 @@ export class OpenAIChatService extends AbstractChatService {
     output: string | IterableReadableStream<any>,
   ): Promise<Response> {
     const params: Partial<ChatModelParams> = await c.get("params") ?? {};
-    const modelName = params.modelName || "unknown";
+    const modelName = params.model || "unknown";
     if (
       output instanceof IterableReadableStream ||
       isIterableReadableStream(output)
@@ -217,7 +215,7 @@ export class OpenAITranscriptionService
       (Array.isArray(formData["file"])
         ? formData["file"].pop()
         : formData["file"]) as File;
-    params.modelName = (params.modelName || formData["model"]) as string;
+    params.model = (params.model || formData["model"]) as string;
     return params;
   }
 
@@ -269,7 +267,7 @@ export class OpenAIImageEditService extends AbstractImageEditService {
         params[field] = params[field] || formData[field];
       }
     }
-    params["modelName"] = (params["modelName"] || formData["model"]) as string;
+    params["model"] = (params["model"] || formData["model"]) as string;
     c.set("params", params);
     return params;
   }
@@ -310,7 +308,7 @@ export class OpenAIEmbeddingService extends AbstractEmbeddingService {
     let embeddingParams: EmbeddingParams = {
       ...baseModelParams,
       ...body,
-      modelName: baseModelParams.modelName || body.model,
+      model: baseModelParams.model || body.model,
       input: body.input as string | string[],
     };
     c.set("params", embeddingParams);
@@ -347,14 +345,12 @@ export class OpenAIEmbeddingService extends AbstractEmbeddingService {
     const embeddingParams: EmbeddingParams = await c.get("params");
     let embeddingData;
     if (Array.isArray(output) && Array.isArray(output[0])) {
-      // Multiple embeddings
       embeddingData = output.map((embeddingArray, index) => ({
         object: "embedding",
         embedding: embeddingArray,
         index: index,
       }));
     } else if (Array.isArray(output)) {
-      // Single embedding
       embeddingData = [{
         object: "embedding",
         embedding: output,
@@ -366,7 +362,7 @@ export class OpenAIEmbeddingService extends AbstractEmbeddingService {
     return c.json({
       object: "list",
       data: embeddingData,
-      model: embeddingParams.modelName,
+      model: embeddingParams.model,
       usage: {
         prompt_tokens: 0,
         total_tokens: 0,

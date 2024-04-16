@@ -30,6 +30,8 @@ interface CommunitySecretMap {
   COHERE_API_KEY?: string;
   DATABERRY_API_KEY?: string;
   FIREWORKS_API_KEY?: string;
+  FRIENDLI_TOKEN?: string;
+  FRIENDLI_TEAM?: string;
   GOOGLE_API_KEY?: string;
   GOOGLE_PALM_API_KEY?: string;
   GOOGLE_PLACES_API_KEY?: string;
@@ -100,29 +102,29 @@ export enum Target {
 }
 
 export enum Provider {
-  OPENAI = "openai",
-  ANTHROPIC = "anthropic",
-  AZURE_OPENAI = "azure-openai",
-  ANYSCALE = "anyscale",
-  COHERE = "cohere",
-  PALM = "palm",
-  GOOGLE = "google",
-  CLOUDFLARE = "cloudflare",
-  AZUREOPENAI = "azureopenai",
-  BEDROCK = "bedrock",
-  CLIENTS = "clients",
-  OCTOML = "octoml",
-  OLLAMA = "ollama",
-  TOGETHER_AI = "together-ai",
-  PERPLEXITY_AI = "perplexity-ai",
-  MISTRAL_AI = "mistral-ai",
-  DEEPINFRA = "deepinfra",
-  STABILITY_AI = "stability-ai",
-  NOMIC = "nomic",
-  AI21 = "ai21",
-  GROQ = "groq",
-  SEGMIND = "segmind",
-  HUGGINGFACEHUB = "huggingface",
+  OPEN_AI = 'openai',
+  COHERE = 'cohere',
+  AZURE_OPEN_AI = 'azure-openai',
+  ANTHROPIC = 'anthropic',
+  ANYSCALE = 'anyscale',
+  PALM = 'palm',
+  TOGETHER_AI = 'together-ai',
+  GOOGLE = 'google',
+  GOOGLE_VERTEX_AI = 'vertex-ai',
+  PERPLEXITY_AI = 'perplexity-ai',
+  MISTRAL_AI = 'mistral-ai',
+  DEEPINFRA = 'deepinfra',
+  STABILITY_AI = 'stability-ai',
+  NOMIC = 'nomic',
+  OLLAMA = 'ollama',
+  AI21 = 'ai21',
+  BEDROCK = 'bedrock',
+  GROQ = 'groq',
+  SEGMIND = 'segmind',
+  JINA = 'jina',
+  FIREWORKS_AI = 'fireworks-ai',
+  WORKERS_AI = 'workers-ai',
+  HUGGINGFACE_INFERENCE = "huggingface-inference",
 }
 
 const secretMap: SecretMap = await configAsync();
