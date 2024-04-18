@@ -634,71 +634,6 @@ const ListFineTuningJobCheckpointsResponse = z
     has_more: z.boolean(),
   })
   .passthrough();
-const createBatch_Body = z
-  .object({
-    input_file_id: z.string(),
-    endpoint: z.literal("/v1/chat/completions"),
-    completion_window: z.literal("24h"),
-    metadata: z.record(z.string()).nullish(),
-  })
-  .passthrough();
-const Batch = z
-  .object({
-    id: z.string(),
-    object: z.literal("batch"),
-    endpoint: z.string(),
-    errors: z
-      .object({
-        object: z.string(),
-        data: z.array(
-          z
-            .object({
-              code: z.string(),
-              message: z.string(),
-              param: z.string().nullable(),
-              line: z.number().int().nullable(),
-            })
-            .partial()
-            .passthrough()
-        ),
-      })
-      .partial()
-      .passthrough()
-      .optional(),
-    input_file_id: z.string(),
-    completion_window: z.string(),
-    status: z.enum([
-      "validating",
-      "failed",
-      "in_progress",
-      "finalizing",
-      "completed",
-      "expired",
-      "cancelling",
-      "cancelled",
-    ]),
-    output_file_id: z.string().optional(),
-    error_file_id: z.string().optional(),
-    created_at: z.string(),
-    in_progress_at: z.string().optional(),
-    expires_at: z.string().optional(),
-    finalizing_at: z.string().optional(),
-    completed_at: z.string().optional(),
-    failed_at: z.string().optional(),
-    expired_at: z.string().optional(),
-    cancelling_at: z.string().optional(),
-    cancelled_at: z.string().optional(),
-    request_counts: z
-      .object({
-        total: z.number().int(),
-        completed: z.number().int(),
-        failed: z.number().int(),
-      })
-      .passthrough()
-      .optional(),
-    metadata: z.object({}).partial().passthrough().nullish(),
-  })
-  .passthrough();
 const Model = z
   .object({
     id: z.string(),
@@ -771,12 +706,20 @@ const CreateModerationResponse = z
 const AssistantToolsCode = z
   .object({ type: z.literal("code_interpreter") })
   .passthrough();
-const AssistantToolsRetrieval = z
-  .object({ type: z.literal("retrieval") })
+const AssistantToolsFileSearch = z
+  .object({ type: z.literal("file_search") })
   .passthrough();
 const AssistantToolsFunction = z
   .object({ type: z.literal("function"), function: FunctionObject })
   .passthrough();
+const AssistantsApiResponseFormat = z
+  .object({ type: z.enum(["text", "json_object"]).default("text") })
+  .partial()
+  .passthrough();
+const AssistantsApiResponseFormatOption = z.union([
+  z.enum(["none", "auto"]),
+  AssistantsApiResponseFormat,
+]);
 const AssistantObject = z
   .object({
     id: z.string(),
@@ -790,14 +733,30 @@ const AssistantObject = z
       .array(
         z.union([
           AssistantToolsCode,
-          AssistantToolsRetrieval,
+          AssistantToolsFileSearch,
           AssistantToolsFunction,
         ])
       )
       .max(128)
       .default([]),
-    file_ids: z.array(z.string()).max(20).default([]),
+    tool_resources: z
+      .object({
+        code_interpreter: z
+          .object({ file_ids: z.array(z.string()).max(20).default([]) })
+          .partial()
+          .passthrough(),
+        file_search: z
+          .object({ vector_store_ids: z.array(z.string()).max(1) })
+          .partial()
+          .passthrough(),
+      })
+      .partial()
+      .passthrough()
+      .nullish(),
     metadata: z.object({}).partial().passthrough().nullable(),
+    temperature: z.number().gte(0).lte(2).nullish().default(1),
+    top_p: z.number().gte(0).lte(1).nullish().default(1),
+    response_format: AssistantsApiResponseFormatOption.optional(),
   })
   .passthrough();
 const ListAssistantsResponse = z
@@ -840,15 +799,28 @@ const CreateAssistantRequest = z.object({
     .array(
       z.union([
         AssistantToolsCode,
-        AssistantToolsRetrieval,
+        AssistantToolsFileSearch,
         AssistantToolsFunction,
       ])
     )
     .max(128)
     .optional()
     .default([]),
-  file_ids: z.array(z.string()).max(20).optional().default([]),
+  tool_resources: z
+    .object({
+      code_interpreter: z
+        .object({ file_ids: z.array(z.string()).max(20).default([]) })
+        .partial()
+        .passthrough(),
+      file_search: z.union([z.unknown(), z.unknown()]),
+    })
+    .partial()
+    .passthrough()
+    .nullish(),
   metadata: z.object({}).partial().passthrough().nullish(),
+  temperature: z.number().gte(0).lte(2).nullish().default(1),
+  top_p: z.number().gte(0).lte(1).nullish().default(1),
+  response_format: AssistantsApiResponseFormatOption.optional(),
 });
 const ModifyAssistantRequest = z
   .object({
@@ -860,14 +832,30 @@ const ModifyAssistantRequest = z
       .array(
         z.union([
           AssistantToolsCode,
-          AssistantToolsRetrieval,
+          AssistantToolsFileSearch,
           AssistantToolsFunction,
         ])
       )
       .max(128)
       .default([]),
-    file_ids: z.array(z.string()).max(20).default([]),
+    tool_resources: z
+      .object({
+        code_interpreter: z
+          .object({ file_ids: z.array(z.string()).max(20).default([]) })
+          .partial()
+          .passthrough(),
+        file_search: z
+          .object({ vector_store_ids: z.array(z.string()).max(1) })
+          .partial()
+          .passthrough(),
+      })
+      .partial()
+      .passthrough()
+      .nullable(),
     metadata: z.object({}).partial().passthrough().nullable(),
+    temperature: z.number().gte(0).lte(2).nullable().default(1),
+    top_p: z.number().gte(0).lte(1).nullable().default(1),
+    response_format: AssistantsApiResponseFormatOption,
   })
   .partial();
 const DeleteAssistantResponse = z
@@ -880,12 +868,33 @@ const DeleteAssistantResponse = z
 const CreateMessageRequest = z.object({
   role: z.enum(["user", "assistant"]),
   content: z.string().min(1).max(256000),
-  file_ids: z.array(z.string()).min(1).max(10).optional().default([]),
+  attachments: z
+    .array(
+      z
+        .object({
+          file_id: z.string(),
+          add_to: z.array(z.enum(["file_search", "code_interpreter"])),
+        })
+        .partial()
+        .passthrough()
+    )
+    .nullish(),
   metadata: z.object({}).partial().passthrough().nullish(),
 });
 const CreateThreadRequest = z
   .object({
     messages: z.array(CreateMessageRequest),
+    tool_resources: z
+      .object({
+        code_interpreter: z
+          .object({ file_ids: z.array(z.string()).max(20).default([]) })
+          .partial()
+          .passthrough(),
+        file_search: z.union([z.unknown(), z.unknown()]),
+      })
+      .partial()
+      .passthrough()
+      .nullable(),
     metadata: z.object({}).partial().passthrough().nullable(),
   })
   .partial();
@@ -894,11 +903,41 @@ const ThreadObject = z
     id: z.string(),
     object: z.literal("thread"),
     created_at: z.number().int(),
+    tool_resources: z
+      .object({
+        code_interpreter: z
+          .object({ file_ids: z.array(z.string()).max(20).default([]) })
+          .partial()
+          .passthrough(),
+        file_search: z
+          .object({ vector_store_ids: z.array(z.string()).max(1) })
+          .partial()
+          .passthrough(),
+      })
+      .partial()
+      .passthrough()
+      .nullable(),
     metadata: z.object({}).partial().passthrough().nullable(),
   })
   .passthrough();
 const ModifyThreadRequest = z
-  .object({ metadata: z.object({}).partial().passthrough().nullable() })
+  .object({
+    tool_resources: z
+      .object({
+        code_interpreter: z
+          .object({ file_ids: z.array(z.string()).max(20).default([]) })
+          .partial()
+          .passthrough(),
+        file_search: z
+          .object({ vector_store_ids: z.array(z.string()).max(1) })
+          .partial()
+          .passthrough(),
+      })
+      .partial()
+      .passthrough()
+      .nullable(),
+    metadata: z.object({}).partial().passthrough().nullable(),
+  })
   .partial();
 const DeleteThreadResponse = z
   .object({
@@ -976,7 +1015,17 @@ const MessageObject = z
     ),
     assistant_id: z.string().nullable(),
     run_id: z.string().nullable(),
-    file_ids: z.array(z.string()).max(10).default([]),
+    attachments: z
+      .array(
+        z
+          .object({
+            file_id: z.string(),
+            add_to: z.array(z.enum(["file_search", "code_interpreter"])),
+          })
+          .partial()
+          .passthrough()
+      )
+      .nullable(),
     metadata: z.object({}).partial().passthrough().nullable(),
   })
   .passthrough();
@@ -998,23 +1047,15 @@ const TruncationObject = z
     last_messages: z.number().int().gte(1).nullish(),
   })
   .passthrough();
-const AssistantsApiNamedToolChoice = z
+const AssistantsNamedToolChoice = z
   .object({
-    type: z.enum(["function", "code_interpreter", "retrieval"]),
+    type: z.enum(["function", "code_interpreter", "file_search"]),
     function: z.object({ name: z.string() }).passthrough().optional(),
   })
   .passthrough();
 const AssistantsApiToolChoiceOption = z.union([
   z.enum(["none", "auto"]),
-  AssistantsApiNamedToolChoice,
-]);
-const AssistantsApiResponseFormat = z
-  .object({ type: z.enum(["text", "json_object"]).default("text") })
-  .partial()
-  .passthrough();
-const AssistantsApiResponseFormatOption = z.union([
-  z.enum(["none", "auto"]),
-  AssistantsApiResponseFormat,
+  AssistantsNamedToolChoice,
 ]);
 const CreateThreadAndRunRequest = z.object({
   assistant_id: z.string(),
@@ -1049,14 +1090,29 @@ const CreateThreadAndRunRequest = z.object({
     .array(
       z.union([
         AssistantToolsCode,
-        AssistantToolsRetrieval,
+        AssistantToolsFileSearch,
         AssistantToolsFunction,
       ])
     )
     .max(20)
     .nullish(),
+  tool_resources: z
+    .object({
+      code_interpreter: z
+        .object({ file_ids: z.array(z.string()).max(20).default([]) })
+        .partial()
+        .passthrough(),
+      file_search: z
+        .object({ vector_store_ids: z.array(z.string()).max(1) })
+        .partial()
+        .passthrough(),
+    })
+    .partial()
+    .passthrough()
+    .nullish(),
   metadata: z.object({}).partial().passthrough().nullish(),
   temperature: z.number().gte(0).lte(2).nullish().default(1),
+  top_p: z.number().gte(0).lte(1).nullish().default(1),
   stream: z.boolean().nullish(),
   max_prompt_tokens: z.number().int().gte(256).nullish(),
   max_completion_tokens: z.number().int().gte(256).nullish(),
@@ -1131,16 +1187,16 @@ const RunObject = z
       .array(
         z.union([
           AssistantToolsCode,
-          AssistantToolsRetrieval,
+          AssistantToolsFileSearch,
           AssistantToolsFunction,
         ])
       )
       .max(20)
       .default([]),
-    file_ids: z.array(z.string()).default([]),
     metadata: z.object({}).partial().passthrough().nullable(),
     usage: RunCompletionUsage.nullable(),
     temperature: z.number().nullish(),
+    top_p: z.number().nullish(),
     max_prompt_tokens: z.number().int().gte(256).nullable(),
     max_completion_tokens: z.number().int().gte(256).nullable(),
     truncation_strategy: TruncationObject,
@@ -1191,7 +1247,7 @@ const CreateRunRequest = z.object({
     .array(
       z.union([
         AssistantToolsCode,
-        AssistantToolsRetrieval,
+        AssistantToolsFileSearch,
         AssistantToolsFunction,
       ])
     )
@@ -1199,6 +1255,7 @@ const CreateRunRequest = z.object({
     .nullish(),
   metadata: z.object({}).partial().passthrough().nullish(),
   temperature: z.number().gte(0).lte(2).nullish().default(1),
+  top_p: z.number().gte(0).lte(1).nullish().default(1),
   stream: z.boolean().nullish(),
   max_prompt_tokens: z.number().int().gte(256).nullish(),
   max_completion_tokens: z.number().int().gte(256).nullish(),
@@ -1250,11 +1307,11 @@ const RunStepDetailsToolCallsCodeObject = z
       .passthrough(),
   })
   .passthrough();
-const RunStepDetailsToolCallsRetrievalObject = z
+const RunStepDetailsToolCallsFileSearchObject = z
   .object({
     id: z.string(),
-    type: z.literal("retrieval"),
-    retrieval: z.object({}).partial().passthrough(),
+    type: z.literal("file_search"),
+    file_search: z.object({}).partial().passthrough(),
   })
   .passthrough();
 const RunStepDetailsToolCallsFunctionObject = z
@@ -1276,7 +1333,7 @@ const RunStepDetailsToolCallsObject = z
     tool_calls: z.array(
       z.union([
         RunStepDetailsToolCallsCodeObject,
-        RunStepDetailsToolCallsRetrievalObject,
+        RunStepDetailsToolCallsFileSearchObject,
         RunStepDetailsToolCallsFunctionObject,
       ])
     ),
@@ -1333,46 +1390,197 @@ const ListRunStepsResponse = z
     has_more: z.boolean(),
   })
   .passthrough();
-const AssistantFileObject = z
+const VectorStoreExpirationAfter = z
   .object({
-    id: z.string(),
-    object: z.literal("assistant.file"),
-    created_at: z.number().int(),
-    assistant_id: z.string(),
+    anchor: z.literal("last_active_at"),
+    days: z.number().int().gte(1).lte(365),
   })
   .passthrough();
-const ListAssistantFilesResponse = z
+const VectorStoreObject = z
+  .object({
+    id: z.string(),
+    object: z.literal("vector_store"),
+    created_at: z.number().int(),
+    name: z.string(),
+    bytes: z.number().int(),
+    file_counts: z
+      .object({
+        in_progress: z.number().int(),
+        completed: z.number().int(),
+        failed: z.number().int(),
+        cancelled: z.number().int(),
+        total: z.number().int(),
+      })
+      .passthrough(),
+    status: z.enum(["expired", "in_progress", "completed"]),
+    expires_after: VectorStoreExpirationAfter.optional(),
+    expires_at: z.number().int().nullish(),
+    last_active_at: z.number().int().nullable(),
+    metadata: z.object({}).partial().passthrough().nullable(),
+  })
+  .passthrough();
+const ListVectorStoresResponse = z
   .object({
     object: z.string(),
-    data: z.array(AssistantFileObject),
+    data: z.array(VectorStoreObject),
     first_id: z.string(),
     last_id: z.string(),
     has_more: z.boolean(),
   })
   .passthrough();
-const CreateAssistantFileRequest = z.object({ file_id: z.string() });
-const DeleteAssistantFileResponse = z
+const CreateVectorStoreRequest = z
+  .object({
+    file_ids: z.array(z.string()).max(500),
+    name: z.string(),
+    expires_after: VectorStoreExpirationAfter,
+    metadata: z.object({}).partial().passthrough().nullable(),
+  })
+  .partial();
+const UpdateVectorStoreRequest = z
+  .object({
+    name: z.string().nullable(),
+    expires_after: VectorStoreExpirationAfter,
+    metadata: z.object({}).partial().passthrough().nullable(),
+  })
+  .partial();
+const DeleteVectorStoreResponse = z
   .object({
     id: z.string(),
     deleted: z.boolean(),
-    object: z.literal("assistant.file.deleted"),
+    object: z.literal("vector_store.deleted"),
   })
   .passthrough();
-const MessageFileObject = z
+const VectorStoreFileObject = z
   .object({
     id: z.string(),
-    object: z.literal("thread.message.file"),
+    object: z.literal("vector_store.file"),
     created_at: z.number().int(),
-    message_id: z.string(),
+    vector_store_id: z.string(),
+    status: z.enum(["in_progress", "completed", "cancelled", "failed"]),
+    last_error: z
+      .object({
+        code: z.enum([
+          "internal_error",
+          "file_not_found",
+          "parsing_error",
+          "unhandled_mime_type",
+        ]),
+        message: z.string(),
+      })
+      .passthrough()
+      .nullable(),
   })
   .passthrough();
-const ListMessageFilesResponse = z
+const ListVectorStoreFilesResponse = z
   .object({
     object: z.string(),
-    data: z.array(MessageFileObject),
+    data: z.array(VectorStoreFileObject),
     first_id: z.string(),
     last_id: z.string(),
     has_more: z.boolean(),
+  })
+  .passthrough();
+const CreateVectorStoreFileRequest = z.object({ file_id: z.string() });
+const DeleteVectorStoreFileResponse = z
+  .object({
+    id: z.string(),
+    deleted: z.boolean(),
+    object: z.literal("vector_store.file.deleted"),
+  })
+  .passthrough();
+const CreateVectorStoreFileBatchRequest = z.object({
+  file_ids: z.array(z.string()).min(1).max(500),
+});
+const VectorStoreFileBatchObject = z
+  .object({
+    id: z.string(),
+    object: z.literal("vector_store.files_batch"),
+    created_at: z.number().int(),
+    vector_store_id: z.string(),
+    status: z.enum(["in_progress", "completed", "cancelled", "failed"]),
+    file_counts: z
+      .object({
+        in_progress: z.number().int(),
+        completed: z.number().int(),
+        failed: z.number().int(),
+        cancelled: z.number().int(),
+        total: z.number().int(),
+      })
+      .passthrough(),
+  })
+  .passthrough();
+const createBatch_Body = z
+  .object({
+    input_file_id: z.string(),
+    endpoint: z.literal("/v1/chat/completions"),
+    completion_window: z.literal("24h"),
+    metadata: z.record(z.string()).nullish(),
+  })
+  .passthrough();
+const Batch = z
+  .object({
+    id: z.string(),
+    object: z.literal("batch"),
+    endpoint: z.string(),
+    errors: z
+      .object({
+        object: z.string(),
+        data: z.array(
+          z
+            .object({
+              code: z.string(),
+              message: z.string(),
+              param: z.string().nullable(),
+              line: z.number().int().nullable(),
+            })
+            .partial()
+            .passthrough()
+        ),
+      })
+      .partial()
+      .passthrough()
+      .optional(),
+    input_file_id: z.string(),
+    completion_window: z.string(),
+    status: z.enum([
+      "validating",
+      "failed",
+      "in_progress",
+      "finalizing",
+      "completed",
+      "expired",
+      "cancelling",
+      "cancelled",
+    ]),
+    output_file_id: z.string().optional(),
+    error_file_id: z.string().optional(),
+    created_at: z.string(),
+    in_progress_at: z.string().optional(),
+    expires_at: z.string().optional(),
+    finalizing_at: z.string().optional(),
+    completed_at: z.string().optional(),
+    failed_at: z.string().optional(),
+    expired_at: z.string().optional(),
+    cancelling_at: z.string().optional(),
+    cancelled_at: z.string().optional(),
+    request_counts: z
+      .object({
+        total: z.number().int(),
+        completed: z.number().int(),
+        failed: z.number().int(),
+      })
+      .passthrough()
+      .optional(),
+    metadata: z.object({}).partial().passthrough().nullish(),
+  })
+  .passthrough();
+const ListBatchesResponse = z
+  .object({
+    data: z.array(Batch),
+    first_id: z.string().optional(),
+    last_id: z.string().optional(),
+    has_more: z.boolean(),
+    object: z.literal("list"),
   })
   .passthrough();
 
@@ -1431,16 +1639,16 @@ export const schemas = {
   ListFineTuningJobEventsResponse,
   FineTuningJobCheckpoint,
   ListFineTuningJobCheckpointsResponse,
-  createBatch_Body,
-  Batch,
   Model,
   ListModelsResponse,
   DeleteModelResponse,
   CreateModerationRequest,
   CreateModerationResponse,
   AssistantToolsCode,
-  AssistantToolsRetrieval,
+  AssistantToolsFileSearch,
   AssistantToolsFunction,
+  AssistantsApiResponseFormat,
+  AssistantsApiResponseFormatOption,
   AssistantObject,
   ListAssistantsResponse,
   CreateAssistantRequest,
@@ -1459,10 +1667,8 @@ export const schemas = {
   ListMessagesResponse,
   ModifyMessageRequest,
   TruncationObject,
-  AssistantsApiNamedToolChoice,
+  AssistantsNamedToolChoice,
   AssistantsApiToolChoiceOption,
-  AssistantsApiResponseFormat,
-  AssistantsApiResponseFormatOption,
   CreateThreadAndRunRequest,
   RunToolCallObject,
   RunCompletionUsage,
@@ -1475,18 +1681,27 @@ export const schemas = {
   RunStepDetailsToolCallsCodeOutputLogsObject,
   RunStepDetailsToolCallsCodeOutputImageObject,
   RunStepDetailsToolCallsCodeObject,
-  RunStepDetailsToolCallsRetrievalObject,
+  RunStepDetailsToolCallsFileSearchObject,
   RunStepDetailsToolCallsFunctionObject,
   RunStepDetailsToolCallsObject,
   RunStepCompletionUsage,
   RunStepObject,
   ListRunStepsResponse,
-  AssistantFileObject,
-  ListAssistantFilesResponse,
-  CreateAssistantFileRequest,
-  DeleteAssistantFileResponse,
-  MessageFileObject,
-  ListMessageFilesResponse,
+  VectorStoreExpirationAfter,
+  VectorStoreObject,
+  ListVectorStoresResponse,
+  CreateVectorStoreRequest,
+  UpdateVectorStoreRequest,
+  DeleteVectorStoreResponse,
+  VectorStoreFileObject,
+  ListVectorStoreFilesResponse,
+  CreateVectorStoreFileRequest,
+  DeleteVectorStoreFileResponse,
+  CreateVectorStoreFileBatchRequest,
+  VectorStoreFileBatchObject,
+  createBatch_Body,
+  Batch,
+  ListBatchesResponse,
 };
 
 const endpoints = makeApi([
@@ -1581,105 +1796,6 @@ const endpoints = makeApi([
     response: DeleteAssistantResponse,
   },
   {
-    method: "get",
-    path: "/assistants/:assistant_id/files",
-    alias: "listAssistantFiles",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "assistant_id",
-        type: "Path",
-        schema: z.string(),
-      },
-      {
-        name: "limit",
-        type: "Query",
-        schema: z.number().int().optional().default(20),
-      },
-      {
-        name: "order",
-        type: "Query",
-        schema: z.enum(["asc", "desc"]).optional().default("desc"),
-      },
-      {
-        name: "after",
-        type: "Query",
-        schema: z.string().optional(),
-      },
-      {
-        name: "before",
-        type: "Query",
-        schema: z.string().optional(),
-      },
-    ],
-    response: z
-      .object({
-        object: z.string(),
-        data: z.array(AssistantFileObject),
-        first_id: z.string(),
-        last_id: z.string(),
-        has_more: z.boolean(),
-      })
-      .passthrough(),
-  },
-  {
-    method: "post",
-    path: "/assistants/:assistant_id/files",
-    alias: "createAssistantFile",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "body",
-        type: "Body",
-        schema: z.object({ file_id: z.string() }),
-      },
-      {
-        name: "assistant_id",
-        type: "Path",
-        schema: z.string(),
-      },
-    ],
-    response: AssistantFileObject,
-  },
-  {
-    method: "get",
-    path: "/assistants/:assistant_id/files/:file_id",
-    alias: "getAssistantFile",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "assistant_id",
-        type: "Path",
-        schema: z.string(),
-      },
-      {
-        name: "file_id",
-        type: "Path",
-        schema: z.string(),
-      },
-    ],
-    response: AssistantFileObject,
-  },
-  {
-    method: "delete",
-    path: "/assistants/:assistant_id/files/:file_id",
-    alias: "deleteAssistantFile",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "assistant_id",
-        type: "Path",
-        schema: z.string(),
-      },
-      {
-        name: "file_id",
-        type: "Path",
-        schema: z.string(),
-      },
-    ],
-    response: DeleteAssistantFileResponse,
-  },
-  {
     method: "post",
     path: "/audio/speech",
     alias: "createSpeech",
@@ -1740,6 +1856,25 @@ const endpoints = makeApi([
       },
     ],
     response: Batch,
+  },
+  {
+    method: "get",
+    path: "/batches",
+    alias: "listBatches",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "after",
+        type: "Query",
+        schema: z.string().optional(),
+      },
+      {
+        name: "limit",
+        type: "Query",
+        schema: z.number().int().optional().default(20),
+      },
+    ],
+    response: ListBatchesResponse,
   },
   {
     method: "get",
@@ -2163,9 +2298,7 @@ const endpoints = makeApi([
       {
         name: "body",
         type: "Body",
-        schema: z
-          .object({ metadata: z.object({}).partial().passthrough().nullable() })
-          .partial(),
+        schema: ModifyThreadRequest,
       },
       {
         name: "thread_id",
@@ -2299,77 +2432,6 @@ const endpoints = makeApi([
       },
     ],
     response: MessageObject,
-  },
-  {
-    method: "get",
-    path: "/threads/:thread_id/messages/:message_id/files",
-    alias: "listMessageFiles",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "thread_id",
-        type: "Path",
-        schema: z.string(),
-      },
-      {
-        name: "message_id",
-        type: "Path",
-        schema: z.string(),
-      },
-      {
-        name: "limit",
-        type: "Query",
-        schema: z.number().int().optional().default(20),
-      },
-      {
-        name: "order",
-        type: "Query",
-        schema: z.enum(["asc", "desc"]).optional().default("desc"),
-      },
-      {
-        name: "after",
-        type: "Query",
-        schema: z.string().optional(),
-      },
-      {
-        name: "before",
-        type: "Query",
-        schema: z.string().optional(),
-      },
-    ],
-    response: z
-      .object({
-        object: z.string(),
-        data: z.array(MessageFileObject),
-        first_id: z.string(),
-        last_id: z.string(),
-        has_more: z.boolean(),
-      })
-      .passthrough(),
-  },
-  {
-    method: "get",
-    path: "/threads/:thread_id/messages/:message_id/files/:file_id",
-    alias: "getMessageFile",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "thread_id",
-        type: "Path",
-        schema: z.string(),
-      },
-      {
-        name: "message_id",
-        type: "Path",
-        schema: z.string(),
-      },
-      {
-        name: "file_id",
-        type: "Path",
-        schema: z.string(),
-      },
-    ],
-    response: MessageFileObject,
   },
   {
     method: "get",
@@ -2596,6 +2658,321 @@ const endpoints = makeApi([
       },
     ],
     response: RunObject,
+  },
+  {
+    method: "get",
+    path: "/vector_stores",
+    alias: "listVectorStores",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "limit",
+        type: "Query",
+        schema: z.number().int().optional().default(20),
+      },
+      {
+        name: "order",
+        type: "Query",
+        schema: z.enum(["asc", "desc"]).optional().default("desc"),
+      },
+      {
+        name: "after",
+        type: "Query",
+        schema: z.string().optional(),
+      },
+      {
+        name: "before",
+        type: "Query",
+        schema: z.string().optional(),
+      },
+    ],
+    response: z
+      .object({
+        object: z.string(),
+        data: z.array(VectorStoreObject),
+        first_id: z.string(),
+        last_id: z.string(),
+        has_more: z.boolean(),
+      })
+      .passthrough(),
+  },
+  {
+    method: "post",
+    path: "/vector_stores",
+    alias: "createVectorStore",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: CreateVectorStoreRequest,
+      },
+    ],
+    response: VectorStoreObject,
+  },
+  {
+    method: "get",
+    path: "/vector_stores/:vector_store_id",
+    alias: "getVectorStore",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "vector_store_id",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: VectorStoreObject,
+  },
+  {
+    method: "post",
+    path: "/vector_stores/:vector_store_id",
+    alias: "modifyVectorStore",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: UpdateVectorStoreRequest,
+      },
+      {
+        name: "vector_store_id",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: VectorStoreObject,
+  },
+  {
+    method: "delete",
+    path: "/vector_stores/:vector_store_id",
+    alias: "deleteVectorStore",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "vector_store_id",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: DeleteVectorStoreResponse,
+  },
+  {
+    method: "post",
+    path: "/vector_stores/:vector_store_id/file_batches",
+    alias: "createVectorStoreFileBatch",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: CreateVectorStoreFileBatchRequest,
+      },
+      {
+        name: "vector_store_id",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: VectorStoreFileBatchObject,
+  },
+  {
+    method: "get",
+    path: "/vector_stores/:vector_store_id/file_batches/:batch_id",
+    alias: "getVectorStoreFileBatch",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "vector_store_id",
+        type: "Path",
+        schema: z.string(),
+      },
+      {
+        name: "batch_id",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: VectorStoreFileBatchObject,
+  },
+  {
+    method: "post",
+    path: "/vector_stores/:vector_store_id/file_batches/:batch_id/cancel",
+    alias: "cancelVectorStoreFileBatch",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "vector_store_id",
+        type: "Path",
+        schema: z.string(),
+      },
+      {
+        name: "batch_id",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: VectorStoreFileBatchObject,
+  },
+  {
+    method: "get",
+    path: "/vector_stores/:vector_store_id/file_batches/:batch_id/files",
+    alias: "listFilesInVectorStoreBatch",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "vector_store_id",
+        type: "Path",
+        schema: z.string(),
+      },
+      {
+        name: "batch_id",
+        type: "Path",
+        schema: z.string(),
+      },
+      {
+        name: "limit",
+        type: "Query",
+        schema: z.number().int().optional().default(20),
+      },
+      {
+        name: "order",
+        type: "Query",
+        schema: z.enum(["asc", "desc"]).optional().default("desc"),
+      },
+      {
+        name: "after",
+        type: "Query",
+        schema: z.string().optional(),
+      },
+      {
+        name: "before",
+        type: "Query",
+        schema: z.string().optional(),
+      },
+      {
+        name: "filter",
+        type: "Query",
+        schema: z
+          .enum(["in_progress", "completed", "failed", "cancelled"])
+          .optional(),
+      },
+    ],
+    response: z
+      .object({
+        object: z.string(),
+        data: z.array(VectorStoreFileObject),
+        first_id: z.string(),
+        last_id: z.string(),
+        has_more: z.boolean(),
+      })
+      .passthrough(),
+  },
+  {
+    method: "get",
+    path: "/vector_stores/:vector_store_id/files",
+    alias: "listVectorStoreFiles",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "vector_store_id",
+        type: "Path",
+        schema: z.string(),
+      },
+      {
+        name: "limit",
+        type: "Query",
+        schema: z.number().int().optional().default(20),
+      },
+      {
+        name: "order",
+        type: "Query",
+        schema: z.enum(["asc", "desc"]).optional().default("desc"),
+      },
+      {
+        name: "after",
+        type: "Query",
+        schema: z.string().optional(),
+      },
+      {
+        name: "before",
+        type: "Query",
+        schema: z.string().optional(),
+      },
+      {
+        name: "filter",
+        type: "Query",
+        schema: z
+          .enum(["in_progress", "completed", "failed", "cancelled"])
+          .optional(),
+      },
+    ],
+    response: z
+      .object({
+        object: z.string(),
+        data: z.array(VectorStoreFileObject),
+        first_id: z.string(),
+        last_id: z.string(),
+        has_more: z.boolean(),
+      })
+      .passthrough(),
+  },
+  {
+    method: "post",
+    path: "/vector_stores/:vector_store_id/files",
+    alias: "createVectorStoreFile",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: z.object({ file_id: z.string() }),
+      },
+      {
+        name: "vector_store_id",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: VectorStoreFileObject,
+  },
+  {
+    method: "get",
+    path: "/vector_stores/:vector_store_id/files/:file_id",
+    alias: "getVectorStoreFile",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "vector_store_id",
+        type: "Path",
+        schema: z.string(),
+      },
+      {
+        name: "file_id",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: VectorStoreFileObject,
+  },
+  {
+    method: "delete",
+    path: "/vector_stores/:vector_store_id/files/:file_id",
+    alias: "deleteVectorStoreFile",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "vector_store_id",
+        type: "Path",
+        schema: z.string(),
+      },
+      {
+        name: "file_id",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: DeleteVectorStoreFileResponse,
   },
 ]);
 

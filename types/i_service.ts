@@ -24,10 +24,10 @@ export abstract class AbstractChatService implements IModelService<ChatModelPara
     async prepareModelParams(c: Context): Promise<ChatModelParams> {
         throw new Error("Method not implemented.");
     }
-    async executeModel(c: Context, params: ChatModelParams): Promise<any> {
+    async executeModel(c: Context, params: ChatModelParams): Promise<string | BaseMessageChunk | IterableReadableStream> {
         throw new Error("Method not implemented.");
     }
-    async deliverOutput(c: Context, output: any): Promise<Response> {
+    async deliverOutput(c: Context, output: string | BaseMessageChunk | IterableReadableStream): Promise<Response> {
         throw new Error("Method not implemented.");
     }
 }
