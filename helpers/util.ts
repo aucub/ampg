@@ -1,6 +1,4 @@
-import {
-  IterableReadableStream,
-} from "../deps.ts";
+import { IterableReadableStream } from "../deps.ts";
 
 export async function urlToDataURL(url: string): Promise<string> {
   const response = await fetch(url);

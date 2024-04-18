@@ -5,15 +5,13 @@ import {
   CloudflareWorkersAIChatService,
   CloudflareWorkersAIEmbeddingService,
   CloudflareWorkersAIImageEditService,
-  CloudflareWorkersAITranscriptionService
+  CloudflareWorkersAITranscriptionService,
 } from "./cloudflare_service.ts";
 import {
   GoogleGenerativeAIChatService,
   GoogleGenerativeAIEmbeddingService,
 } from "./google_genai_service.ts";
-import {
-  HuggingFaceInferenceEmbeddingService,
-} from "./hf_service.ts";
+import { HuggingFaceInferenceEmbeddingService } from "./hf_service.ts";
 import {
   OpenAIChatService,
   OpenAIEmbeddingService,

@@ -7,8 +7,8 @@ import {
   CloudflareWorkersAIInput,
   Context,
   Document,
+  env,
   IterableReadableStream,
-  env
 } from "../deps.ts";
 import {
   ChatModelParams,
@@ -34,15 +34,18 @@ class AIFetcher {
   cloudflareApiToken?: string;
   baseUrl?: string;
   async fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
-    const request = new Request(input, init)
+    const request = new Request(input, init);
     request.headers.delete("Host");
     request.headers.delete("Content-Length");
     request.headers.set("Authorization", "Bearer " + this.cloudflareApiToken);
-    const res = await fetch(this.baseUrl + `/${this.cloudflareAccountId}/ai/run/proxy`, {
-      method: "POST",
-      headers: Object.fromEntries(request.headers.entries()),
-      body: request.body,
-    });
+    const res = await fetch(
+      this.baseUrl + `/${this.cloudflareAccountId}/ai/run/proxy`,
+      {
+        method: "POST",
+        headers: Object.fromEntries(request.headers.entries()),
+        body: request.body,
+      },
+    );
     const respHeaders = new Headers(res.headers);
     respHeaders.delete("Host");
     respHeaders.delete("Content-Length");
@@ -51,7 +54,8 @@ class AIFetcher {
   constructor(fields: AIFetcherParams) {
     this.cloudflareAccountId = fields?.cloudflareAccountId,
       this.cloudflareApiToken = fields?.cloudflareApiToken,
-      this.baseUrl = fields?.baseUrl ?? `https://api.cloudflare.com/client/v4/accounts`;
+      this.baseUrl = fields?.baseUrl ??
+        `https://api.cloudflare.com/client/v4/accounts`;
     if (this.baseUrl.endsWith("/")) {
       this.baseUrl = this.baseUrl.slice(0, -1);
     }
@@ -94,13 +98,15 @@ export class CloudflareWorkersAIEmbeddingService
       cloudflareApiToken: params.apiKey ||
         env<{ CLOUDFLARE_API_TOKEN: string }>(c)["CLOUDFLARE_API_TOKEN"],
       baseUrl: env<{ CLOUDFLARE_BASE_URL: string }>(c)["CLOUDFLARE_BASE_URL"],
-    })
+    });
     const cloudflareWorkersAIEmbeddingsParams:
       CloudflareWorkersAIEmbeddingsParams = {
-      ...params,
-      binding: AI
-    };
-    const embeddings = new CloudflareWorkersAIEmbeddings(cloudflareWorkersAIEmbeddingsParams);
+        ...params,
+        binding: AI,
+      };
+    const embeddings = new CloudflareWorkersAIEmbeddings(
+      cloudflareWorkersAIEmbeddingsParams,
+    );
     if (Array.isArray(params.input)) {
       return await embeddings.embedDocuments(params.input);
     } else {
@@ -118,11 +124,11 @@ export class CloudflareWorkersAITranscriptionService
       cloudflareApiToken: params.apiKey ||
         env<{ CLOUDFLARE_API_TOKEN: string }>(c)["CLOUDFLARE_API_TOKEN"],
       baseUrl: env<{ CLOUDFLARE_BASE_URL: string }>(c)["CLOUDFLARE_BASE_URL"],
-    })
+    });
     const ai = new Ai(AI);
     const inputs = {
       //@ts-ignore
-      audio: [...new Uint8Array(params.file)]
+      audio: [...new Uint8Array(params.file)],
     };
     //@ts-ignore
     const response = await ai.run(params.model, inputs);
@@ -143,15 +149,15 @@ export class CloudflareWorkersAIImageEditService
       cloudflareApiToken: params.apiKey ||
         env<{ CLOUDFLARE_API_TOKEN: string }>(c)["CLOUDFLARE_API_TOKEN"],
       baseUrl: env<{ CLOUDFLARE_BASE_URL: string }>(c)["CLOUDFLARE_BASE_URL"],
-    })
+    });
     const ai = new Ai(AI);
     const response = await ai.run(
       // @ts-ignore
       params.model,
       // @ts-ignore
-      params as AiTextToImageInput
+      params as AiTextToImageInput,
     );
     // @ts-ignore
-    return new Blob([response], { type: 'image/png' });;
+    return new Blob([response], { type: "image/png" });
   }
 }

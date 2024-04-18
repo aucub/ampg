@@ -1,5 +1,5 @@
 import { Provider, Target, TaskType } from "../config.ts";
-import { MiddlewareHandler, ZodSchema, createMiddleware, z } from "../deps.ts";
+import { createMiddleware, MiddlewareHandler, z, ZodSchema } from "../deps.ts";
 import { getZodValidatorSchema } from "../services/model_service_provider.ts";
 
 export const validatorMiddleware = (): MiddlewareHandler => {

@@ -1,12 +1,6 @@
-import {
-  Context,
-  env,
-  HuggingFaceInferenceEmbeddings,
-} from "../deps.ts";
+import { Context, env, HuggingFaceInferenceEmbeddings } from "../deps.ts";
 import { EmbeddingParams } from "../types.ts";
-import {
-  AbstractEmbeddingService,
-} from "../types/i_service.ts";
+import { AbstractEmbeddingService } from "../types/i_service.ts";
 
 export class HuggingFaceInferenceEmbeddingService
   extends AbstractEmbeddingService {
