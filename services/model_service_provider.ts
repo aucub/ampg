@@ -3,6 +3,9 @@ import { IExceptionHandling, IModelService } from "../types/i_service.ts";
 import { schemas as openaiSchemas } from "../types/schemas/openai.ts";
 import {
   CloudflareWorkersAIChatService,
+  CloudflareWorkersAIEmbeddingService,
+  CloudflareWorkersAIImageEditService,
+  CloudflareWorkersAITranscriptionService
 } from "./cloudflare_service.ts";
 import {
   GoogleGenerativeAIChatService,
@@ -33,12 +36,17 @@ export function getModelService(
       [Provider.OPEN_AI]: OpenAIEmbeddingService,
       [Provider.GOOGLE]: GoogleGenerativeAIEmbeddingService,
       [Provider.HUGGINGFACE_INFERENCE]: HuggingFaceInferenceEmbeddingService,
+      [Provider.WORKERS_AI]: CloudflareWorkersAIEmbeddingService,
     },
     [TaskType.AUDIO_TRANSCRIPTIONS]: {
       [Provider.OPEN_AI]: OpenAITranscriptionService,
+      [Provider.WORKERS_AI]: CloudflareWorkersAITranscriptionService,
     },
     [TaskType.IMAGES_GENERATIONS]: {
       [Provider.OPEN_AI]: OpenAIImageGenerationService,
+    },
+    [TaskType.IMAGES_EDITS]: {
+      [Provider.WORKERS_AI]: CloudflareWorkersAIImageEditService,
     },
   };
 
