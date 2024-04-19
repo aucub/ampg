@@ -20,9 +20,11 @@ import {
   streamSSE,
   SystemMessage,
   z,
+  BaseFunctionCallOptions
 } from "../deps.ts";
 import {
   blobToBase64,
+  isChatCompletionNamedToolChoice,
   isIterableReadableStream,
   urlToDataURL,
 } from "../helpers/util.ts";
@@ -101,6 +103,24 @@ export class OpenAIChatService extends AbstractChatService {
           break;
       }
     }
+    if (body.tools && body.tools.length > 0) {
+      const functions: BaseFunctionCallOptions = {
+        functions: []
+      }
+      for (const tool of body.tools) {
+        if (tool.type == "function") {
+          //@ts-ignore
+          functions.functions.push(tool.function)
+        }
+      }
+      if (isChatCompletionNamedToolChoice(body.tool_choice)) {
+        if (body.tool_choice.type == 'function') {
+          //@ts-ignore
+          functions.function_call = body.tool_choice.function
+        }
+      }
+      mergedParams.options = functions
+    }
     mergedParams.input = chatHistory;
     c.set("params", mergedParams);
     return mergedParams;
@@ -116,18 +136,19 @@ export class OpenAIChatService extends AbstractChatService {
       & {
         configuration?: ClientOptions;
       } = {
-        cache: chatModelParams.cache ?? true,
-        openAIApiKey: chatModelParams.apiKey ??
-          env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_API_KEY"],
-        configuration: {
-          baseURL: env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_BASE_URL"] ??
-            undefined,
-        },
-      };
+      cache: chatModelParams.cache ?? true,
+      openAIApiKey: chatModelParams.apiKey ??
+        env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_API_KEY"],
+      configuration: {
+        baseURL: env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_BASE_URL"] ??
+          undefined,
+      },
+    };
     const openAIChatInput = { ...chatModelParams, ...openAIChatModelInput };
     // @ts-ignore
     const model = new ChatOpenAI(openAIChatInput);
-    return await model.invoke(chatModelParams.input);
+    // @ts-ignore
+    return await model.invoke(chatModelParams.input, chatModelParams.options);
   }
 
   async deliverOutput(

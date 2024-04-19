@@ -39,3 +39,11 @@ export function isIterableReadableStream(
     "cancel" in obj &&
     "getReader" in obj;
 }
+
+export function isChatCompletionNamedToolChoice(
+  obj: any,
+) {
+  return typeof obj === "object" && obj !== null && "type" in obj &&
+    "function" in obj &&
+    "name" in obj["function"];
+}

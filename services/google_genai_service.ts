@@ -58,10 +58,10 @@ export class GoogleGenerativeAIEmbeddingService
   ): Promise<number[] | number[][]> {
     const googleGenerativeAIEmbeddingsParams:
       GoogleGenerativeAIEmbeddingsParams = {
-        ...params,
-        apiKey: params.apiKey ||
-          env<{ GOOGLE_API_KEY: string }>(c)["GOOGLE_API_KEY"],
-      };
+      ...params,
+      apiKey: params.apiKey ||
+        env<{ GOOGLE_API_KEY: string }>(c)["GOOGLE_API_KEY"],
+    };
     const embeddings = new GoogleGenerativeAIEmbeddings(
       googleGenerativeAIEmbeddingsParams,
     );

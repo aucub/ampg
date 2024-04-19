@@ -1,4 +1,4 @@
-import { BaseLanguageModelInput, z } from "./deps.ts";
+import { BaseChatModelCallOptions, BaseLanguageModelInput, z } from "./deps.ts";
 
 export interface BaseModelParams {
   /**
@@ -57,6 +57,7 @@ export interface ChatModelParams extends BaseModelParams {
    */
   stopSequences?: string[];
   input?: BaseLanguageModelInput;
+  options?: BaseChatModelCallOptions;
 }
 
 export interface EmbeddingParams extends BaseModelParams {

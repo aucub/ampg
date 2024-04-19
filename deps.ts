@@ -31,7 +31,7 @@ export { ChatCloudflareWorkersAI } from "https://esm.sh/@langchain/cloudflare@0.
 export type { CloudflareWorkersAIInput } from "https://esm.sh/@langchain/cloudflare@0.0.4";
 export { HuggingFaceInferenceEmbeddings } from "https://esm.sh/@langchain/community@0.0.50/embeddings/hf";
 export { Document } from "https://esm.sh/@langchain/core@0.1.58/documents";
-export type { BaseLanguageModelInput } from "https://esm.sh/@langchain/core@0.1.58/language_models/base";
+export type { BaseLanguageModelInput, BaseFunctionCallOptions } from "https://esm.sh/@langchain/core@0.1.58/language_models/base";
 export type {
   BaseChatModelCallOptions,
   BaseChatModelParams,
