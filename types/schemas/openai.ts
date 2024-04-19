@@ -873,7 +873,9 @@ const CreateMessageRequest = z.object({
       z
         .object({
           file_id: z.string(),
-          add_to: z.array(z.enum(["file_search", "code_interpreter"])),
+          tools: z.array(
+            z.union([AssistantToolsCode, AssistantToolsFileSearch])
+          ),
         })
         .partial()
         .passthrough()
@@ -1020,7 +1022,9 @@ const MessageObject = z
         z
           .object({
             file_id: z.string(),
-            add_to: z.array(z.enum(["file_search", "code_interpreter"])),
+            tools: z.array(
+              z.union([AssistantToolsCode, AssistantToolsFileSearch])
+            ),
           })
           .partial()
           .passthrough()
