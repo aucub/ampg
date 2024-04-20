@@ -1,10 +1,4 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/universal:2",
-  "features": {
-    "ghcr.io/devcontainers-community/features/deno:1": {
-      "version": "latest"
-    }
-  },
   "customizations": {
     "vscode": {
       "extensions": [
@@ -21,8 +15,16 @@
         "oderwat.indent-rainbow",
         "mhutchie.git-graph",
         "formulahendry.code-runner",
-        "golang.go"
+        "golang.go",
+        "foxundermoon.shell-format",
+        "tamasfe.even-better-toml"
       ]
     }
-  }
+  },
+  "features": {
+    "ghcr.io/devcontainers-community/features/deno:1": {
+      "version": "latest"
+    }
+  },
+  "image": "mcr.microsoft.com/devcontainers/universal:2"
 }

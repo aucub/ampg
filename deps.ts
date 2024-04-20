@@ -19,7 +19,7 @@ export {
 } from "https://deno.land/x/hono@v4.2.5/middleware.ts";
 export { Hono, HTTPException } from "https://deno.land/x/hono@v4.2.5/mod.ts";
 export type { MiddlewareHandler } from "https://deno.land/x/hono@v4.2.5/types.ts";
-export { OpenAI } from "https://deno.land/x/openai@v4.38.1/mod.ts";
+export { OpenAI } from "https://deno.land/x/openai@v4.38.2/mod.ts";
 export { z, ZodSchema } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 export { Ai } from "https://esm.sh/@cloudflare/ai@1.1.0";
 export {
@@ -31,7 +31,10 @@ export { ChatCloudflareWorkersAI } from "https://esm.sh/@langchain/cloudflare@0.
 export type { CloudflareWorkersAIInput } from "https://esm.sh/@langchain/cloudflare@0.0.4";
 export { HuggingFaceInferenceEmbeddings } from "https://esm.sh/@langchain/community@0.0.50/embeddings/hf";
 export { Document } from "https://esm.sh/@langchain/core@0.1.58/documents";
-export type { BaseLanguageModelInput, BaseFunctionCallOptions } from "https://esm.sh/@langchain/core@0.1.58/language_models/base";
+export type {
+  BaseFunctionCallOptions,
+  BaseLanguageModelInput,
+} from "https://esm.sh/@langchain/core@0.1.58/language_models/base";
 export type {
   BaseChatModelCallOptions,
   BaseChatModelParams,

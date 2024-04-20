@@ -1,15 +1,8 @@
 {
-  "deno.enable": true,
-  "deno.lint": false,
-  "editor.formatOnSave": false,
-  "deno.cacheOnSave": false,
-  "deno.maxTsServerMemory": 4096,
   "[typescript]": {
     "editor.defaultFormatter": "vscode.typescript-language-features"
   },
-  "deno.enablePaths": [
-    "./"
-  ],
+  "deno.cacheOnSave": false,
   "deno.disablePaths": [
     "types/",
     "*.md",
@@ -18,5 +11,12 @@
     ".env*",
     ".gitignore"
   ],
+  "deno.enable": true,
+  "deno.enablePaths": [
+    "./"
+  ],
+  "deno.lint": false,
+  "deno.maxTsServerMemory": 4096,
+  "editor.formatOnSave": false,
   "editor.inlayHints.enabled": "off"
 }

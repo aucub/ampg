@@ -1,6 +1,8 @@
 import {
   AIMessage,
   BaseChatModelParams,
+  BaseFunctionCallOptions,
+  BaseMessage,
   BaseMessageChunk,
   BaseMessageLike,
   ChatOpenAI,
@@ -20,7 +22,6 @@ import {
   streamSSE,
   SystemMessage,
   z,
-  BaseFunctionCallOptions
 } from "../deps.ts";
 import {
   blobToBase64,
@@ -105,21 +106,22 @@ export class OpenAIChatService extends AbstractChatService {
     }
     if (body.tools && body.tools.length > 0) {
       const functions: BaseFunctionCallOptions = {
-        functions: []
-      }
+        functions: [],
+      };
       for (const tool of body.tools) {
         if (tool.type == "function") {
           //@ts-ignore
-          functions.functions.push(tool.function)
+          functions.functions.push(tool.function);
         }
       }
       if (isChatCompletionNamedToolChoice(body.tool_choice)) {
-        if (body.tool_choice.type == 'function') {
+        //@ts-ignore
+        if (body.tool_choice.type == "function") {
           //@ts-ignore
-          functions.function_call = body.tool_choice.function
+          functions.function_call = body.tool_choice.function;
         }
       }
-      mergedParams.options = functions
+      mergedParams.options = functions;
     }
     mergedParams.input = chatHistory;
     c.set("params", mergedParams);
@@ -148,86 +150,121 @@ export class OpenAIChatService extends AbstractChatService {
     // @ts-ignore
     const model = new ChatOpenAI(openAIChatInput);
     // @ts-ignore
-    return await model.invoke(chatModelParams.input, chatModelParams.options);
+    return chatModelParams.streaming ? await model.stream(chatModelParams.input, chatModelParams.options) : await model.invoke(chatModelParams.input, chatModelParams.options);
   }
 
   async deliverOutput(
     c: Context,
     output: string | IterableReadableStream<any>,
   ): Promise<Response> {
-    const params: Partial<ChatModelParams> = await c.get("params") ?? {};
-    const modelName = params.model || "unknown";
+    const params: ChatModelParams = await c.get("params") ?? {};
     if (
       output instanceof IterableReadableStream ||
       isIterableReadableStream(output)
     ) {
       return streamSSE(c, async (stream) => {
-        for await (let chunk of output) {
-          if (chunk && (isBaseMessageChunk(chunk) || isBaseMessage(chunk))) {
-            chunk = chunk.content.toString();
-          }
+        for await (const chunk of output) {
           if (chunk) {
             await stream.writeSSE({
               data: JSON.stringify(
-                this.createCompletionChunk(chunk, modelName),
+                this.createCompletionChunk(chunk, params),
               ),
             });
           }
         }
         await stream.writeSSE({ data: "[DONE]" });
       });
-    } else if (isBaseMessageChunk(output) || isBaseMessage(output)) {
+    } else if (output) {
       // @ts-ignore
       return c.json(
-        this.createCompletion(output.content.toString(), modelName),
-      );
-    } else if (typeof output === "string") {
-      return c.json(this.createCompletion(output, modelName));
-    } else {
-      throw new Error(
-        "The output types are incompatible.",
+        this.createCompletion(output, params),
       );
     }
   }
 
-  createCompletionChunk(chunk: string, modelName: string) {
-    return {
-      id: `chatcmpl-${Date.now()}`,
-      choices: [
-        {
-          delta: {
-            "role": `assistant`,
-            "content": chunk || null,
+  createCompletionChunk(message: string | BaseMessage, params: ChatModelParams) {
+    if (isBaseMessageChunk(message) || isBaseMessage(message)) {
+      return {
+        id: `chatcmpl-${Date.now()}`,
+        choices: [
+          {
+            delta: {
+              "role": `assistant`,
+              "content": message.content.toString(),
+              "tool_calls": message.additional_kwargs.tool_calls
+            },
+            finish_reason: message.response_metadata.finishReason.toString(),
+            index: message.response_metadata.index as number,
+            logprobs: message.response_metadata.logprobs,
           },
-          finish_reason: "length",
-          index: 0,
-          logprobs: null,
-        },
-      ],
-      created: Math.floor(Date.now() / 1000),
-      model: modelName,
-      object: "chat.completion.chunk",
-    };
+        ],
+        created: Math.floor(Date.now() / 1000),
+        model: params.model || "unknown",
+        object: "chat.completion.chunk",
+        usage: message.response_metadata.estimatedTokenUsage,
+      };
+    } else {
+      return {
+        id: `chatcmpl-${Date.now()}`,
+        choices: [
+          {
+            delta: {
+              "role": `assistant`,
+              "content": message,
+            },
+            finish_reason: "length",
+            index: 0,
+            logprobs: null,
+          },
+        ],
+        created: Math.floor(Date.now() / 1000),
+        model: params.model || "unknown",
+        object: "chat.completion.chunk",
+      };
+    }
   }
 
-  createCompletion(content: string, modelName: string) {
-    return {
-      id: `chatcmpl-${Date.now()}`,
-      choices: [
-        {
-          message: {
-            "role": `assistant`,
-            "content": content || null,
+  createCompletion(message: string | BaseMessage, params: ChatModelParams) {
+    if (isBaseMessageChunk(message) || isBaseMessage(message)) {
+      return {
+        id: `chatcmpl-${Date.now()}`,
+        choices: [
+          {
+            message: {
+              "role": `assistant`,
+              "content": message.content.toString(),
+              "tool_calls": message.additional_kwargs.tool_calls
+            },
+            finish_reason: message.response_metadata.finishReason.toString(),
+            index: message.response_metadata.index as number,
+            logprobs: message.response_metadata.logprobs,
           },
-          finish_reason: "length",
-          index: 0,
-          logprobs: null,
-        },
-      ],
-      created: Math.floor(Date.now() / 1000),
-      model: modelName,
-      object: "chat.completion",
-    };
+        ],
+        created: Math.floor(Date.now() / 1000),
+        model: params.model || "unknown",
+        object: "chat.completion",
+        usage: message.response_metadata.estimatedTokenUsage,
+      };
+    } else {
+      return {
+        id: `chatcmpl-${Date.now()}`,
+        choices: [
+          {
+            message: {
+              "role": `assistant`,
+              "content": message,
+            },
+            finish_reason: "length",
+            index: 0,
+            logprobs: null,
+          },
+        ],
+        created: Math.floor(Date.now() / 1000),
+        model: params.model || "unknown",
+        object: "chat.completion",
+      };
+    }
+
   }
 }
 
