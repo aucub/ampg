@@ -1406,7 +1406,7 @@ const VectorStoreObject = z
     object: z.literal("vector_store"),
     created_at: z.number().int(),
     name: z.string(),
-    bytes: z.number().int(),
+    usage_bytes: z.number().int(),
     file_counts: z
       .object({
         in_progress: z.number().int(),
@@ -1458,6 +1458,7 @@ const VectorStoreFileObject = z
   .object({
     id: z.string(),
     object: z.literal("vector_store.file"),
+    usage_bytes: z.number().int(),
     created_at: z.number().int(),
     vector_store_id: z.string(),
     status: z.enum(["in_progress", "completed", "cancelled", "failed"]),

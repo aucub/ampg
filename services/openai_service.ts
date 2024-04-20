@@ -150,7 +150,9 @@ export class OpenAIChatService extends AbstractChatService {
     // @ts-ignore
     const model = new ChatOpenAI(openAIChatInput);
     // @ts-ignore
-    return chatModelParams.streaming ? await model.stream(chatModelParams.input, chatModelParams.options) : await model.invoke(chatModelParams.input, chatModelParams.options);
+    return chatModelParams.streaming
+      ? await model.stream(chatModelParams.input, chatModelParams.options)
+      : await model.invoke(chatModelParams.input, chatModelParams.options);
   }
 
   async deliverOutput(
@@ -182,7 +184,10 @@ export class OpenAIChatService extends AbstractChatService {
     }
   }
 
-  createCompletionChunk(message: string | BaseMessage, params: ChatModelParams) {
+  createCompletionChunk(
+    message: string | BaseMessage,
+    params: ChatModelParams,
+  ) {
     if (isBaseMessageChunk(message) || isBaseMessage(message)) {
       return {
         id: `chatcmpl-${Date.now()}`,
@@ -191,7 +196,7 @@ export class OpenAIChatService extends AbstractChatService {
             delta: {
               "role": `assistant`,
               "content": message.content.toString(),
-              "tool_calls": message.additional_kwargs.tool_calls
+              "tool_calls": message.additional_kwargs.tool_calls,
             },
             finish_reason: message.response_metadata.finishReason.toString(),
             index: message.response_metadata.index as number,
@@ -233,7 +238,7 @@ export class OpenAIChatService extends AbstractChatService {
             message: {
               "role": `assistant`,
               "content": message.content.toString(),
-              "tool_calls": message.additional_kwargs.tool_calls
+              "tool_calls": message.additional_kwargs.tool_calls,
             },
             finish_reason: message.response_metadata.finishReason.toString(),
             index: message.response_metadata.index as number,
@@ -264,7 +269,6 @@ export class OpenAIChatService extends AbstractChatService {
         object: "chat.completion",
       };
     }
-
   }
 }
 

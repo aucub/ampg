@@ -47,7 +47,9 @@ export class GoogleGenerativeAIChatService extends AbstractChatService {
     };
     const model = new ChatGoogleGenerativeAI(googleGenerativeAIChatInput);
     // @ts-ignore
-    return googleGenerativeAIChatInput.streaming ? await model.stream(params.input) : await model.invoke(params.input);
+    return googleGenerativeAIChatInput.streaming
+      ? await model.stream(params.input)
+      : await model.invoke(params.input);
   }
 }
 

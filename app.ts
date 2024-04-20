@@ -1,11 +1,13 @@
 import { Provider, Target, TaskType } from "./config.ts";
 import {
+  bearerAuth,
   compress,
   cors,
   Hono,
   HTTPException,
   logger,
   OutputParserException,
+  parse,
   prettyJSON,
   qs,
   secureHeaders,
@@ -24,6 +26,7 @@ import {
   GatewayParams,
   GatewayParamsSchema,
   LangException,
+  RouterConfigSchema,
 } from "./types.ts";
 
 type Variables = {
@@ -99,6 +102,41 @@ app.all("/portkey-ai/gateway", async (c) => {
   const newResponse = new Response(response.body, response);
   return newResponse;
 });
+
+const routeConfigEnv = Deno.env.get("ROUTE_CONFIG");
+if (routeConfigEnv) {
+  const config = parse(routeConfigEnv) as { token: string[]; routers: any[] };
+  try {
+    const validatedConfig = RouterConfigSchema.parse(config);
+    for (const router of validatedConfig.routers) {
+      // @ts-ignore
+      app.use(
+        router.router,
+        bearerAuth({ token: validatedConfig.token }),
+      );
+      // @ts-ignore
+      app.on(router.methods, router.router, async (c) => {
+        const rawRequest = c.req.raw;
+        const headers = new Headers(rawRequest.headers);
+        for (const header of router.default_headers || []) {
+          headers.set(header.name, header.value);
+        }
+        if (router.redirect) {
+          const request = new Request(
+            router.redirect,
+            new Request(rawRequest, { headers }),
+          );
+          const response = await fetch(request);
+          const newResponse = new Response(response.body, response);
+          return newResponse;
+        }
+        return c.notFound();
+      });
+    }
+  } catch (error) {
+    console.error(`Error validating config file: ${error.message}`);
+  }
+}
 
 app.onError((err, c) => {
   console.error(`${err}`);
