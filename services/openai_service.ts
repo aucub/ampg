@@ -138,14 +138,14 @@ export class OpenAIChatService extends AbstractChatService {
       & {
         configuration?: ClientOptions;
       } = {
-      cache: chatModelParams.cache ?? true,
-      openAIApiKey: chatModelParams.apiKey ??
-        env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_API_KEY"],
-      configuration: {
-        baseURL: env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_BASE_URL"] ??
-          undefined,
-      },
-    };
+        cache: chatModelParams.cache ?? true,
+        openAIApiKey: chatModelParams.apiKey ??
+          env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_API_KEY"],
+        configuration: {
+          baseURL: env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_BASE_URL"] ??
+            undefined,
+        },
+      };
     const openAIChatInput = { ...chatModelParams, ...openAIChatModelInput };
     // @ts-ignore
     const model = new ChatOpenAI(openAIChatInput);

@@ -55,7 +55,7 @@ class AIFetcher {
     this.cloudflareAccountId = fields?.cloudflareAccountId,
       this.cloudflareApiToken = fields?.cloudflareApiToken,
       this.baseUrl = fields?.baseUrl ??
-      `https://api.cloudflare.com/client/v4/accounts`;
+        `https://api.cloudflare.com/client/v4/accounts`;
     if (this.baseUrl.endsWith("/")) {
       this.baseUrl = this.baseUrl.slice(0, -1);
     }
@@ -101,9 +101,9 @@ export class CloudflareWorkersAIEmbeddingService
     });
     const cloudflareWorkersAIEmbeddingsParams:
       CloudflareWorkersAIEmbeddingsParams = {
-      ...params,
-      binding: AI,
-    };
+        ...params,
+        binding: AI,
+      };
     const embeddings = new CloudflareWorkersAIEmbeddings(
       cloudflareWorkersAIEmbeddingsParams,
     );
