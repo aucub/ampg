@@ -209,23 +209,3 @@ export const GatewayParamsSchema = z.object({
   options: z.any().optional(),
   endpoint: z.any().optional(),
 }).passthrough();
-
-const HeaderSchema = z.object({
-  name: z.string(),
-  value: z.string(),
-});
-
-const RouterSchema = z.object({
-  router: z.string(),
-  methods: z.array(z.enum(["GET", "POST", "PUT", "DELETE"])).min(
-    1,
-    "At least one method is required",
-  ),
-  redirect: z.string(),
-  default_headers: z.array(HeaderSchema).optional().default([]),
-});
-
-export const RouterConfigSchema = z.object({
-  routers: z.array(RouterSchema),
-  token: z.array(z.string()),
-});

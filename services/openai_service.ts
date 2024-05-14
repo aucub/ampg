@@ -8,7 +8,6 @@ import {
   ChatOpenAI,
   ClientOptions,
   Context,
-  DallEAPIWrapper,
   Document,
   env,
   HumanMessage,
@@ -16,12 +15,8 @@ import {
   isBaseMessageChunk,
   IterableReadableStream,
   OpenAIChatInput,
-  OpenAIEmbeddings,
-  OpenAIEmbeddingsParams,
-  OpenAIWhisperAudio,
   streamSSE,
-  SystemMessage,
-  z,
+  SystemMessage
 } from "../deps.ts";
 import {
   blobToBase64,
@@ -33,29 +28,24 @@ import {
   ChatModelParams,
   EmbeddingParams,
   ImageEditParams,
-  ImageGenerationParams,
   LangException,
   OpenAIError,
-  TranscriptionParams,
+  TranscriptionParams
 } from "../types.ts";
 import {
   AbstractAudioTranscriptionService,
   AbstractChatService,
   AbstractEmbeddingService,
   AbstractImageEditService,
-  AbstractImageGenerationService,
-  IExceptionHandling,
+  IExceptionHandling
 } from "../types/i_service.ts";
-import { schemas as openaiSchemas } from "../types/schemas/openai.ts";
 
 export class OpenAIChatService extends AbstractChatService {
   async prepareModelParams(c: Context): Promise<ChatModelParams> {
     const params: Partial<ChatModelParams> = await c.get("params") ?? {};
     // @ts-ignore
-    const body: z.infer<typeof openaiSchemas.CreateChatCompletionRequest> =
-      // @ts-ignore
-      await c.req.valid("json");
-    if (body.stop) {
+    const body = await c.req.json();
+    if ("stop" in body && body.stop) {
       if (typeof body.stop === "string") {
         body.stopSequences = [body.stop];
       } else {
@@ -138,20 +128,22 @@ export class OpenAIChatService extends AbstractChatService {
       & {
         configuration?: ClientOptions;
       } = {
-        cache: chatModelParams.cache ?? true,
-        openAIApiKey: chatModelParams.apiKey ??
-          env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_API_KEY"],
-        configuration: {
-          baseURL: env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_BASE_URL"] ??
-            undefined,
-        },
-      };
+      cache: chatModelParams.cache ?? true,
+      openAIApiKey: chatModelParams.apiKey ??
+        env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_API_KEY"],
+      configuration: {
+        baseURL: env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_BASE_URL"] ??
+          undefined,
+      },
+    };
     const openAIChatInput = { ...chatModelParams, ...openAIChatModelInput };
     // @ts-ignore
     const model = new ChatOpenAI(openAIChatInput);
     // @ts-ignore
     return chatModelParams.streaming
+      // @ts-ignore
       ? await model.stream(chatModelParams.input, chatModelParams.options)
+      // @ts-ignore
       : await model.invoke(chatModelParams.input, chatModelParams.options);
   }
 
@@ -285,17 +277,6 @@ export class OpenAITranscriptionService
     return params;
   }
 
-  async executeModel(
-    c: Context,
-    params: TranscriptionParams,
-  ): Promise<Document[]> {
-    const clientOptions: ClientOptions = params as ClientOptions;
-    const audioLoader = new OpenAIWhisperAudio(params.file, {
-      clientOptions: clientOptions,
-    });
-    return await audioLoader.load();
-  }
-
   async deliverOutput(c: Context, output: Document[]): Promise<Response> {
     let text = "";
     let words = [];
@@ -303,11 +284,10 @@ export class OpenAITranscriptionService
       text += document.pageContent;
       words.concat(document.metadata["words"] || []);
     }
-    const transcriptionResponse = openaiSchemas
-      .CreateTranscriptionResponseVerboseJson.parse({
-        "text": text,
-        "words": words,
-      });
+    const transcriptionResponse = JSON.stringify({
+      "text": text,
+      "words": words,
+    })
     return c.json(transcriptionResponse);
   }
 }
@@ -368,9 +348,7 @@ export class OpenAIEmbeddingService extends AbstractEmbeddingService {
   async prepareModelParams(c: Context): Promise<EmbeddingParams> {
     const baseModelParams: EmbeddingParams = await c.get("params");
     // @ts-ignore
-    const body: z.infer<typeof openaiSchemas.CreateEmbeddingRequest> = await c
-      // @ts-ignore
-      .req.valid("json");
+    const body = await c.req.json();
     let embeddingParams: EmbeddingParams = {
       ...baseModelParams,
       ...body,
@@ -379,29 +357,6 @@ export class OpenAIEmbeddingService extends AbstractEmbeddingService {
     };
     c.set("params", embeddingParams);
     return embeddingParams;
-  }
-
-  async executeModel(
-    c: Context,
-    params: EmbeddingParams,
-  ): Promise<number[] | number[][]> {
-    const embeddingsParams: Partial<OpenAIEmbeddingsParams> & {
-      verbose?: boolean;
-      openAIApiKey?: string;
-      configuration?: ClientOptions;
-    } = {
-      ...params,
-      openAIApiKey: params.apiKey ||
-        env<{ OPENAI_API_KEY: string }>(c)["OPENAI_API_KEY"],
-      configuration: {
-        baseURL: params.baseURL ||
-          env<{ OPENAI_BASE_URL: string }>(c)["OPENAI_BASE_URL"],
-      },
-    };
-    const embeddings = new OpenAIEmbeddings(embeddingsParams);
-    return Array.isArray(params.input)
-      ? await embeddings.embedDocuments(params.input)
-      : await embeddings.embedQuery(params.input);
   }
 
   async deliverOutput(
@@ -437,19 +392,6 @@ export class OpenAIEmbeddingService extends AbstractEmbeddingService {
   }
 }
 
-export class OpenAIImageGenerationService
-  extends AbstractImageGenerationService {
-  async executeModel(c: Context, params: ImageGenerationParams) {
-    const { apiKey, prompt } = params;
-    const apiParams = {
-      openAIApiKey: apiKey ||
-        env<{ OPENAI_API_KEY: string }>(c)["OPENAI_API_KEY"],
-      responseFormat: params.response_format as ("url" | "b64_json"),
-    };
-    const tool = new DallEAPIWrapper(apiParams);
-    return await tool.invoke(prompt);
-  }
-}
 
 export class OpenAIExceptionHandling implements IExceptionHandling {
   handleException(exception: LangException): Response {

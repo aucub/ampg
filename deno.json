@@ -15,7 +15,6 @@
   "tasks": {
     "dev": "deno run --allow-net --allow-env --allow-read --unstable-hmr main.ts",
     "start": "deno run --allow-net --allow-env --allow-read main.ts",
-    "test": "deno test --allow-net --no-check --allow-read --allow-write --allow-env tests/api.test.ts",
     "update": "deno run --allow-env --allow-read --allow-write --allow-run=git,deno --allow-net https://deno.land/x/molt@0.17.2/cli.ts ./deps.ts --commit --pre-commit=fmt"
   }
 }

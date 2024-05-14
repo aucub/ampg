@@ -1,4 +1,4 @@
-import { BaseMessageChunk, Context, IterableReadableStream, z } from "../deps.ts";
+import { BaseMessageChunk, Context, IterableReadableStream } from "../deps.ts";
 import {
     TranscriptionParams as AudioTranscriptionParams,
     BaseModelParams, ChatModelParams,
@@ -6,7 +6,6 @@ import {
     ImageGenerationParams,
     LangException
 } from "../types.ts";
-import { schemas as openaiSchemas } from "../types/schemas/openai.ts";
 
 /**
  * Base interface for model services with generic parameter and result types.
@@ -35,7 +34,7 @@ export abstract class AbstractChatService implements IModelService<ChatModelPara
 /**
  * Abstract class for audio transcription service with specific parameter and result types.
  */
-export abstract class AbstractAudioTranscriptionService implements IModelService<AudioTranscriptionParams, z.infer<typeof openaiSchemas.CreateTranscriptionResponseVerboseJson> | z.infer<typeof openaiSchemas.CreateTranscriptionResponseJson> | z.infer<typeof openaiSchemas.CreateTranscriptionResponseJson>> {
+export abstract class AbstractAudioTranscriptionService implements IModelService<AudioTranscriptionParams, any> {
     async prepareModelParams(c: Context): Promise<AudioTranscriptionParams> {
         throw new Error("Method not implemented.");
     }
