@@ -14,7 +14,6 @@ import {
   zValidator,
 } from "./deps.ts";
 import { headersMiddleware } from "./middlewares/header_middleware.ts";
-import { validatorMiddleware } from "./middlewares/validator_middleware.ts";
 import {
   getExceptionHandling,
   getModelService,
@@ -67,7 +66,6 @@ Object.values(TaskType).forEach((taskType) => {
     // @ts-ignore
     zValidator(Target.QUERY, GatewayParamsSchema),
     headersMiddleware(),
-    validatorMiddleware(),
     createModelRequestHandler(taskType),
   );
 });

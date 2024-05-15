@@ -12,7 +12,6 @@ import {
   OpenAIChatService,
   OpenAIEmbeddingService,
   OpenAIExceptionHandling,
-  OpenAITranscriptionService,
 } from "./openai_service.ts";
 
 export function getModelService(
@@ -30,13 +29,6 @@ export function getModelService(
       [Provider.GOOGLE]: GoogleGenerativeAIEmbeddingService,
       [Provider.HUGGINGFACE_INFERENCE]: HuggingFaceInferenceEmbeddingService,
     },
-    [TaskType.AUDIO_TRANSCRIPTIONS]: {
-      [Provider.OPEN_AI]: OpenAITranscriptionService,
-    },
-    [TaskType.IMAGES_GENERATIONS]: {
-    },
-    [TaskType.IMAGES_EDITS]: {
-    },
   };
 
   const constructorMap = modelServiceConstructorMap[taskType];
@@ -52,31 +44,6 @@ export function getModelService(
   }
 
   return new Constructor();
-}
-
-export function getZodValidatorSchema(
-  taskType: TaskType,
-  provider: Provider,
-  target: Target,
-) {
-  const zodValidatorModelRequestMap = {
-    [TaskType.CHAT]: {
-    },
-    [TaskType.EMBEDDINGS]: {
-    },
-    [TaskType.IMAGES_GENERATIONS]: {
-    },
-    [TaskType.AUDIO_TRANSCRIPTIONS]: {
-    },
-    [TaskType.IMAGES_EDITS]: {
-    },
-  };
-  try {
-    const schema = zodValidatorModelRequestMap[taskType][provider][target];
-    return schema;
-  } catch (error) {
-    return null;
-  }
 }
 
 export function getExceptionHandling(provider: Provider): IExceptionHandling {

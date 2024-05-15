@@ -8,7 +8,6 @@ import {
   ChatOpenAI,
   ClientOptions,
   Context,
-  Document,
   env,
   HumanMessage,
   isBaseMessage,
@@ -27,16 +26,12 @@ import {
 import {
   ChatModelParams,
   EmbeddingParams,
-  ImageEditParams,
   LangException,
   OpenAIError,
-  TranscriptionParams
 } from "../types.ts";
 import {
-  AbstractAudioTranscriptionService,
   AbstractChatService,
   AbstractEmbeddingService,
-  AbstractImageEditService,
   IExceptionHandling
 } from "../types/i_service.ts";
 
@@ -260,86 +255,6 @@ export class OpenAIChatService extends AbstractChatService {
         model: params.model || "unknown",
         object: "chat.completion",
       };
-    }
-  }
-}
-
-export class OpenAITranscriptionService
-  extends AbstractAudioTranscriptionService {
-  async prepareModelParams(c: Context): Promise<TranscriptionParams> {
-    let params = await c.get("params") as TranscriptionParams;
-    const formData = await c.req.parseBody({ all: true });
-    params.file =
-      (Array.isArray(formData["file"])
-        ? formData["file"].pop()
-        : formData["file"]) as File;
-    params.model = (params.model || formData["model"]) as string;
-    return params;
-  }
-
-  async deliverOutput(c: Context, output: Document[]): Promise<Response> {
-    let text = "";
-    let words = [];
-    for (const document of output) {
-      text += document.pageContent;
-      words.concat(document.metadata["words"] || []);
-    }
-    const transcriptionResponse = JSON.stringify({
-      "text": text,
-      "words": words,
-    })
-    return c.json(transcriptionResponse);
-  }
-}
-
-export class OpenAIImageEditService extends AbstractImageEditService {
-  async prepareModelParams(c: Context): Promise<ImageEditParams> {
-    let params: ImageEditParams = await c.get("params") ?? {};
-    const formData = await c.req.parseBody();
-    const fileFields = ["image", "mask"];
-    for (const field of fileFields) {
-      params[field] = formData[field];
-    }
-    const otherFields = [
-      "prompt",
-      "model",
-      "n",
-      "size",
-      "response_format",
-      "user",
-    ];
-    for (const field of otherFields) {
-      if (formData[field]) {
-        params[field] = params[field] || formData[field];
-      }
-    }
-    params["model"] = (params["model"] || formData["model"]) as string;
-    c.set("params", params);
-    return params;
-  }
-  async deliverOutput(c: Context, output: string | Blob): Promise<Response> {
-    const params = await c.get("params") as ImageEditParams;
-    const currentTime = Math.floor(Date.now() / 1000);
-    if (typeof output === "string") {
-      if (params.response_format === "url") {
-        return c.json({
-          created: currentTime,
-          data: [{ url: output }],
-        });
-      } else if (params.response_format === "b64_json") {
-        return c.json({
-          created: currentTime,
-          data: [{ b64_json: output }],
-        });
-      }
-    } else if (output instanceof Blob) {
-      const b64Json = await blobToBase64(output);
-      return c.json({
-        created: currentTime,
-        data: [{ b64_json: b64Json }],
-      });
-    } else {
-      throw new Error(`The output types are incompatible.`);
     }
   }
 }

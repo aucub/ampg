@@ -25,7 +25,6 @@ export { zValidator } from "https://esm.sh/@hono/zod-validator@0.2.1";
 export { ChatCloudflareWorkersAI } from "https://esm.sh/@langchain/cloudflare@0.0.4";
 export type { CloudflareWorkersAIInput } from "https://esm.sh/@langchain/cloudflare@0.0.4";
 export { HuggingFaceInferenceEmbeddings } from "https://esm.sh/@langchain/community@0.0.57/embeddings/hf";
-export { Document } from "https://esm.sh/@langchain/core@0.1.63/documents";
 export type {
   BaseFunctionCallOptions,
   BaseLanguageModelInput
@@ -63,5 +62,5 @@ export type {
   OpenAIChatInput
 } from "https://esm.sh/@langchain/openai@0.0.29";
 export { qs };
-  import qs from "https://esm.sh/qs@6.12.1";
+import qs from "https://esm.sh/qs@6.12.1";
 
