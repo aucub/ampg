@@ -51,15 +51,15 @@ export { IterableReadableStream } from "https://esm.sh/@langchain/core@0.1.63/ut
 export {
   ChatGoogleGenerativeAI,
   GoogleGenerativeAIEmbeddings,
-} from "https://esm.sh/@langchain/google-genai@0.0.14";
+} from "https://esm.sh/@langchain/google-genai@0.0.13";
 export type {
   GoogleGenerativeAIChatInput,
   GoogleGenerativeAIEmbeddingsParams,
-} from "https://esm.sh/@langchain/google-genai@0.0.14";
+} from "https://esm.sh/@langchain/google-genai@0.0.13";
 export { ChatOpenAI } from "https://esm.sh/@langchain/openai@0.0.32";
 export type {
   ClientOptions,
   OpenAIChatInput,
-} from "https://esm.sh/@langchain/openai@0.0.31";
+} from "https://esm.sh/@langchain/openai@0.0.32";
 export { qs };
 import qs from "https://esm.sh/qs@6.12.1";

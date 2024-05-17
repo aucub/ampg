@@ -22,9 +22,9 @@ export class GoogleGenerativeAIChatService extends AbstractChatService {
     params: ChatModelParams,
   ): Promise<string | BaseMessageChunk | IterableReadableStream<any>> {
     const googleGenerativeAIChatInput: GoogleGenerativeAIChatInput = {
-      baseUrl: "https://generativelanguage.googleapis.com",
-      apiVersion: "v1beta",
       ...params,
+      baseUrl: params.baseURL || "https://generativelanguage.googleapis.com",
+      apiVersion: "v1beta",
       maxOutputTokens: params.maxTokens,
       apiKey: params.apiKey ||
         env<{ GOOGLE_API_KEY: string }>(c)["GOOGLE_API_KEY"],
