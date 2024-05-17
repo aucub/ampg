@@ -31,8 +31,8 @@ export const headersMiddleware = (): MiddlewareHandler => {
     const queryString = new URL(c.req.url).search.slice(1);
     const gatewayParams = qs.parse(queryString);
     const mergedParams = {
-      ...(gatewayParams.options as Record<string, unknown>),
       ...params,
+      ...(gatewayParams.options as Record<string, unknown>),
     };
     c.set("query", gatewayParams);
     c.set("params", mergedParams);

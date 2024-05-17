@@ -20,10 +20,10 @@ export { z, ZodSchema } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 export {
   HarmBlockThreshold,
   HarmCategory,
-} from "https://esm.sh/@google/generative-ai@0.11.2";
+} from "https://esm.sh/@google/generative-ai@0.11.3";
 export { zValidator } from "https://esm.sh/@hono/zod-validator@0.2.1";
-export { ChatCloudflareWorkersAI } from "https://esm.sh/@langchain/cloudflare@0.0.5";
-export type { CloudflareWorkersAIInput } from "https://esm.sh/@langchain/cloudflare@0.0.5";
+export { ChatCloudflareWorkersAI } from "https://esm.sh/@langchain/cloudflare@0.0.6";
+export type { CloudflareWorkersAIInput } from "https://esm.sh/@langchain/cloudflare@0.0.6";
 export { HuggingFaceInferenceEmbeddings } from "https://esm.sh/@langchain/community@0.0.57/embeddings/hf";
 export type {
   BaseFunctionCallOptions,
@@ -51,11 +51,11 @@ export { IterableReadableStream } from "https://esm.sh/@langchain/core@0.1.63/ut
 export {
   ChatGoogleGenerativeAI,
   GoogleGenerativeAIEmbeddings,
-} from "https://esm.sh/@langchain/google-genai@0.0.13";
+} from "https://esm.sh/@langchain/google-genai@0.0.14";
 export type {
   GoogleGenerativeAIChatInput,
   GoogleGenerativeAIEmbeddingsParams,
-} from "https://esm.sh/@langchain/google-genai@0.0.13";
+} from "https://esm.sh/@langchain/google-genai@0.0.14";
 export { ChatOpenAI } from "https://esm.sh/@langchain/openai@0.0.31";
 export type {
   ClientOptions,
