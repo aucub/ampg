@@ -15,7 +15,7 @@ import {
   IterableReadableStream,
   OpenAIChatInput,
   streamSSE,
-  SystemMessage
+  SystemMessage,
 } from "../deps.ts";
 import {
   blobToBase64,
@@ -32,7 +32,7 @@ import {
 import {
   AbstractChatService,
   AbstractEmbeddingService,
-  IExceptionHandling
+  IExceptionHandling,
 } from "../types/i_service.ts";
 
 export class OpenAIChatService extends AbstractChatService {
@@ -306,7 +306,6 @@ export class OpenAIEmbeddingService extends AbstractEmbeddingService {
     });
   }
 }
-
 
 export class OpenAIExceptionHandling implements IExceptionHandling {
   handleException(exception: LangException): Response {

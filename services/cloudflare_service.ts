@@ -6,13 +6,8 @@ import {
   env,
   IterableReadableStream,
 } from "../deps.ts";
-import {
-  ChatModelParams,
-} from "../types.ts";
-import {
-  AbstractChatService,
-} from "../types/i_service.ts";
-
+import { ChatModelParams } from "../types.ts";
+import { AbstractChatService } from "../types/i_service.ts";
 
 export class CloudflareWorkersAIChatService extends AbstractChatService {
   async executeModel(

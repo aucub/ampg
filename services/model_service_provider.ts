@@ -1,8 +1,6 @@
 import { Provider, Target, TaskType } from "../config.ts";
 import { IExceptionHandling, IModelService } from "../types/i_service.ts";
-import {
-  CloudflareWorkersAIChatService,
-} from "./cloudflare_service.ts";
+import { CloudflareWorkersAIChatService } from "./cloudflare_service.ts";
 import {
   GoogleGenerativeAIChatService,
   GoogleGenerativeAIEmbeddingService,
