@@ -1,10 +1,10 @@
 export { configAsync } from "https://deno.land/x/dotenv@v3.2.2/mod.ts";
-export { Context } from "https://deno.land/x/hono@v4.3.7/context.ts";
+export { Context } from "https://deno.land/x/hono@v4.3.11/context.ts";
 export {
   createMiddleware,
   env,
   streamSSE,
-} from "https://deno.land/x/hono@v4.3.7/helper.ts";
+} from "https://deno.land/x/hono@v4.3.11/helper.ts";
 export {
   compress,
   cors,
@@ -12,9 +12,9 @@ export {
   prettyJSON,
   secureHeaders,
   timing,
-} from "https://deno.land/x/hono@v4.3.7/middleware.ts";
-export { Hono, HTTPException } from "https://deno.land/x/hono@v4.3.7/mod.ts";
-export type { MiddlewareHandler } from "https://deno.land/x/hono@v4.3.7/types.ts";
+} from "https://deno.land/x/hono@v4.3.11/middleware.ts";
+export { Hono, HTTPException } from "https://deno.land/x/hono@v4.3.11/mod.ts";
+export type { MiddlewareHandler } from "https://deno.land/x/hono@v4.3.11/types.ts";
 export { OpenAI } from "https://deno.land/x/openai@v4.47.1/mod.ts";
 export { z, ZodSchema } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 export {
