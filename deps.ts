@@ -51,7 +51,7 @@ export { IterableReadableStream } from "https://esm.sh/@langchain/core@0.2.4/uti
 export {
   ChatGoogleGenerativeAI,
   GoogleGenerativeAIEmbeddings,
-} from "https://esm.sh/@langchain/google-genai@0.0.13";
+} from "https://esm.sh/@langchain/google-genai@0.0.16";
 export type {
   GoogleGenerativeAIChatInput,
   GoogleGenerativeAIEmbeddingsParams,
