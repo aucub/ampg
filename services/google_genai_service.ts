@@ -23,8 +23,6 @@ export class GoogleGenerativeAIChatService extends AbstractChatService {
   ): Promise<string | BaseMessageChunk | IterableReadableStream<any>> {
     const googleGenerativeAIChatInput: GoogleGenerativeAIChatInput = {
       ...params,
-      baseUrl: params.baseURL || "https://generativelanguage.googleapis.com",
-      apiVersion: "v1beta",
       maxOutputTokens: params.maxTokens,
       apiKey: params.apiKey ||
         env<{ GOOGLE_API_KEY: string }>(c)["GOOGLE_API_KEY"],
@@ -63,10 +61,10 @@ export class GoogleGenerativeAIEmbeddingService
   ): Promise<number[] | number[][]> {
     const googleGenerativeAIEmbeddingsParams:
       GoogleGenerativeAIEmbeddingsParams = {
-      ...params,
-      apiKey: params.apiKey ||
-        env<{ GOOGLE_API_KEY: string }>(c)["GOOGLE_API_KEY"],
-    };
+        ...params,
+        apiKey: params.apiKey ||
+          env<{ GOOGLE_API_KEY: string }>(c)["GOOGLE_API_KEY"],
+      };
     const embeddings = new GoogleGenerativeAIEmbeddings(
       googleGenerativeAIEmbeddingsParams,
     );
