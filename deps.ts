@@ -21,7 +21,7 @@ export {
   HarmBlockThreshold,
   HarmCategory,
 } from "https://esm.sh/@google/generative-ai@0.12.0";
-export { zValidator } from "https://esm.sh/@hono/zod-validator@0.2.1";
+export { zValidator } from "https://esm.sh/@hono/zod-validator@0.2.2";
 export { ChatCloudflareWorkersAI } from "https://esm.sh/@langchain/cloudflare@0.0.6";
 export type { CloudflareWorkersAIInput } from "https://esm.sh/@langchain/cloudflare@0.0.6";
 export { HuggingFaceInferenceEmbeddings } from "https://esm.sh/@langchain/community@0.2.4/embeddings/hf";
