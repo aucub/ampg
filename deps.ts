@@ -24,7 +24,7 @@ export {
 export { zValidator } from "https://esm.sh/@hono/zod-validator@0.2.2";
 export { ChatCloudflareWorkersAI } from "https://esm.sh/@langchain/cloudflare@0.0.6";
 export type { CloudflareWorkersAIInput } from "https://esm.sh/@langchain/cloudflare@0.0.6";
-export { HuggingFaceInferenceEmbeddings } from "https://esm.sh/@langchain/community@0.2.9/embeddings/hf";
+export { HuggingFaceInferenceEmbeddings } from "https://esm.sh/@langchain/community@0.2.10/embeddings/hf";
 export type {
   BaseFunctionCallOptions,
   BaseLanguageModelInput,
