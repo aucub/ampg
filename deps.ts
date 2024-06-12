@@ -60,6 +60,6 @@ export { ChatOpenAI } from "https://esm.sh/@langchain/openai@0.1.3";
 export type {
   ClientOptions,
   OpenAIChatInput,
-} from "https://esm.sh/@langchain/openai@0.1.2";
+} from "https://esm.sh/@langchain/openai@0.1.3";
 export { qs };
 import qs from "https://esm.sh/qs@6.12.1";
