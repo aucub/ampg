@@ -56,7 +56,7 @@ export type {
   GoogleGenerativeAIChatInput,
   GoogleGenerativeAIEmbeddingsParams,
 } from "https://esm.sh/@langchain/google-genai@0.0.17";
-export { ChatOpenAI } from "https://esm.sh/@langchain/openai@0.1.3";
+export { ChatOpenAI } from "https://esm.sh/@langchain/openai@0.2.0";
 export type {
   ClientOptions,
   OpenAIChatInput,
