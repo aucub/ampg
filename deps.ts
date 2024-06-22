@@ -15,7 +15,7 @@ export {
 } from "https://deno.land/x/hono@v4.3.11/middleware.ts";
 export { Hono, HTTPException } from "https://deno.land/x/hono@v4.3.11/mod.ts";
 export type { MiddlewareHandler } from "https://deno.land/x/hono@v4.3.11/types.ts";
-export { OpenAI } from "https://deno.land/x/openai@v4.50.0/mod.ts";
+export { OpenAI } from "https://deno.land/x/openai@v4.52.0/mod.ts";
 export { z, ZodSchema } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 export {
   HarmBlockThreshold,
