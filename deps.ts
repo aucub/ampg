@@ -44,7 +44,7 @@ export {
 export type {
   BaseMessageChunk,
   BaseMessageLike,
-} from "https://esm.sh/@langchain/core@0.2.10/messages";
+} from "https://esm.sh/@langchain/core@0.2.11/messages";
 export { OutputParserException } from "https://esm.sh/@langchain/core@0.2.11/output_parsers";
 export { ToolInputParsingException } from "https://esm.sh/@langchain/core@0.2.11/tools";
 export { IterableReadableStream } from "https://esm.sh/@langchain/core@0.2.11/utils/stream";
