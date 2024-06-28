@@ -20,7 +20,7 @@ export { z, ZodSchema } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 export {
   HarmBlockThreshold,
   HarmCategory,
-} from "https://esm.sh/@google/generative-ai@0.13.0";
+} from "https://esm.sh/@google/generative-ai@0.14.0";
 export { zValidator } from "https://esm.sh/@hono/zod-validator@0.2.2";
 export { ChatCloudflareWorkersAI } from "https://esm.sh/@langchain/cloudflare@0.0.6";
 export type { CloudflareWorkersAIInput } from "https://esm.sh/@langchain/cloudflare@0.0.6";
